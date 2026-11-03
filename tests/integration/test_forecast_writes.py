@@ -21,7 +21,7 @@ _DRUG = "J05AH02"
 def _seed(cur) -> None:
     cur.execute(
         "INSERT INTO silver.dim_sites (site_id, site_name, country, region) "
-        "VALUES (%s, 'Site de test prévision', 'FR', 'Île-de-France') "
+        "VALUES (%s, 'India Demo Forecast Site', 'IN', 'Karnataka') "
         "ON CONFLICT (site_id) DO NOTHING",
         (_SITE,),
     )

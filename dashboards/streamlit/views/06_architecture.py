@@ -1,16 +1,16 @@
-"""Architecture du pipeline : la page où tout le vocabulaire technique vit.
+"""Pipeline architecture: the page where the technical vocabulary lives.
 
-Intention UX
-------------
-C'est ICI que la fierté technique s'exprime (Redpanda, TimescaleDB, Prophet,
-Dagster, ChromaDB, hypertables…). Le jargon y est légitime et valorisant,
-et il ne déborde pas sur les pages cliniques.
+UX intent
+---------
+This is the place where the engineering pride is expressed (Redpanda,
+TimescaleDB, Prophet, Dagster, ChromaDB, hypertables...). The jargon is
+legitimate here, and it does not spill over onto the clinical pages.
 
-Layout :
-* Un diagramme de pipeline organisé de gauche à droite (sens du flux),
-  six étages : Sense, Stream, Store, Forecast, Reason, Act.
-* Des onglets pour le deep-dive sur chaque étage.
-* Un tableau de mapping cloud : l'équivalent managé de chaque choix OSS.
+Layout:
+* A pipeline diagram organized left-to-right (flow direction), six stages:
+  Sense, Stream, Store, Forecast, Reason, Act.
+* Tabs for deep dives on each stage.
+* A cloud mapping table: the managed equivalent of each OSS choice.
 """
 from __future__ import annotations
 
@@ -19,27 +19,26 @@ from lib import components as C
 from lib import icons as I
 
 # ---------------------------------------------------------------------------
-# En-tête de page (ton ambre : section Pipeline & données)
+# Page header (ambient tone: Pipeline & data section)
 # ---------------------------------------------------------------------------
 C.page_header(
-    eyebrow="Pipeline & données",
+    eyebrow="Pipeline & data",
     icon="pipeline",
     tone="secondary",
-    title="Architecture du pipeline",
+    title="Pipeline architecture",
     subtitle=(
-        "Pipeline temps réel, 100 % open source, pensé pour tourner sur un "
-        "MacBook M1 8 Go et se rebrancher en un changement de config sur "
-        "AWS / GCP / Azure."
+        "Real-time pipeline, 100% open source, designed to run on a MacBook M1 "
+        "8 GB and switch cleanly to AWS / GCP / Azure with a config-only change."
     ),
 )
 
 
 # ---------------------------------------------------------------------------
-# Diagramme pipeline : 6 nœuds de gauche à droite, flèches SVG
+# Pipeline diagram: 6 nodes left-to-right, SVG arrows
 # ---------------------------------------------------------------------------
 C.section_header(
-    "Le pipeline", icon="pipeline", tone="secondary",
-    subtitle="de la sonde frigo à la décision pharmacien",
+    "The pipeline", icon="pipeline", tone="secondary",
+    subtitle="from fridge sensor to pharmacist decision",
 )
 
 _NODES = [
@@ -60,7 +59,7 @@ for i, (icon, title, tech) in enumerate(_NODES):
             C.pipeline_arrow()
 
 
-# Bandeau orchestration transversale (Dagster)
+# Cross-cutting orchestration banner (Dagster)
 st.markdown(
     f"""
     <div style="margin-top:1rem;background:#FFFFFF;
@@ -70,10 +69,10 @@ st.markdown(
       <div style="display:flex;align-items:flex-start;gap:.55rem;
                   color:var(--ms-text-2);font-size:.875rem;">
         <span style="color:var(--ms-secondary);margin-top:2px;">{I.icon('pipeline', size=16)}</span>
-        <span><strong>Orchestration transversale</strong> : Dagster
-        software-defined assets : un graphe unique pilote ingestion batch,
-        retraining ML et ré-indexation RAG. Asset checks Dagster = data
-        quality continue.</span>
+        <span><strong>Cross-cutting orchestration</strong>: Dagster
+        software-defined assets: one graph drives batch ingestion,
+        ML retraining, and RAG re-indexing. Dagster asset checks = continuous
+        data quality.</span>
       </div>
       <span class="ms-pill warn"><span class="dot"></span>Dagster</span>
     </div>
@@ -83,33 +82,33 @@ st.markdown(
 
 
 # ---------------------------------------------------------------------------
-# Onglets de deep-dive
+# Deep-dive tabs
 # ---------------------------------------------------------------------------
-C.section_header("Tout le détail technique", icon="search", tone="secondary",
-                 subtitle="choix par étage, équivalences cloud, organisation du dépôt")
+C.section_header("All technical details", icon="search", tone="secondary",
+                 subtitle="choices by layer, cloud equivalences, repository layout")
 
 t1, t2, t3, t4, t5, t6, t7 = st.tabs([
     "Sense + Stream", "Store", "Forecast", "Reason (RAG + LLM)", "Act",
-    "Multi-cloud", "Dépôt",
+    "Multi-cloud", "Repository",
 ])
 
 with t1:
     st.markdown(
         """
         ### Sense - IoT simulator (SimPy)
-        - `simulator/` produit un signal réaliste (8 sites × 6 frigos = 48)
-          avec pannes probabilistes, incident scripté et bruit gaussien.
-        - Sortie : événements Kafka JSON `coldchain.telemetry` à 30 s
-          (producteur : `simulator/run.py`).
+        - `simulator/` produces a realistic signal (8 sites × 6 fridges = 48)
+          with probabilistic failures, scripted incidents, and Gaussian noise.
+        - Output: JSON Kafka events `coldchain.telemetry` every 30 s
+          (producer: `simulator/run.py`).
 
-        ### Stream - Redpanda + consumer Python
-        - `streaming/consumer.py` : détection d'anomalie en vol
-          (`streaming/anomaly.py`, seuils de durée hors zone 2-8 °C :
-          30 min WARN, 2 h BREAKAGE_RISK, 4 h CRITICAL). Émet le miroir
-          sur `coldchain.alerts` et marque les lots suspects.
-        - Idempotence : alertes upsertées sur clé fonctionnelle
-          (frigo + horodatage d'ouverture), commit d'offset après écriture.
-        - À l'arrêt brutal : Redpanda rejoue, le consumer est at-least-once.
+        ### Stream - Redpanda + Python consumer
+        - `streaming/consumer.py`: detects anomalies in flight
+          (`streaming/anomaly.py`, threshold rules outside 2-8 °C zone:
+          30 min WARN, 2 h BREAKAGE_RISK, 4 h CRITICAL). It emits the mirror on
+          `coldchain.alerts` and flags suspect lots.
+        - Idempotence: alerts are upserted on a functional key
+          (fridge + opening timestamp), offset commit happens after write.
+        - On abrupt shutdown: Redpanda replays, and the consumer is at-least-once.
         """
     )
 
@@ -117,53 +116,54 @@ with t2:
     st.markdown(
         """
         ### Store - TimescaleDB (Postgres extension)
-        - Hypertables `silver.telemetry_raw` (chunks 1 j) et
-          `silver.alerts` (chunks 30 j).
-        - Continuous aggregate `silver.telemetry_5m`, rafraîchi chaque minute.
-        - `silver.forecasts` + `gold.forecast_points` matérialisent les
-          prévisions Prophet ; vues `gold.v_*` consommées par l'UI.
-        - Retention policy : télémétrie brute purgée à 90 j.
+        - Hypertables `silver.telemetry_raw` (1-day chunks) and
+          `silver.alerts` (30-day chunks).
+        - Continuous aggregate `silver.telemetry_5m`, refreshed every minute.
+        - `silver.forecasts` + `gold.forecast_points` materialize Prophet forecasts;
+          `gold.v_*` views are consumed by the UI.
+        - Retention policy: raw telemetry purged after 90 days.
 
-        **Pourquoi Timescale ?**
-        Postgres : pas de nouveau dialecte SQL à apprendre, transactions ACID,
-        hypertables = la seule extension qui combine compression columnar +
-        continuous aggregates sans casser le contrat SQL.
+        **Why Timescale?**
+        Postgres: no new SQL dialect to learn, ACID transactions,
+        hypertables = the only extension that combines columnar compression +
+        continuous aggregates without breaking the SQL contract.
         """
     )
 
 with t3:
     st.markdown(
         """
-        ### Forecast - Prophet sur Dagster
-        - `ml/shortage_forecast.py` : un modèle Prophet par
-          (site, médicament), saisonnalités hebdomadaire + annuelle,
-          boosté par les signaux pénurie FDA / ANSM.
-        - Réentraînement nocturne (schedule Dagster) + capteur qui
-          rematérialise la prévision dès qu'une alerte BREAKAGE_RISK tombe.
-        - Backtest walk-forward (6 folds de 15 j) hebdomadaire : MAPE et
-          couverture 80 % écrits dans `silver.forecast_backtests`.
+        ### Forecast - Prophet on Dagster
+        - `ml/shortage_forecast.py`: one Prophet model per
+          (site, drug), with weekly + annual seasonality,
+          optionally informed by international FDA / ANSM reference signals
+          (not India-specific).
+        - Nightly retraining (Dagster schedule) + sensor that
+          re-materializes the forecast whenever a BREAKAGE_RISK alert lands.
+        - Weekly walk-forward backtests (6 folds of 15 days): MAPE and
+          80% coverage written to `silver.forecast_backtests`.
 
         **Outputs**
-        - `silver.forecasts` (résumé par run) et `gold.forecast_points`
-          (trajectoire quotidienne : médiane + bande de confiance 80 %).
+        - `silver.forecasts` (summary per run) and `gold.forecast_points`
+          (daily trajectory: median + 80% confidence band).
         """
     )
 
 with t4:
     st.markdown(
         """
-        ### Reason - RAG + LLM local
-        - `llm/indexer/run.py` : extraction + chunking (~800 tokens,
-          chevauchement 100) + métadonnées ATC vers ChromaDB.
-        - `llm/rag/` : retrieve top-5 (pré-filtre par code ATC), puis
-          prompt SBAR, puis Ollama en mode JSON.
-        - Validation d'ancrage (`llm/rag/validator.py`) : chaque citation
-          `[doc:page]` doit référencer un chunk réellement récupéré,
-          sinon le brief est dégradé avec avertissement.
+        ### Reason - local RAG + LLM
+        - `llm/indexer/run.py`: extraction + chunking (~800 tokens,
+          100-token overlap) + ATC metadata to ChromaDB.
+        - `llm/rag/`: retrieve top-5 (pre-filtered by ATC code), then
+          build the SBAR prompt, then call Ollama in JSON mode.
+        - Anchor validation (`llm/rag/validator.py`): each citation
+          `[doc:page]` must refer to an actually retrieved chunk,
+          otherwise the brief is downgraded with a warning.
 
-        **Pourquoi local ?**
-        Aucun PHI ne sort du périmètre. La compliance HIPAA / RGPD
-        devient un argument commercial et non un frein.
+        **Why local?**
+        No PHI leaves the perimeter. HIPAA / GDPR compliance becomes a
+        business argument, not a blocker.
         """
     )
 
@@ -171,24 +171,24 @@ with t5:
     st.markdown(
         """
         ### Act - Streamlit + Grafana
-        - **Streamlit** : surface décisionnelle pour les pharmaciens
-          (cette app). Multipages + ``st.fragment`` pour les zones live.
-        - **Grafana** : surface ops temps réel (frigos, lag Kafka,
-          latence requêtes). Alerting sur excursions et lag.
-        - **Dagster UI** : surface engineering (asset graph, runs).
+        - **Streamlit**: decision-support surface for pharmacists
+          (this app). Multi-page + ``st.fragment`` for live zones.
+        - **Grafana**: real-time operations surface (fridges, Kafka lag,
+          request latency). Alerting on excursions and lag.
+        - **Dagster UI**: engineering surface (asset graph, runs).
 
-        Chaque surface a un public différent. La même donnée (Timescale)
-        nourrit les trois.
+        Each surface has a different audience. The same data (Timescale)
+        feeds all three.
         """
     )
 
 
 # ---------------------------------------------------------------------------
-# Onglet : mapping multi-cloud
+# Multi-cloud mapping tab
 # ---------------------------------------------------------------------------
 with t6:
-    st.caption("Chaque choix OSS a une équivalence managée : "
-               "un changement de config, pas de réécriture.")
+    st.caption("Each OSS choice has a managed equivalent: "
+               "a config change, not a rewrite.")
 
     import pandas as pd
     mapping = pd.DataFrame([
@@ -218,25 +218,25 @@ with t6:
 
 
 # ---------------------------------------------------------------------------
-# Onglet : organisation du dépôt
+# Repository layout tab
 # ---------------------------------------------------------------------------
 with t7:
-    st.caption("Où vit chaque composant dans le dépôt.")
+    st.caption("Where each component lives in the repository.")
 
     st.code(
         """vigistock/
-├── dashboards/streamlit/    # cette app (UI pharmacien)
-├── docs/                    # architecture, sources de données, gouvernance
+├── dashboards/streamlit/    # this app (pharmacist UI)
+├── docs/                    # architecture, data sources, governance
 ├── ingestion/               # FDA, openFDA, ANSM, OpenPrescribing (batch)
-├── simulator/               # SimPy cold-chain generator vers Redpanda
+├── simulator/               # SimPy cold-chain generator to Redpanda
 ├── streaming/               # producer + consumer + anomaly detection
 ├── ml/                      # Prophet, backtests, metrics
-├── llm/                     # RAG : chunking, indexer, prompt template
+├── llm/                     # RAG: chunking, indexer, prompt template
 ├── orchestration/dagster/   # @asset definitions, schedules, sensors
-├── sql/                     # Timescale DDL, hypertables, materialized
+├── sql/                     # Timescale DDL, hypertables, materialized views
 ├── infra/                   # Dockerfiles, terraform (cloud version)
 ├── docker-compose.yml       # full local stack
-└── Makefile                 # `make help` pour tout enchaîner
+└── Makefile                 # `make help` to orchestrate everything
 """,
         language="text",
     )

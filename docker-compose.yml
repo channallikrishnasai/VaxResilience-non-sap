@@ -54,7 +54,7 @@ services:
 
   # --- Stockage objets (protocoles PDF, artefacts modèles) --------------
   minio:
-    image: minio/minio:RELEASE.2024-12-13T22-19-12Z
+    image: pgsty/silo:RELEASE.2026-09-16T00-00-00Z
     container_name: vigistock-minio
     command: server /data --console-address ":9001"
     environment:
@@ -255,7 +255,10 @@ services:
     volumes:
       - ./:/app
       - dagster-home:/opt/dagster/dagster_home
-    command: dagster-daemon run
+    # `-w` obligatoire : sans workspace, le daemon s'arrête sur
+    # "No arguments given and no [tool.dagster] block in pyproject.toml"
+    # (le webserver a déjà le même flag plus haut).
+    command: dagster-daemon run -w /app/orchestration/dagster/workspace.yaml
     depends_on:
       timescaledb:
         condition: service_healthy
@@ -270,6 +273,9 @@ services:
   # --- Bootstrap Ollama : télécharge le modèle de chat au premier démarrage --
   # One-shot : se termine après le `ollama pull` (idempotent : skip si déjà là).
   # Les embeddings tournent en local via sentence-transformers (bge-small-en), hors Ollama.
+  # Le pull est rejoué en boucle : le réseau local peut lâcher en cours de
+  # téléchargement (DNS/r2), sans quoi le service resterait en échec et
+  # bloquerait llm-indexer puis streamlit (depends_on service_completed_successfully).
   ollama-bootstrap:
     image: ollama/ollama:0.5.4
     container_name: vigistock-ollama-bootstrap
@@ -278,7 +284,7 @@ services:
     entrypoint: ["/bin/sh", "-c"]
     command: >
       "until ollama list >/dev/null 2>&1; do sleep 2; done;
-       ollama pull phi3:mini"
+       until ollama pull phi3:mini; do echo 'pull failed, retrying in 10s'; sleep 10; done"
     depends_on:
       ollama:
         condition: service_healthy

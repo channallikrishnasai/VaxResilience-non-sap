@@ -1,21 +1,20 @@
-"""Validation : workflow en deux étapes pharmacien + infirmier·ère.
+"""Validation workflow with pharmacist and nurse checks.
 
-Intention UX
-------------
-Une substitution clinique n'est *jamais* une décision unilatérale. La gate
-de validation est la surface la plus critique de toute l'app, la page est
-donc délibérément *moins* visuelle et *plus* rigoureuse que les autres :
+UX intent
+---------
+A clinical substitution is never a unilateral decision. The validation gate
+is the highest-risk surface in the app, so the page is intentionally less
+visual and more rigorous than the other screens:
 
-* Stepper en haut : l'utilisateur sait toujours à quelle étape il se trouve.
-* Étape 1 = pharmacien (4 contrôles : dose, allergie, stock, voie).
-* Étape 2 = infirmier·ère 5B au chevet (Bon patient, Bon médicament, Bonne
-  dose, Bonne voie, Bon moment).
-* Étape 3 = aperçu du journal d'audit.
+* Top stepper: the user always knows which step they are on.
+* Step 1 = pharmacist (4 checks: dose, allergy, stock, route).
+* Step 2 = nurse 5B check at bedside (Right patient, right medication, right
+  dose, right route, right time).
+* Step 3 = audit log overview.
 
-On utilise ``st.checkbox`` avec des labels explicites plutôt qu'un widget
-choix multiple unique, pour que chaque contrôle soit auditable
-indépendamment (un lecteur d'écran entend chaque gate comme une affordance
-distincte).
+We use explicit ``st.checkbox`` labels rather than a single multi-select widget,
+so each control is auditable independently (screen readers announce each gate as
+its own affordance).
 """
 from __future__ import annotations
 
@@ -25,48 +24,48 @@ from lib import icons as I
 from lib.data import M
 
 # ---------------------------------------------------------------------------
-# En-tête de page
+# Page header
 # ---------------------------------------------------------------------------
 C.page_header(
-    eyebrow="Aide clinique",
+    eyebrow="Clinical support",
     icon="check-circle",
     title="Validation",
     subtitle=(
-        "Deux contrôles humains avant toute administration : le pharmacien "
-        "(4 critères) puis l'infirmier(ère) (règle des 5B). Chaque coche est "
-        "consignée au journal d'audit."
+        "Two human checks before any administration: the pharmacist "
+        "(4 criteria) and the nurse (5 rights). Every checkbox is recorded "
+        "in the audit log."
     ),
 )
 
-# récupérer le dernier brief depuis la session, ou utiliser un placeholder
+# Retrieve the latest brief from the session, or use a placeholder
 brief = st.session_state.get("last_brief")
-form  = st.session_state.get("last_form", {
+form = st.session_state.get("last_form", {
     "drug": "Influenza vaccine (inactivated)", "atc": "J07BB02",
-    "ctx": "Hospitalisation", "horizon": "14 jours", "nurse_note": "",
+    "ctx": "Hospitalization", "horizon": "14 days", "nurse_note": "",
 })
 
 # ---------------------------------------------------------------------------
-# Stepper (indicateur d'étapes), chiffres + coche SVG, zéro emoji
+# Stepper (progress indicator), numbers + SVG check, zero emoji
 # ---------------------------------------------------------------------------
 _CHECK_SVG = I.icon("check", size=14, color="#FFFFFF", stroke_width=2.4)
 
 
 def _stepper(active: int) -> None:
     steps = [
-        ("1", "Pharmacien", "4 contrôles cliniques"),
-        ("2", "Infirmier(ère) 5B", "vérification au chevet"),
-        ("3", "Journal d'audit", "trace immuable"),
+        ("1", "Pharmacist", "4 clinical checks"),
+        ("2", "Nurse 5 rights", "bedside verification"),
+        ("3", "Audit log", "immutable trace"),
     ]
     cols = st.columns(len(steps), gap="small")
     for i, (col, (num, title, sub)) in enumerate(zip(cols, steps, strict=False), start=1):
         with col:
             is_active = i == active
-            is_done   = i < active
-            bg     = "var(--ms-brand)" if is_active else (
+            is_done = i < active
+            bg = "var(--ms-brand)" if is_active else (
                 "var(--ms-ok)" if is_done else "var(--ms-bg-muted)")
-            color  = "#FFFFFF" if (is_active or is_done) else "var(--ms-text-3)"
+            color = "#FFFFFF" if (is_active or is_done) else "var(--ms-text-3)"
             border = "transparent" if (is_active or is_done) else "var(--ms-border)"
-            inner  = _CHECK_SVG if is_done else num
+            inner = _CHECK_SVG if is_done else num
             st.markdown(
                 f"""
                 <div style="display:flex;align-items:center;gap:.65rem;
@@ -94,13 +93,13 @@ def _stepper(active: int) -> None:
 step = st.session_state.get("validation_step", 1)
 _stepper(step)
 
-# Récapitulatif compact du contexte -----------------------------------------
+# Compact summary of the clinical context -------------------------------------
 st.markdown(
     f"""
     <div class="ms-callout" style="margin-top:1rem;">
-      <strong>Brief en cours :</strong> {form['drug']} ({form['atc']}),
-      contexte <b>{form['ctx']}</b>, horizon <b>{form['horizon']}</b>.
-      {('Note : <em>' + form['nurse_note'] + '</em>') if form['nurse_note'] else ''}
+      <strong>Current brief:</strong> {form['drug']} ({form['atc']}),
+      context <b>{form['ctx']}</b>, horizon <b>{form['horizon']}</b>.
+      {('Note: <em>' + form['nurse_note'] + '</em>') if form['nurse_note'] else ''}
     </div>
     """,
     unsafe_allow_html=True,
@@ -108,70 +107,74 @@ st.markdown(
 
 
 # ---------------------------------------------------------------------------
-# ÉTAPE 1 - Gate pharmacien
+# STEP 1 - Pharmacist gate
 # ---------------------------------------------------------------------------
 if step == 1:
     C.section_header(
-        "Validation pharmacien", icon="check-circle",
-        subtitle="les 4 cases doivent être cochées pour transmettre au prescripteur",
+        "Pharmacist validation", icon="check-circle",
+        subtitle="all 4 boxes must be checked before sending to the prescriber",
     )
 
     with st.form("pharma_form", border=False):
         c1, c2 = st.columns(2, gap="medium")
         with c1:
-            chk_dose    = st.checkbox(
-                "**Posologie** vérifiée et adaptée au patient",
-                help="Vérifier que la dose proposée est cohérente avec le poids / la "
-                     "fonction rénale / l'âge du patient.")
+            chk_dose = st.checkbox(
+                "**Dose** verified and appropriate for the patient",
+                help="Check that the proposed dose matches the patient weight, renal function, and age.")
             chk_allergy = st.checkbox(
-                "**Allergies / contre-indications** revues",
-                help="Croiser les substituts avec le dossier allergique du patient.")
+                "**Allergies / contraindications** reviewed",
+                help="Cross-check the substitute with the patient allergy record.")
         with c2:
             chk_stock = st.checkbox(
-                "**Stock physique** du substitut confirmé",
-                help="Confirmer la disponibilité réelle (pas seulement théorique) "
-                     "sur le site, ou via redistribution.")
+                "**Physical stock** of the substitute confirmed",
+                help="Confirm real availability onsite or through redistribution.")
             chk_route = st.checkbox(
-                "**Voie d'administration** compatible",
-                help="IM, IV, PO, SC… la voie doit correspondre à la prescription "
-                     "initiale ou être explicitement ajustée.")
+                "**Administration route** compatible",
+                help="IM, IV, PO, SC… the route must match the original prescription or be explicitly adjusted.")
 
-        actor_note = st.text_area("Note pharmacien (optionnelle)",
-                                  placeholder="Ex : redistribution depuis Lyon-Nord confirmée par M. Dubois.",
-                                  height=80)
+        actor_note = st.text_area(
+            "Pharmacist note (optional)",
+            placeholder="Example: redistribution from Bengaluru North Demo Hospital confirmed by the pharmacist.",
+            height=80,
+        )
 
-        submitted = st.form_submit_button("Transmettre au prescripteur",
-                                          type="primary", use_container_width=True)
+        submitted = st.form_submit_button(
+            "Send to prescriber",
+            type="primary",
+            use_container_width=True,
+        )
 
     if submitted:
         missing = [n for n, v in {
-            "Posologie": chk_dose, "Allergie": chk_allergy,
-            "Stock": chk_stock, "Voie": chk_route,
+            "Dose": chk_dose,
+            "Allergy": chk_allergy,
+            "Stock": chk_stock,
+            "Route": chk_route,
         }.items() if not v]
         if missing:
-            st.error(f"Contrôles manquants : {', '.join(missing)}. "
-                     "Ces 4 contrôles sont obligatoires.")
+            st.error(f"Missing checks: {', '.join(missing)}. These 4 checks are mandatory.")
         else:
-            st.success("Validé. Le brief est transmis au prescripteur et "
-                       "le journal d'audit est mis à jour. Vous pouvez "
-                       "maintenant passer à la vérification 5B au chevet.")
+            st.success(
+                "Validated. The brief has been sent to the prescriber and the audit log has been updated. "
+                "You can now proceed to the 5-right bedside check."
+            )
             st.session_state["pharma_note"] = actor_note
             st.session_state["validation_step"] = 2
-            if st.button("Continuer vers la vérification 5B", type="primary"):
+            if st.button("Continue to the 5-right check", type="primary"):
                 st.rerun()
 
 
 # ---------------------------------------------------------------------------
-# ÉTAPE 2 - Gate infirmier·ère 5B
+# STEP 2 - Nurse 5-rights gate
 # ---------------------------------------------------------------------------
 elif step == 2:
     C.section_header(
-        "Vérification 5B au chevet", icon="user",
-        subtitle="Bon patient, bon médicament, bonne dose, bonne voie, bon moment",
-        right="IFSI 2024, HAS Outil 5",
+        "5-right bedside verification", icon="user",
+        subtitle="right patient, right medication, right dose, right route, right time",
+        right="IFSI 2024, HAS 5 Rights",
     )
 
-    # Cartouche patient
+    # Patient card
     st.markdown(
         f"""
         <div style="background:#FFFFFF;border:1px solid var(--ms-border);
@@ -183,20 +186,20 @@ elif step == 2:
             <div style="font-size:.7rem;color:var(--ms-text-3);text-transform:uppercase;
                         letter-spacing:.08em;font-weight:600;">Patient</div>
             <div style="font-weight:700;color:var(--ms-text);font-size:1rem;">
-              M. R. (initiales, anonymisé)
+              Mr. R. (initials, anonymized)
             </div>
             <div style="color:var(--ms-text-2);font-size:.85rem;">
-              PAT-2026-0871, chambre W3-217
+              PAT-2026-0871, room W3-217
             </div>
           </div>
           <div style="text-align:right;">
             <div style="font-size:.7rem;color:var(--ms-text-3);text-transform:uppercase;
-                        letter-spacing:.08em;font-weight:600;">Administration prévue</div>
+                        letter-spacing:.08em;font-weight:600;">Planned administration</div>
             <div style="font-weight:700;color:var(--ms-text);font-size:1rem;">
               {form['drug']}
             </div>
             <div style="color:var(--ms-text-2);font-size:.85rem;font-family:ui-monospace,monospace;">
-              LOT-SUBST-A3F2, 0,5 mL IM
+              LOT-SUBST-A3F2, 0.5 mL IM
             </div>
           </div>
         </div>
@@ -205,84 +208,99 @@ elif step == 2:
     )
 
     with st.form("nurse_form", border=False):
-        b1 = st.checkbox("**Bon patient** : bracelet d'identification scanné et vérifié",
-                         help="ID + date de naissance + bracelet.")
-        b2 = st.checkbox("**Bon médicament** : étiquette du flacon vérifiée",
-                         help="Nom + DCI + ATC + lot identique à la prescription.")
-        b3 = st.checkbox("**Bonne dose** : calcul confirmé",
-                         help="Dose × concentration × volume = quantité administrée.")
-        b4 = st.checkbox("**Bonne voie** : IM/IV/PO conforme",
-                         help="Vérifier qu'aucune contre-indication n'existe (ex. voie veineuse périmée).")
-        b5 = st.checkbox("**Bon moment** : fenêtre temporelle respectée",
-                         help="Délai depuis la dernière dose, horaire du protocole.")
+        b1 = st.checkbox(
+            "**Right patient** : identification bracelet scanned and verified",
+            help="ID + date of birth + bracelet.",
+        )
+        b2 = st.checkbox(
+            "**Right medication** : vial label checked",
+            help="Name + INN + ATC + lot matches the prescription.",
+        )
+        b3 = st.checkbox(
+            "**Right dose** : calculation confirmed",
+            help="Dose × concentration × volume = administered amount.",
+        )
+        b4 = st.checkbox(
+            "**Right route** : IM/IV/PO compliant",
+            help="Check that no contraindication exists (for example, a non-viable vein).",
+        )
+        b5 = st.checkbox(
+            "**Right time** : time window respected",
+            help="Interval since last dose, protocol schedule.",
+        )
 
-        nurse_note = st.text_area("Note infirmier(ère) (optionnelle)",
-                                  placeholder="Ex : patient à jeun depuis 6 h, état clinique stable.",
-                                  height=80)
+        nurse_note = st.text_area(
+            "Nurse note (optional)",
+            placeholder="Example: patient fasted for 6 hours; condition clinically stable.",
+            height=80,
+        )
 
-        submitted = st.form_submit_button("Valider l'administration",
-                                          type="primary", use_container_width=True)
+        submitted = st.form_submit_button(
+            "Validate administration",
+            type="primary",
+            use_container_width=True,
+        )
 
     if submitted:
         missing = [n for n, v in {
-            "Bon patient": b1, "Bon médicament": b2, "Bonne dose": b3,
-            "Bonne voie": b4, "Bon moment": b5,
+            "Right patient": b1,
+            "Right medication": b2,
+            "Right dose": b3,
+            "Right route": b4,
+            "Right time": b5,
         }.items() if not v]
         if missing:
-            st.error(f"STOP : ne pas administrer. Cases manquantes : {', '.join(missing)}.")
+            st.error(f"STOP: do not administer. Missing checks: {', '.join(missing)}.")
         else:
-            st.success("Administration validée. L'événement est consigné dans "
-                       "le journal d'audit immuable.")
+            st.success("Administration validated. The event has been recorded in the immutable audit log.")
             st.session_state["nurse_note_final"] = nurse_note
             st.session_state["validation_step"] = 3
-            if st.button("Voir le journal d'audit", type="primary"):
+            if st.button("View audit log", type="primary"):
                 st.rerun()
 
 
 # ---------------------------------------------------------------------------
-# ÉTAPE 3 - Journal d'audit
+# STEP 3 - Audit log
 # ---------------------------------------------------------------------------
 else:
     C.section_header(
-        "Journal d'audit", icon="database",
-        subtitle="trace immuable : qui a fait quoi, à quelle heure, avec quelle note",
+        "Audit log", icon="database",
+        subtitle="immutable trace: who did what, when, and with which note",
     )
 
     import pandas as pd
+
     rows = M.audit_log()
-    # En mode live, un journal vide est un état sain (aucune action encore
-    # tracée) : on l'affiche honnêtement plutôt que de basculer sur le mock.
+    # In live mode, an empty log is a healthy state (no actions recorded yet):
+    # display it honestly instead of falling back to the mock.
     if not rows:
-        st.caption("Aucune action enregistrée pour le moment : le journal "
-                   "se remplit à mesure que les briefs sont validés ou refusés.")
+        st.caption("No actions recorded yet: the log fills as briefs are validated or rejected.")
         st.stop()
     df = pd.DataFrame(rows)
-    df["Décision"] = df["ok"].map({True: "Validé", False: "Refusé"})
+    df["Decision"] = df["ok"].map({True: "Validated", False: "Rejected"})
     df = df.rename(columns={
-        "ts":      "Horodatage UTC",
-        "actor":   "Acteur",
-        "role":    "Rôle",
-        "event":   "Événement",
+        "ts": "IST timestamp",
+        "actor": "Actor",
+        "role": "Role",
+        "event": "Event",
         "brief_id": "Brief",
-        "drug":    "Médicament",
-        "note":    "Note",
-    })[["Horodatage UTC", "Acteur", "Rôle", "Événement", "Brief",
-        "Médicament", "Décision", "Note"]]
+        "drug": "Medication",
+        "note": "Note",
+    })[["IST timestamp", "Actor", "Role", "Event", "Brief",
+        "Medication", "Decision", "Note"]]
 
     st.dataframe(df, hide_index=True, use_container_width=True,
                  column_config={
-                     "Brief":    st.column_config.TextColumn(width="small"),
-                     "Décision": st.column_config.TextColumn(width="small"),
+                     "Brief": st.column_config.TextColumn(width="small"),
+                     "Decision": st.column_config.TextColumn(width="small"),
                  })
 
     C.callout(
-        "<strong>Conformité.</strong> Les écritures du journal d'audit sont "
-        "immuables (table en ajout seul). Aucune donnée patient ne quitte "
-        "le périmètre hospitalier : le modèle de langage est local. "
-        "Voir <em>docs/governance_hipaa_rgpd.md</em>.",
+        "<strong>Compliance.</strong> Audit log writes are immutable (append-only table). No patient data leaves the hospital perimeter: the language model is local. "
+        "See <em>docs/governance_hipaa_rgpd.md</em>.",
     )
 
-    if st.button("Recommencer un nouveau brief"):
+    if st.button("Start a new brief"):
         st.session_state.pop("validation_step", None)
         st.session_state.pop("last_brief", None)
         st.session_state.pop("last_form", None)

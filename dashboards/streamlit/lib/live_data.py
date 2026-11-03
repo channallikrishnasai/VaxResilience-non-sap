@@ -33,6 +33,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from functools import wraps
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import streamlit as st
 
@@ -47,6 +48,7 @@ except ImportError:  # psycopg absent : tout retombe sur le mock
 
 
 _CONNECT_TIMEOUT_S = 2
+_IST = ZoneInfo("Asia/Kolkata")
 
 logger = logging.getLogger("vigistock.live_data")
 
@@ -109,8 +111,8 @@ def _with_fallback(mock_fn_name: str, *, empty_falls_back: bool = True) -> Calla
 
 
 def _hm(ts: datetime) -> str:
-    """Horodatage uniformisé « HH:MM » (heure locale UTC du serveur)."""
-    return ts.astimezone(UTC).strftime("%H:%M")
+    """Format a timestamp as Indian Standard Time for the UI."""
+    return ts.astimezone(_IST).strftime("%H:%M")
 
 
 # ---------------------------------------------------------------------------
@@ -188,7 +190,8 @@ def fridge_24h(fridge_id: str = "F-01-03") -> list[dict]:
         WHERE fridge_id = %s AND bucket > NOW() - INTERVAL '24 hours'
         ORDER BY bucket
     """, (fridge_id,))
-    return [{"ts": r["ts"].isoformat(), "temp": round(r["temp"], 2)}
+    return [{"ts": r["ts"].astimezone(_IST).isoformat(),
+             "temp": round(r["temp"], 2)}
             for r in rows]
 
 
@@ -269,7 +272,7 @@ def shortage_overview() -> list[dict]:
         WHERE fl.predicted_stockout_on IS NOT NULL
         ORDER BY fl.shortage_prob DESC
     """)
-    today = datetime.now(UTC).date()
+    today = datetime.now(_IST).date()
     out = []
     for r in rows:
         days_left = max(1, (r["stockout_date"] - today).days)
@@ -338,7 +341,7 @@ def shortage_forecast_curve(atc_code: str, *, horizon_days: int = 30) -> dict:
         WHERE drug_id = %s ORDER BY shortage_prob DESC LIMIT 1
     """, (atc_code,))[0]
 
-    today = datetime.now(UTC).date()
+    today = datetime.now(_IST).date()
     last_stock = float(latest["doses_remaining"] or history[-1]["stock"])
     days_to_zero = max(1, (latest["predicted_stockout_on"] - today).days) \
         if latest["predicted_stockout_on"] else horizon_days
@@ -364,9 +367,9 @@ def shortage_forecast_curve(atc_code: str, *, horizon_days: int = 30) -> dict:
 _SEVERITY_LEVEL = {"CRITICAL": "crit", "BREAKAGE_RISK": "crit",
                    "WARN": "warn", "INFO": "info"}
 _SEVERITY_TITLE = {
-    "CRITICAL":      "Rupture de la chaîne du froid",
-    "BREAKAGE_RISK": "Risque de casse de la chaîne du froid",
-    "WARN":          "Excursion modérée",
+    "CRITICAL":      "Cold chain failure",
+    "BREAKAGE_RISK": "Cold chain breakage risk",
+    "WARN":          "Moderate excursion",
     "INFO":          "Information",
 }
 
@@ -383,13 +386,13 @@ def recent_alerts() -> list[dict]:
     out = []
     for r in rows:
         mins = (r["duration_sec"] or 0) // 60
-        peak = f"{r['peak']:.1f}".replace(".", ",") if r["peak"] else "?"
+        peak = f"{r['peak']:.1f}" if r["peak"] is not None else "?"
         out.append({
             "ts":    _hm(r["opened_at"]),
             "level": _SEVERITY_LEVEL.get(r["severity"], "warn"),
-            "title": f"{_SEVERITY_TITLE.get(r['severity'], r['severity'])} (frigo {r['fridge_id']})",
+            "title": f"{_SEVERITY_TITLE.get(r['severity'], r['severity'])} (fridge {r['fridge_id']})",
             "site":  r["site_name"],
-            "msg":   f"Pic à {peak} °C, {mins} min hors de la zone 2-8 °C.",
+            "msg":   f"Peak at {peak} °C, out of the 2-8 °C safe range for {mins} minutes.",
             "tech":  f"{r['severity']} ({r['fridge_id']})",
         })
     return out
@@ -480,7 +483,7 @@ def audit_log() -> list[dict]:
         FROM silver.audit_log ORDER BY at DESC LIMIT 20
     """)
     return [{
-        "ts":       r["at"].strftime("%Y-%m-%d %H:%M:%S"),
+        "ts":       r["at"].astimezone(_IST).strftime("%Y-%m-%d %H:%M:%S IST"),
         "actor":    r["actor"],
         "role":     (r["payload"] or {}).get("role", "non renseigné"),
         "event":    r["action"],
@@ -545,8 +548,8 @@ def dagster_runs() -> list[dict]:
             "job":        r["jobName"],
             "status":     status_map.get(r["status"], "warn"),
             "duration_s": duration,
-            "started":    datetime.fromtimestamp(start, tz=UTC)
-                          .strftime("%H:%M") if start else "en attente",
+            "started":    datetime.fromtimestamp(start, tz=_IST)
+                          .strftime("%H:%M IST") if start else "pending",
         })
     return out[:4]
 
@@ -590,7 +593,7 @@ def asset_checks() -> list[dict]:
                 "result":   result,
                 "value":    ex.get("status", "non exécuté"),
                 "severity": severity,
-                "last_run": datetime.fromtimestamp(ts, tz=UTC)
-                            .strftime("%Y-%m-%d %H:%M UTC") if ts else "jamais exécuté",
+                "last_run": datetime.fromtimestamp(ts, tz=_IST)
+                            .strftime("%Y-%m-%d %H:%M IST") if ts else "not run",
             })
     return out

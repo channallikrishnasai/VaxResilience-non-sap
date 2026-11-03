@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore", case_sensitive=False)
 
     # --- Serveur ---
-    app_name:        str  = "Vigistock"
+    app_name:        str  = "VaxResilience"
     app_build:       str  = "v4.0-streamlit"
     debug:           bool = False
 

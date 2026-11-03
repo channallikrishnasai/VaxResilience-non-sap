@@ -21,7 +21,7 @@ def _insert_fridge(cur, site_id: str, fridge_id: str) -> None:
     # qui fait foi, pas une variante locale au test.
     cur.execute(
         "INSERT INTO silver.dim_sites (site_id, site_name, country, region) "
-        "VALUES (%s, 'Site de test', 'FR', 'Île-de-France') "
+        "VALUES (%s, 'India Demo Site', 'IN', 'Karnataka') "
         "ON CONFLICT (site_id) DO NOTHING",
         (site_id,),
     )

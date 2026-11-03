@@ -77,120 +77,117 @@ class SBARBrief:
 _MOCK_CORPUS: dict[str, dict] = {
     "vaccine": dict(
         situation=(
-            "BREAKAGE_RISK F-01-03 (CHU Lyon-Sud) : sortie de zone 2-8 °C pendant "
-            "72 min, pic à 9.4 °C. Lot VAX-2026-0142 (640 doses) potentiellement "
-            "compromis."
+            "BREAKAGE_RISK F-04-01 (Mysuru Demo Hospital): outbound from the 2-8 °C zone for "
+            "72 minutes, peaking at 9.4 °C. Lot VAX-2026-0142 (640 doses) may be compromised."
         ),
         background=(
-            "Vaccin antigrippal inactivé Influvac Tetra, ATC J07BB02. Campagne "
-            "saisonnière en cours. Signal FDA shortage 2026-04 actif sur le "
-            "J07BB02 jusque Q3 2026."
+            "Inactivated influenza vaccine, ATC J07BB02. This is an illustrative India "
+            "shortage signal, not a live Indian feed or product-specific recommendation."
         ),
         assessment=(
-            "Stabilité documentée jusqu'à 25 °C × 24 h (ANSM 2024-03), donc le "
-            "lot reste théoriquement utilisable. Mais alerte BREAKAGE_RISK + "
-            "pénurie active = quarantaine prudente recommandée. Substitution "
-            "intra-classe disponible sur site partenaire."
+            "No verified Indian product document is attached to this illustrative record. "
+            "The lot status cannot be established from these records; quarantine pending "
+            "review under the institution's approved protocol."
         ),
         recommendation=(
-            "1) Mettre VAX-2026-0142 en quarantaine, ne pas administrer. "
-            "2) Demander 420 doses Influvac Tetra à CHU Lyon-Nord (12 km). "
-            "3) Si refus, basculer sur Vaxigrip Tetra (même ATC). "
-            "4) Prescripteur : confirmer avant retour en stock dispensable."
+            "1) Keep VAX-2026-0142 quarantined pending pharmacist review. "
+            "2) Verify the excursion against the product's CDSCO-approved information "
+            "and the institution's validated cold-chain procedure. "
+            "3) Use only an institution-approved redistribution or substitution process. "
+            "4) This demo does not determine whether the lot is safe to use."
         ),
         alternatives=[
-            Alternative("Influvac Tetra", "J07BB02",
-                        "0.5 mL IM dose unique ≥18 ans",
-                        "Allergie protéines œuf · différer si fébrile."),
-            Alternative("Vaxigrip Tetra", "J07BB02",
-                        "0.5 mL IM ≥6 mois (schéma pédiatrique adapté)",
-                        "Latex dans le bouchon : vérifier dossier allergies."),
+            Alternative("Inactivated influenza vaccine", "J07BB02",
+                        "Consult the CDSCO-approved product information.",
+                        "Illustrative entry; clinician review required."),
+            Alternative("Alternative influenza vaccine formulation", "J07BB02",
+                        "Consult the CDSCO-approved product information.",
+                        "Illustrative entry; verify formulation and indication."),
         ],
         citations=[
-            Citation("ANSM_FluVax_2024-03.pdf", 3,
-                     "Stabilité immunogénique acceptable jusqu'à 25 °C / 24 h.", 0.91),
-            Citation("WHO_VVM_Guidance.pdf", 12,
-                     "VVM grade 3 = exposition cumulée proche du seuil de rejet.", 0.84),
-            Citation("Hospital_SOP_Vaccines_v4.docx", 7,
-                     "Mise en quarantaine de tout lot ayant déclenché une alerte.", 0.78),
+            Citation("India_demo_vaccine_context.md", 1,
+                     "Illustrative scenario only; no verified Indian product document attached.", 0.91),
+            Citation("India_demo_cold_chain_context.md", 1,
+                     "Follow the institution's validated procedure; demo data cannot establish product safety.", 0.84),
+            Citation("Institutional_protocol_required.md", 1,
+                     "Placeholder for a locally approved protocol; not a real clinical document.", 0.78),
         ],
         redistribution=[
-            Redistribution("CHU Lyon-Nord", 420, 12),
-            Redistribution("Pharmacie Centrale Grenoble", 180, 104),
+            Redistribution("Bengaluru North Demo Hospital", 420, 8),
+            Redistribution("Bengaluru South Demo Hospital", 180, 9),
         ],
     ),
     "insulin": dict(
         situation=(
-            "Stock insuline glargine A10AE04 à J-7 sur Hôpital Cochin "
-            "(320 unités restantes). Probabilité rupture 14 j : 61 %."
+            "Glargine insulin stock at J-7 at Bengaluru North Demo Hospital "
+            "(320 units remaining). 14-day stockout probability: 61%."
         ),
         background=(
-            "Insuline basale longue durée. Instabilité thermique >30 °C. "
-            "Patients diabétiques de type 1 et type 2 insulino-dépendants."
+            "Illustrative inventory scenario involving basal insulin. No verified "
+            "Indian product information is attached to this demo record."
         ),
         assessment=(
-            "Risque de rupture concret à 14 jours. Substitution par un autre "
-            "analogue basal (detemir / degludec) avec ratio 0.8× possible "
-            "selon NICE NG28 (2023). Nécessite ajustement individuel."
+            "Illustrative 14-day shortage scenario. No verified Indian "
+            "product information or institution-approved substitution protocol; "
+            "a qualified clinician must determine any treatment decision."
         ),
         recommendation=(
-            "1) Rebascule programmée vers Levemir (detemir) ou Tresiba (degludec). "
-            "2) Ratio initial 0.8 × dose glargine, puis titration sur 3 jours. "
-            "3) Surveillance glycémique renforcée x4/j. "
-            "4) Médecin : valider la conversion par patient avant ordonnance."
+            "1) Review the local inventory and the applicable CDSCO-approved product information. "
+            "2) Do not use this forecast to change a patient's treatment. "
+            "3) Consult the institution's approved diabetes protocol and pharmacist. "
+            "4) A qualified prescriber must make and validate any treatment decision."
         ),
         alternatives=[
-            Alternative("Insuline detemir (Levemir)", "A10AE05",
-                        "0.8 × dose glargine actuelle, OD ou BID",
-                        "~30 % des patients passent à 2 inj/jour."),
-            Alternative("Insuline degludec (Tresiba)", "A10AE06",
-                        "0.8 × dose glargine, OD",
-                        "Demi-vie longue : prudence en insuffisance rénale."),
+            Alternative("Insulin detemir", "A10AE05",
+                        "Consult the CDSCO-approved product information.",
+                        "Illustrative entry; clinician review required."),
+            Alternative("Insulin degludec", "A10AE06",
+                        "Consult the CDSCO-approved product information.",
+                        "Illustrative entry; clinician review required."),
         ],
         citations=[
-            Citation("NICE_NG28_2023.pdf", 44,
-                     "Detemir ou degludec sont des substituts basaux acceptables si glargine indisponible.", 0.93),
-            Citation("EMA_Insulin_StorageGuide.pdf", 9,
-                     "Éviter températures >30 °C ; rejeter si exposition ≥24 h.", 0.88),
+            Citation("India_demo_insulin_context.md", 1,
+                     "Illustrative scenario; verify against current Indian product information.", 0.93),
+            Citation("Institutional_protocol_required.md", 1,
+                     "A locally approved protocol is required; this is not dosing guidance.", 0.88),
         ],
-        redistribution=[Redistribution("Hôpital de la Croix-Rousse", 96, 4)],
+        redistribution=[Redistribution("Bengaluru Central Demo Hospital", 96, 8)],
     ),
     "antibiotic": dict(
         situation=(
-            "Signal pénurie FDA 2026-04 sur amoxicilline/clavulanate (J01CR02). "
-            "Stock CHU Bordeaux à 1450 unités, projection rupture J+23."
+            "Illustrative India shortage scenario for amoxicillin/clavulanate (J01CR02). "
+            "Stock at Hyderabad Demo Hospital is 1,450 units; projected stockout at day +23."
         ),
         background=(
-            "Antibiotique de première ligne en infection respiratoire "
-            "communautaire et infections cutanées. Beta-lactamine + inhibiteur "
-            "de β-lactamases."
+            "Illustrative inventory scenario for a beta-lactam and beta-lactamase inhibitor. "
+            "No treatment indication or local shortage status is asserted."
         ),
         assessment=(
-            "Pénurie modérée, fenêtre de réapprovisionnement Q3 2026. "
-            "Désescalade vers PO si infection non sévère, ou bascule "
-            "céphalosporine 2G en IV."
+            "Illustrative inventory warning only. No verified Indian shortage notice or "
+            "institution-approved antimicrobial protocol is attached to this demo record."
         ),
         recommendation=(
-            "1) Désescalade IV vers PO dès J3 si critères Quick Switch remplis. "
-            "2) Alternative IV : céfuroxime 750 mg × 3/j. "
-            "3) Vérifier allergie pénicilline avant chaque substitution. "
-            "4) Antibiogramme si disponible avant tout changement."
+            "1) Confirm inventory with the pharmacy team. "
+            "2) Do not use this forecast to change antibiotic treatment. "
+            "3) Follow the institution's antimicrobial stewardship protocol and current "
+            "CDSCO-approved product information. "
+            "4) A qualified prescriber must validate any treatment decision."
         ),
         alternatives=[
-            Alternative("Amoxicilline/clavulanate (PO)", "J01CR02",
-                        "875 mg / 125 mg PO × 2/j × 7 jours",
-                        "À éviter si allergie pénicilline (~10 % cohorte)."),
-            Alternative("Céfuroxime IV", "J01DC02",
-                        "750 mg IV × 3/j",
-                        "Cross-réactivité allergie pénicilline ~2 %."),
+            Alternative("Amoxicillin/clavulanate", "J01CR02",
+                        "Consult the CDSCO-approved product information.",
+                        "Illustrative entry; clinician review required."),
+            Alternative("Cefuroxime", "J01DC02",
+                        "Consult the CDSCO-approved product information.",
+                        "Illustrative entry; clinician review required."),
         ],
         citations=[
-            Citation("IDSA_Sepsis_2021.pdf", 22,
-                     "Désescalade empirique recommandée dès cultures disponibles.", 0.86),
-            Citation("FDA_Shortage_Bulletin_2026-04.json", 1,
-                     "Pénurie sur la classe béta-lactamine X, résolution prévue Q3 2026.", 0.79),
+            Citation("India_demo_antibiotic_context.md", 1,
+                     "Illustrative inventory scenario; not an Indian shortage notice.", 0.86),
+            Citation("Institutional_protocol_required.md", 1,
+                     "A locally approved antimicrobial protocol is required.", 0.79),
         ],
-        redistribution=[Redistribution("CHU Saint-Étienne", 240, 78)],
+        redistribution=[Redistribution("Bengaluru Central Demo Hospital", 240, 560)],
     ),
 }
 

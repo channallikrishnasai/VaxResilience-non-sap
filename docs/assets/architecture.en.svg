@@ -1,5 +1,5 @@
-<svg viewBox="0 0 1200 700" width="1200" height="700" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Vigistock architecture diagram">
-  <title>Vigistock: cold chain, shortage forecasting and clinical RAG</title>
+<svg viewBox="0 0 1200 700" width="1200" height="700" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="VaxResilience architecture diagram">
+  <title>VaxResilience: cold chain, shortage forecasting and clinical RAG</title>
   <defs>
     <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="#E6EEED"/></pattern>
     <marker id="chT" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M2 1.5 L8 5 L2 8.5" fill="none" stroke="#0F766E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
@@ -27,7 +27,7 @@
 
   <!-- en-tête -->
   <rect x="48" y="36" width="245" height="26" rx="6" fill="#99F6E4" opacity="0.55" transform="rotate(-0.6 170 49)"/>
-  <text x="56" y="57" class="h1">Vigistock</text>
+  <text x="56" y="57" class="h1">VaxResilience</text>
   <text x="312" y="57" class="h2">: cold chain, shortage forecasting, clinical RAG</text>
   <text x="56" y="82" class="h2">Streaming + ML + LLM for hospital pharmacies, 100% free open source</text>
 
@@ -70,8 +70,8 @@
   <text x="205" y="350" class="lab" fill="#7F9591">OPEN HEALTH DATA, NO API KEY</text>
   <rect x="40" y="360" width="330" height="100" rx="12" fill="#F8F9FB" stroke="#D6DAE3" stroke-width="1.5"/>
   <text x="56" y="388" class="bt" fill="#334155">Public health APIs</text>
-  <text x="56" y="412" class="bl">FDA shortages, OpenFDA labels</text>
-  <text x="56" y="430" class="bl">ANSM RSS, OpenPrescribing (NHS)</text>
+  <text x="56" y="412" class="bl">International: FDA shortages, labels</text>
+  <text x="56" y="430" class="bl">ANSM RSS, NHS prescribing (not India)</text>
 
   <rect x="430" y="360" width="170" height="100" rx="12" fill="#F0FDFA" stroke="#7BD9CB" stroke-width="1.5"/>
   <text x="446" y="388" class="bt">Python ingestion</text>
@@ -93,7 +93,7 @@
   <text x="836" y="303" class="bt" fill="#3730A3">Clinical RAG copilot</text>
   <text x="836" y="327" class="bl">Ollama, phi3:mini</text>
   <text x="836" y="345" class="bl">ChromaDB + bge-small</text>
-  <text x="836" y="363" class="bl">FDA / ANSM monographs</text>
+  <text x="836" y="363" class="bl">synthetic India demo corpus</text>
   <text x="836" y="381" class="bl">→ SBAR brief + citations</text>
 
   <path d="M792 195 C 802 191, 808 191, 817 195" class="flowI" marker-end="url(#chI)"/>
@@ -142,5 +142,5 @@
 
   <!-- pied de page -->
   <text x="50" y="688" class="sm">A sensor signal becomes a sourced clinical action plan in under a minute.</text>
-  <text x="1150" y="688" class="sm" text-anchor="end">vigistock</text>
+  <text x="1150" y="688" class="sm" text-anchor="end">VaxResilience</text>
 </svg>

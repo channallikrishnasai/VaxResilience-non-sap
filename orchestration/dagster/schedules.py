@@ -16,8 +16,8 @@ nightly_job = define_asset_job(
 
 daily_schedule = ScheduleDefinition(
     job=nightly_job,
-    cron_schedule="15 3 * * *",   # 03:15 Europe/Paris
-    execution_timezone="Europe/Paris",
+    cron_schedule="15 3 * * *",   # 03:15 Asia/Kolkata
+    execution_timezone="Asia/Kolkata",
 )
 
 weekly_backtest_job = define_asset_job(
@@ -27,6 +27,6 @@ weekly_backtest_job = define_asset_job(
 
 weekly_backtest_schedule = ScheduleDefinition(
     job=weekly_backtest_job,
-    cron_schedule="0 6 * * 0",    # dimanche 06:00 Europe/Paris
-    execution_timezone="Europe/Paris",
+    cron_schedule="0 6 * * 0",    # Sunday 06:00 Asia/Kolkata
+    execution_timezone="Asia/Kolkata",
 )

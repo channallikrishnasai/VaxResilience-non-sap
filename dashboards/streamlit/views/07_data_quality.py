@@ -1,19 +1,17 @@
-"""Qualité des données : asset checks Dagster + santé du pipeline.
+"""Data quality: Dagster asset checks + pipeline health.
 
-Intention UX
-------------
-Page de la section « Pipeline & données » : le vocabulaire technique y est
-légitime. Elle expose les asset-checks que le pipeline exécute en continu,
-pour vérifier en un regard que la couche données est observée, pas juste
-livrée.
+UX intent
+---------
+Page in the "Pipeline & data" section: the technical vocabulary is legitimate
+here. It exposes the asset checks the pipeline runs continuously to verify at a
+glance that the data layer is observed, not just delivered.
 
 Layout
 ------
-1. Bande KPI : comptages pass / warn / fail + jauge de fraîcheur.
-2. Tableau asset-checks : filtrable par asset + sévérité.
-3. Runs Dagster récents : petite liste avec durée et statut.
-4. Mini-graphe de drift d'embeddings pour le corpus RAG : ferme la boucle
-   côté LLM.
+1. KPI band: pass / warn / fail counts + freshness gauge.
+2. Asset-checks table: filterable by asset + severity.
+3. Recent Dagster runs: short list with duration and status.
+4. Embedding drift mini-chart for the RAG corpus: closes the loop on the LLM.
 """
 from __future__ import annotations
 
@@ -26,23 +24,23 @@ from lib.data import M
 from lib.theme import TOK
 
 # ---------------------------------------------------------------------------
-# En-tête (ton ambre : section Pipeline & données)
+# Header (ambient tone: Pipeline & data section)
 # ---------------------------------------------------------------------------
 C.page_header(
-    eyebrow="Pipeline & données",
+    eyebrow="Pipeline & data",
     icon="bar-chart",
     tone="secondary",
-    title="Qualité des données",
+    title="Data quality",
     subtitle=(
-        "Les contrôles automatiques qui vérifient en continu que les données "
-        "du pipeline sont fiables : fraîcheur, schéma, volumes, dérive. "
-        "Si la qualité dégrade, le pipeline ne livre pas : il alerte."
+        "Automatic checks that continuously verify pipeline data is reliable: "
+        "freshness, schema, volumes, drift. If quality degrades, the pipeline does "
+        "not ship data; it raises an alert."
     ),
 )
 
 
 # ---------------------------------------------------------------------------
-# Bande KPI
+# KPI band
 # ---------------------------------------------------------------------------
 checks = M.asset_checks()
 p = sum(1 for c in checks if c["result"] == "pass")
@@ -50,61 +48,60 @@ w = sum(1 for c in checks if c["result"] == "warn")
 f = sum(1 for c in checks if c["result"] == "fail")
 score = round(100 * p / max(1, len(checks)))
 
-# Blocs explicites : on dit DE QUOI on parle (contrôles automatiques de
-# qualité des données), pas un chiffre hors contexte.
+# Be explicit about what is being measured: automatic data-quality controls,
+# not just a number without context.
 c1, c2, c3, c4 = st.columns(4, gap="small")
 with c1:
-    C.kpi_card(label="Contrôles réussis", value=p, icon="check-circle",
+    C.kpi_card(label="Checks passed", value=p, icon="check-circle",
                tone="ok" if p == len(checks) else "warn",
-               trend=f"sur {len(checks)} contrôles automatiques de qualité "
-                     f"des données ({score} %)")
+               trend=f"out of {len(checks)} automatic data-quality checks ({score} %)")
 with c2:
-    C.kpi_card(label="À investiguer", value=w, icon="alert-triangle",
+    C.kpi_card(label="Needs review", value=w, icon="alert-triangle",
                tone="warn" if w else "ok", frame="warn",
-               trend="contrôle(s) signalant une dérive, à vérifier dans la journée")
+               trend="check(s) indicating drift, to verify during the day")
 with c3:
-    C.kpi_card(label="En échec", value=f, icon="x-circle",
+    C.kpi_card(label="Failed", value=f, icon="x-circle",
                tone="crit" if f else "ok", frame="warn",
-               trend="contrôle(s) bloquant la mise à jour des données en aval")
+               trend="check(s) blocking downstream data updates")
 with c4:
-    C.kpi_card(label="Dernière donnée reçue",
+    C.kpi_card(label="Last data received",
                value=M.telemetry_freshness(),
                icon="clock", tone="ok",
-               trend="âge de la dernière mesure, objectif : moins de 5 minutes")
+               trend="age of the latest measurement, target: under 5 minutes")
 
 
 # ---------------------------------------------------------------------------
-# Tableau des asset-checks
+# Asset-checks table
 # ---------------------------------------------------------------------------
 from lib.data import data_mode
 
-# Provenance honnête : « live » seulement si le webserver Dagster répond
-# vraiment, pas seulement la base (les contrôles affichés restent le mock sinon).
+# Honest provenance: only "live" if the Dagster webserver is really responding,
+# not just the database (otherwise the checks remain demo values).
 _dagster_up = (data_mode()["mode"] == "live"
                and getattr(M, "dagster_available", lambda: False)())
-_src = "live (webserver Dagster)" if _dagster_up else "valeurs de démonstration"
+_src = "live (Dagster webserver)" if _dagster_up else "demo values"
 
 # ---------------------------------------------------------------------------
-# Onglets : la page tient à l'écran, chaque volet à un clic.
+# Tabs: the page fits on one screen, one click per panel.
 # ---------------------------------------------------------------------------
 tab_checks, tab_runs, tab_drift = st.tabs(
-    ["Contrôles automatiques", "Runs Dagster", "Drift RAG"])
+    ["Automatic checks", "Dagster runs", "RAG drift"])
 
 
 with tab_checks:
     C.section_header(
-        "Contrôles automatiques", icon="check-circle", tone="secondary",
-        subtitle="chaque table de données a ses contrôles, exécutés à chaque run Dagster",
+        "Automatic checks", icon="check-circle", tone="secondary",
+        subtitle="each data table has its own checks, executed on every Dagster run",
         right=_src,
     )
 
     filter_col1, filter_col2 = st.columns([2, 1])
     with filter_col1:
         assets = sorted({c["asset"] for c in checks})
-        asset_filter = st.multiselect("Tables de données", assets, default=assets)
+        asset_filter = st.multiselect("Data tables", assets, default=assets)
     with filter_col2:
         severity_filter = st.multiselect(
-            "Résultat", ["pass", "warn", "fail"],
+            "Result", ["pass", "warn", "fail"],
             default=["pass", "warn", "fail"], format_func=str.upper,
         )
 
@@ -112,19 +109,19 @@ with tab_checks:
                 if c["asset"] in asset_filter and c["result"] in severity_filter]
 
     df = pd.DataFrame(filtered)
-    df["Statut"] = df["result"].map({"pass": "PASS", "warn": "WARN", "fail": "FAIL"})
+    df["Status"] = df["result"].map({"pass": "PASS", "warn": "WARN", "fail": "FAIL"})
     df = df.rename(columns={
-        "asset":     "Table de données",
-        "check":     "Contrôle automatique",
-        "value":     "Valeur observée",
-        "last_run":  "Dernier run",
-    })[["Table de données", "Contrôle automatique", "Statut", "Valeur observée", "Dernier run"]]
+        "asset":     "Data table",
+        "check":     "Automatic check",
+        "value":     "Observed value",
+        "last_run":  "Last run",
+    })[["Data table", "Automatic check", "Status", "Observed value", "Last run"]]
 
     st.dataframe(df, hide_index=True, use_container_width=True)
 
 
 with tab_runs:
-    C.section_header("Runs Dagster récents", icon="refresh", tone="secondary",
+    C.section_header("Recent Dagster runs", icon="refresh", tone="secondary",
                      right=_src)
 
     runs = M.dagster_runs()
@@ -144,8 +141,8 @@ with tab_runs:
                     <span class="ms-pill {state}"><span class="dot"></span>{r['status'].upper()}</span>
                   </div>
                   <div class="ms-tile-meta" style="margin-top:.45rem;">
-                    <span><b>Durée</b> {duration}</span>
-                    <span><b>Début</b> {r['started']}</span>
+                    <span><b>Duration</b> {duration}</span>
+                    <span><b>Start</b> {r['started']}</span>
                   </div>
                 </div>
                 """,
@@ -155,16 +152,16 @@ with tab_runs:
 
 with tab_drift:
     C.section_header(
-        "Drift d'embeddings (corpus RAG)", icon="activity", tone="secondary",
-        subtitle="distance moyenne aux centroïdes par version d'index, seuil d'alerte 0,05",
-        right="valeurs de démonstration",
+        "Embedding drift (RAG corpus)", icon="activity", tone="secondary",
+        subtitle="average distance to centroids by index version, alert threshold 0.05",
+        right="demo values",
     )
 
     rng = np.random.default_rng(11)
     days = pd.date_range("2026-05-14", periods=14, freq="D")
     drift = 0.012 + rng.normal(0, .003, size=14).cumsum() * .15
     drift = np.clip(drift, 0.005, 0.055)
-    drift[-1] = 0.018  # valeur actuelle
+    drift[-1] = 0.018  # current value
 
     fig = go.Figure()
     fig.add_hrect(y0=0, y1=0.05,
@@ -190,16 +187,16 @@ with tab_drift:
         font=dict(family=TOK.font_family, color=TOK.text_secondary, size=11),
         plot_bgcolor="#FFFFFF", paper_bgcolor="rgba(0,0,0,0)",
         showlegend=False,
-        yaxis=dict(title="Distance moyenne", gridcolor=TOK.divider,
+        yaxis=dict(title="Average distance", gridcolor=TOK.divider,
                    zerolinecolor=TOK.divider, range=[0, 0.08]),
         xaxis=dict(gridcolor=TOK.divider),
     )
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     C.callout(
-        "<strong>Lecture.</strong> Le corpus RAG (protocoles ANSM / OMS / NICE) "
-        "dérive lentement à chaque ré-indexation. Tant que la distance moyenne "
-        "aux centroïdes reste sous <code>0.05</code>, les requêtes restent "
-        "stables. Au-delà, on déclenche un re-rerank fine-tuned.",
+        "<strong>Readout.</strong> The indexed documents are examples; no Indian regulatory or clinical source feed is connected. "
+        "drifts slowly with each re-indexing. As long as the average distance to the "
+        "centroids stays under <code>0.05</code>, queries remain stable. Beyond that, a "
+        "fine-tuned re-ranker is triggered.",
         variant="warn",
     )

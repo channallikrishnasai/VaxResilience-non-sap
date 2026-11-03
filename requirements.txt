@@ -1,6 +1,10 @@
 # Runtime dependencies: pinned.
 # Python 3.11+ required (Prophet 1.x stable on 3.11; 3.12 partial).
 
+# CPU-only PyTorch wheels (no CUDA). Applied to the whole file; the `+cpu`
+# local version tag pins torch to this index.
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 # --- Data stack ---
 pandas==2.2.3
 numpy==2.1.3
@@ -15,6 +19,11 @@ confluent-kafka==2.6.1
 
 # --- Forecasting ---
 prophet==1.1.6
+# Prophet 1.1.6 embarque cmdstan-2.33.1 dans son wheel ; cmdstanpy 1.3+ refuse
+# cette mise en page ("CmdStan installation missing makefile") et Prophet casse
+# sur `stan_backend` (l'erreur réelle n'est loggée qu'en debug). 1.2.5 = dernière
+# version compatible avec le cmdstan bundled.
+cmdstanpy==1.2.5
 scikit-learn==1.5.2
 
 # --- IoT simulator ---
@@ -24,10 +33,25 @@ simpy==4.1.1
 ollama==0.4.4
 chromadb==0.5.23
 sentence-transformers==3.3.1
+# Pin : sans contrainte, pip remonte transformers→huggingface-hub→tokenizers
+# en backtracking (hub 1.x incompatible avec transformers 4.x).
+# 4.46.3 = plage testée avec sentence-transformers 3.3.1 (transformers>=4.41,<5).
+transformers==4.46.3
+# CPU-only PyTorch: sentence-transformers pulls torch transitively; the
+# `--extra-index-url` at the top of this file plus the `+cpu` version tag keeps
+# the ~2.5 GB CUDA/cudnn wheels out on machines without a GPU.
+torch==2.5.1+cpu
 
 # --- Object storage (MinIO) ---
 s3fs==2024.10.0
 boto3==1.35.81
+# Sans ces deux pins, pip rebondit indéfiniment entre les compatibilités
+# s3fs→aiobotocore→botocore et boto3→botocore (backtracking, résolution lente).
+# Paires vérifiées sur l'installation résolue par pip : s3fs 2024.10.0 +
+# aiobotocore 2.17.0 + botocore 1.35.93 (satisfait aussi boto3 1.35.81 :
+# >=1.35.81,<1.36.0).
+aiobotocore==2.17.0
+botocore==1.35.93
 pypdf==5.1.0
 
 # --- HTTP & APIs ---

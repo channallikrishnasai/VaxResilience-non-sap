@@ -1,5 +1,8 @@
 # Antibiotics: shortage substitution quick reference
 
+> Synthetic India demo fixture only. Not a CDSCO document, approved product
+> label, or hospital antimicrobial protocol. Do not use for clinical decisions or dosing.
+
 Scope: intravenous antibiotics commonly dispensed in hospital settings,
 ATC class **J01**.
 

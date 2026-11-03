@@ -38,23 +38,23 @@ def data_mode() -> dict:
     if _settings.use_mock_data:
         return {
             "mode": "demo",
-            "label": "Mode démo (télémétrie simulée)",
-            "okline": "Signaux pénurie réels : FDA / ANSM (open data)",
-            "note": "Aucune donnée patient. Réinitialisé à chaque démarrage.",
+            "label": "India view",
+            "okline": "Illustrative India records; CDSCO/NPPA feeds are not integrated",
+            "note": "No patient data. Locations and inventory are illustrative, not live records.",
         }
     from . import live_data
     if live_data.ping():
         return {
             "mode": "live",
-            "label": "Stack live (télémétrie simulée)",
-            "okline": "Signaux pénurie réels : FDA / ANSM (open data)",
-            "note": "Capteurs IoT simulés (SimPy) en continu. "
-                    "Aucune donnée patient.",
+            "label": "Live stack (simulated telemetry)",
+            "okline": "International reference feeds: FDA / ANSM / NHS; no India-specific shortage feed",
+            "note": "Telemetry and inventory are simulated. New databases use Indian demo locations; "
+                    "existing database records are left unchanged. No patient data.",
         }
     return {
         "mode": "fallback",
-        "label": "Stack injoignable : repli démo",
+        "label": "Stack unreachable: demo fallback",
         "okline": "",
-        "note": "La base ne répond pas : données simulées servies en repli. "
-                "Aucune donnée patient. Lancez la stack (docker compose up).",
+        "note": "The database is not responding: simulated data is being served in fallback mode. "
+                "No patient data. Start the stack (docker compose up).",
     }

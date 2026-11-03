@@ -1,22 +1,23 @@
-"""Composants UI Streamlit réutilisables : le langage que les pages parlent.
+"""Reusable Streamlit UI components: the language spoken by the pages.
 
-Chaque composant est un mince wrapper Python autour des classes CSS déclarées
-dans ``style.py``. Les pages ne doivent jamais appeler directement
-``st.markdown('<div…>')`` pour les motifs récurrents : elles demandent un
-``section_header`` ou un ``alert_card`` ici pour que le rendu reste cohérent.
+Each component is a thin wrapper around the CSS classes declared in
+``style.py``. Pages should never call ``st.markdown('<div…>')`` directly
+for recurring patterns; they request a ``section_header`` or ``alert_card``
+from here so the rendering remains consistent.
 
-Principes
----------
-* Zéro emoji : toutes les icônes viennent de ``icons.py`` (SVG line/stroke).
-* Mot métier d'abord : le terme technique passe derrière une infobulle
-  (``info_tip``), jamais en première lecture.
-* Les couleurs sémantiques (rouge/ambre/vert) sont réservées au statut.
+Principles
+----------
+* Zero emoji: all icons come from ``icons.py`` (SVG line/stroke).
+* Business language first: technical terms sit behind an info tooltip
+  (``info_tip``), never in the first read.
+* Semantic colors (red/amber/green) are reserved for status.
 """
 from __future__ import annotations
 
 import html
 from collections.abc import Iterable
-from datetime import UTC, datetime
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import streamlit as st
 
@@ -25,32 +26,32 @@ from .theme import fridge_state, state_label
 
 
 # ---------------------------------------------------------------------------
-# Petits helpers
+# Small helpers
 # ---------------------------------------------------------------------------
 def _esc(s: object) -> str:
     return html.escape(str(s), quote=True)
 
 
 def render(html_str: str) -> None:
-    """Injecte un fragment HTML via le canal markdown de Streamlit."""
+    """Inject an HTML fragment via Streamlit's markdown channel."""
     st.markdown(html_str, unsafe_allow_html=True)
 
 
 def fmt_heure(hhmm: str) -> str:
-    """Horodatage uniformisé : « à 20:18 ». Un seul format dans toute l'app."""
-    return f"à {hhmm}"
+    """Uniform display timestamp in Indian Standard Time."""
+    return f"at {hhmm} IST"
 
 
 # ---------------------------------------------------------------------------
-# En-tête de page : eyebrow + titre + sous-titre (+ infobulle optionnelle)
+# Page header: eyebrow + title + subtitle (+ optional tooltip)
 # ---------------------------------------------------------------------------
 def page_header(*, eyebrow: str, title: str, subtitle: str = "",
                 icon: str = "", tone: str = "brand",
                 tip: str = "") -> None:
-    """En-tête de page normalisé.
+    """Normalized page header.
 
-    ``tone="secondary"`` colore l'eyebrow en ambre (pages Pipeline & données).
-    ``tip`` ajoute une infobulle « Comment ça marche ? » au survol du sous-titre.
+    ``tone="secondary"`` colors the eyebrow amber (Pipeline & data pages).
+    ``tip`` adds a tooltip with “How does this work?” on hover.
     """
     head_cls = "ms-pagehead secondary" if tone == "secondary" else "ms-pagehead"
     eyebrow_cls = "eyebrow secondary" if tone == "secondary" else "eyebrow"
@@ -59,7 +60,7 @@ def page_header(*, eyebrow: str, title: str, subtitle: str = "",
     if tip:
         tip_html = (
             f' <span class="ms-tip" title="{_esc(tip)}">{I.icon("info", size=13)}'
-            f' Comment ça marche ?</span>'
+            f' How does this work?</span>'
         )
     sub_html = f'<div class="sub">{subtitle}{tip_html}</div>' if subtitle else ""
     render(
@@ -74,16 +75,16 @@ def page_header(*, eyebrow: str, title: str, subtitle: str = "",
 
 
 # ---------------------------------------------------------------------------
-# En-tête de section normalisé (motif obligatoire §6) :
-# [icône SVG] + [LIBELLÉ EN CAPITALES gras] + [filet horizontal]
+# Normalized section header (required motif §6):
+# [SVG icon] + [LABEL IN BOLD CAPS] + [horizontal rule]
 # ---------------------------------------------------------------------------
 def section_header(label: str, *, icon: str = "chevron-right",
                    tone: str = "brand", subtitle: str = "",
                    right: str = "") -> None:
-    """En-tête de section : crée la grille visuelle commune à toutes les pages.
+    """Section header that creates the common visual grid used across all pages.
 
-    ``tone`` ∈ ``brand`` (vert, défaut) · ``secondary`` (ambre, sections
-    Pipeline & données) · ``crit`` (rouge, réservé à « À traiter maintenant »).
+    ``tone`` ∈ ``brand`` (green, default) · ``secondary`` (amber, pipeline and data
+    sections) · ``crit`` (red, reserved for “Act now”).
     """
     tone_cls = {"brand": "", "secondary": "secondary", "crit": "crit"}.get(tone, "")
     sub_html = f'<span class="sub">{_esc(subtitle)}</span>' if subtitle else ""
@@ -102,18 +103,18 @@ def section_header(label: str, *, icon: str = "chevron-right",
 
 
 def section_head(title: str, subtitle: str = "", right: str = "") -> None:
-    """Alias rétro-compatible : redirige vers le motif normalisé."""
+    """Backward-compatible alias: redirects to the normalized motif."""
     section_header(title, subtitle=subtitle, right=right)
 
 
 # ---------------------------------------------------------------------------
-# Infobulle « mot métier d'abord, technique au survol »
+# Tooltip: business term first, technical detail on hover
 # ---------------------------------------------------------------------------
 def info_tip(label: str, detail: str) -> str:
-    """Retourne un span infobulle : ``label`` visible, ``detail`` au survol.
+    """Return a tooltip span: ``label`` visible, ``detail`` on hover.
 
-    Usage : ``render(f"Fiabilité prévision : élevée {info_tip('détail', 'MAPE 7,4 %')}")``
-    L'icône d'info est un vrai SVG, jamais un caractère ou un emoji.
+    Usage: ``render(f"Forecast reliability: high {info_tip('detail', 'MAPE 7.4%')}")``
+    The info icon is a real SVG, never a character or emoji.
     """
     return (
         f'<span class="ms-tip" title="{_esc(detail)}">'
@@ -209,9 +210,8 @@ def tech_bar(*, events_per_min: int, uptime_pct: float,
         f"""
         <div class="ms-techbar">
           <span class="dot"></span>
-          <b style="color:var(--ms-text);">Système en ligne :</b>
-          {events_per_min} événements/min, disponibilité {uptime_pct} %,
-          pipeline à jour.
+          <b style="color:var(--ms-text);">System online:</b>
+          {events_per_min} events/min, availability {uptime_pct} %, pipeline up to date.
           {src_html}
         </div>
         """
@@ -302,26 +302,26 @@ def fridge_tile(f: dict, *, on_click_key: str | None = None) -> bool:
           <div style="margin-top:.3rem;">{badge(state)}</div>
           <div class="ms-tile-meta">
             <span>{_esc(f['lots'])} lots</span>
-            <span>relevé {fmt_heure(_esc(f['last_seen']))}</span>
+            <span>updated {fmt_heure(_esc(f['last_seen']))}</span>
           </div>
         </div>
         """
     )
     if on_click_key:
-        # Lien texte (gras, couleur primaire, flèche), pas un bloc bouton :
-        # la clé contient « link » : style lien (voir style.py).
+        # Link text (bold, primary color, arrow), not a button block:
+        # the key contains "link" to preserve the link styling (see style.py).
         with st.container(key=f"link_detail_{f['fridge_id']}"):
-            return st.button("Voir le détail 24 h", key=on_click_key)
+            return st.button("View 24h detail", key=on_click_key)
     return False
 
 
 # ---------------------------------------------------------------------------
-# Source chips (citations RAG)
+# Source chips (RAG citations)
 # ---------------------------------------------------------------------------
 def source_chips(citations: list[dict]) -> None:
-    """Affiche les citations RAG sous forme de ligne de chips."""
+    """Render RAG citations as a line of chips."""
     if not citations:
-        render('<span class="ms-pill muted">aucune source</span>')
+        render('<span class="ms-pill muted">No sources</span>')
         return
     parts: list[str] = []
     for c in citations:
@@ -468,4 +468,4 @@ def feed_item(*, title: str, site: str, msg: str, ts: str,
 # Petits utilitaires divers
 # ---------------------------------------------------------------------------
 def now_str() -> str:
-    return datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
+    return datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M IST")

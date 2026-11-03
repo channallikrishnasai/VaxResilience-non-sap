@@ -1,13 +1,15 @@
-"""Jeu de données mock déterministe qui fait tourner la démo sans stack live.
+"""Deterministic India-focused demo data for use without the live stack.
 
 Le générateur plante une petite histoire de panne cohérente pour que le dashboard
 *raconte* quelque chose :
 
-* 6 sites, 24 réfrigérateurs de chaîne du froid.
+* 8 fictional Indian demo sites, 48 refrigerators.
 * 2 frigos en BREAKAGE_RISK (>10 °C), 1 en WARN (8-10 °C).
 * 5 médicaments dans la table pénurie, le premier à ~78 % de probabilité de rupture.
-* 24 h de télémétrie toutes les 5 min par frigo avec une excursion plantée dans la
-  dernière heure du pire frigo, pour que le graphique de détail montre un vrai pic.
+* 24 h of telemetry every 5 min per fridge, with a scripted excursion in the
+  worst fridge so the detail chart shows a clear peak.
+* Shortage signals, inventory, and patient-independent records are synthetic;
+  no India-specific public shortage feed is currently connected.
 
 Quand la stack live est disponible (``USE_MOCK_DATA=false``), les mêmes callables
 sont censés être réimplémentés contre TimescaleDB. Ce module est le contrat
@@ -18,19 +20,23 @@ from __future__ import annotations
 import math
 import random
 from datetime import UTC, datetime, timedelta
+from zoneinfo import ZoneInfo
 
 _RND = random.Random(42)
+_IST = ZoneInfo("Asia/Kolkata")
 
 # ---------------------------------------------------------------------------
 # Données de référence statiques
 # ---------------------------------------------------------------------------
 SITES = [
-    "CHU Lyon-Sud",
-    "CHU Lyon-Nord",
-    "Hôpital Cochin",
-    "CHU Bordeaux Pellegrin",
-    "CHU Toulouse Rangueil",
-    "Pharmacie Centrale Grenoble",
+    "Bengaluru Central Demo Hospital",
+    "Bengaluru North Demo Hospital",
+    "Bengaluru South Demo Hospital",
+    "Mysuru Demo Hospital",
+    "Hyderabad Demo Hospital",
+    "Chennai Demo Hospital",
+    "Mumbai Demo Hospital",
+    "New Delhi Demo Hospital",
 ]
 
 DRUGS: list[tuple[str, str]] = [
@@ -46,14 +52,14 @@ DRUGS: list[tuple[str, str]] = [
 # Snapshot de la flotte
 # ---------------------------------------------------------------------------
 def fleet_snapshot() -> list[dict]:
-    """Retourne l'état actuel des 24 frigos de la flotte.
+    """Return the current state of the 48 demo refrigerators.
 
     Les pannes sont *plantées* (déterministes) pour que la démo raconte toujours
     la même histoire quelle que soit l'heure d'ouverture de la page.
     """
     rows: list[dict] = []
     for site_idx, site in enumerate(SITES):
-        for f in range(1, 5):
+        for f in range(1, 7):
             fid = f"F-{site_idx + 1:02d}-{f:02d}"
             temp = 4.5 + _RND.gauss(0, 0.6)
             # pannes plantées
@@ -68,6 +74,7 @@ def fleet_snapshot() -> list[dict]:
                 # Horodatage uniformisé : heure « HH:MM » (jamais de durée mélangée)
                 "last_seen": (datetime.now(UTC)
                               - timedelta(seconds=_RND.randint(15, 240)))
+                              .astimezone(_IST)
                               .strftime("%H:%M"),
                 "sparkline": _spark(fid),
             })
@@ -99,7 +106,8 @@ def fridge_24h(fridge_id: str = "F-01-03") -> list[dict]:
     elif fridge_id == "F-04-01":
         for i in range(n - 18, n):
             base[i] += (i - (n - 18)) * 0.5
-    return [{"ts": (end - timedelta(minutes=5 * (n - i))).isoformat(),
+    return [{"ts": (end - timedelta(minutes=5 * (n - i)))
+                     .astimezone(_IST).isoformat(),
              "temp": round(base[i], 2)} for i in range(n)]
 
 
@@ -124,30 +132,30 @@ def kpi_snapshot() -> dict:
 # Prévisions de rupture (sortie Prophet, simulée)
 # ---------------------------------------------------------------------------
 def shortage_overview() -> list[dict]:
-    today = datetime.now(UTC).date()
+    today = datetime.now(_IST).date()
     return [
         {"drug_name": "Influenza vaccine (inactivated)", "atc_code": "J07BB02",
-         "site_id": "CHU Lyon-Sud", "current_stock": 640,
+         "site_id": "Bengaluru Central Demo Hospital", "current_stock": 640,
          "stockout_date": (today + timedelta(days=11)).isoformat(),
          "horizon_days": 14, "shortage_prob": 0.78,
          "daily_demand_mean": 58.0, "daily_demand_std": 12.4},
         {"drug_name": "Insulin glargine", "atc_code": "A10AE04",
-         "site_id": "Hôpital Cochin", "current_stock": 320,
+         "site_id": "Bengaluru North Demo Hospital", "current_stock": 320,
          "stockout_date": (today + timedelta(days=18)).isoformat(),
          "horizon_days": 30, "shortage_prob": 0.61,
          "daily_demand_mean": 17.8, "daily_demand_std": 4.1},
         {"drug_name": "Amoxicillin/clavulanate", "atc_code": "J01CR02",
-         "site_id": "CHU Bordeaux Pellegrin", "current_stock": 1450,
+         "site_id": "Hyderabad Demo Hospital", "current_stock": 1450,
          "stockout_date": (today + timedelta(days=23)).isoformat(),
          "horizon_days": 30, "shortage_prob": 0.42,
          "daily_demand_mean": 62.2, "daily_demand_std": 9.0},
         {"drug_name": "MMR vaccine", "atc_code": "J07BD52",
-         "site_id": "CHU Toulouse Rangueil", "current_stock": 220,
+         "site_id": "Chennai Demo Hospital", "current_stock": 220,
          "stockout_date": (today + timedelta(days=26)).isoformat(),
          "horizon_days": 30, "shortage_prob": 0.31,
          "daily_demand_mean": 8.4, "daily_demand_std": 2.8},
         {"drug_name": "Insulin detemir", "atc_code": "A10AE05",
-         "site_id": "CHU Lyon-Nord", "current_stock": 510,
+         "site_id": "Bengaluru South Demo Hospital", "current_stock": 510,
          "stockout_date": (today + timedelta(days=29)).isoformat(),
          "horizon_days": 30, "shortage_prob": 0.18,
          "daily_demand_mean": 17.0, "daily_demand_std": 4.4},
@@ -164,7 +172,7 @@ def shortage_forecast_curve(atc_code: str, *, horizon_days: int = 30) -> dict:
                           "yhat_lower": float, "yhat_upper": float}, ...]
         }
     """
-    today = datetime.now(UTC).date()
+    today = datetime.now(_IST).date()
     rng = random.Random(hash(atc_code) & 0xFFFF)
 
     # Stock initial et profil de consommation par famille ATC
@@ -223,38 +231,38 @@ def services_status() -> list[dict]:
 def recent_alerts() -> list[dict]:
     """Flux d'alertes : libellés humains d'abord (« mot métier en premier »),
     le code technique d'origine est conservé dans ``tech`` (infobulle)."""
-    now = datetime.now(UTC)
+    now = datetime.now(_IST)
     return [
         {"ts": (now - timedelta(minutes=2)).strftime("%H:%M"),
          "level": "crit",
-         "title": "Rupture de la chaîne du froid (frigo F-04-01)",
-         "site":  "CHU Bordeaux Pellegrin",
-         "msg":   "11,2 °C depuis 72 min, hors de la zone de sécurité 2-8 °C.",
+         "title": "Cold chain failure (fridge F-04-01)",
+         "site":  "Mysuru Demo Hospital",
+         "msg":   "11.2 °C for 72 minutes, outside the safe range of 2-8 °C.",
          "tech":  "EXCURSION 11.2 °C (F-04-01)"},
         {"ts": (now - timedelta(minutes=14)).strftime("%H:%M"),
          "level": "crit",
-         "title": "Risque de casse de la chaîne du froid (frigo F-01-03)",
-         "site":  "CHU Lyon-Sud",
-         "msg":   "Pic à 9,4 °C. Lot VAX-2026-0142 à vérifier (640 doses).",
+         "title": "Cold chain breakage risk (fridge F-01-03)",
+         "site":  "Bengaluru Central Demo Hospital",
+         "msg":   "Peak at 9.4 °C. Lot VAX-2026-0142 requires review (640 doses).",
          "tech":  "BREAKAGE_RISK (F-01-03)"},
         {"ts": (now - timedelta(minutes=37)).strftime("%H:%M"),
          "level": "warn",
-         "title": "Risque de rupture : vaccin grippe (Influenza)",
-         "site":  "Réseau",
-         "msg":   "Probabilité de rupture sous 14 jours : 78 %.",
-         "tech":  "Shortage signal FDA (J07BB02)"},
+         "title": "Shortage risk: influenza vaccine (Influenza)",
+         "site":  "India network",
+         "msg":   "14-day shortage probability: 78 %.",
+         "tech":  "Illustrative India shortage signal (J07BB02)"},
         {"ts": (now - timedelta(hours=1, minutes=2)).strftime("%H:%M"),
          "level": "info",
-         "title": "Prévisions recalculées",
-         "site":  "Réseau",
-         "msg":   "5 médicaments mis à jour, fiabilité élevée.",
-         "tech":  "Forecast rerun Prophet (Dagster), MAPE moyen 7,4 %"},
+         "title": "Forecasts recalculated",
+         "site":  "India network",
+         "msg":   "5 drugs updated, high reliability.",
+         "tech":  "Forecast rerun Prophet (Dagster), average MAPE 7.4 %"},
         {"ts": (now - timedelta(hours=2)).strftime("%H:%M"),
          "level": "warn",
-         "title": "Excursion modérée résolue (frigo F-02-02)",
-         "site":  "CHU Lyon-Nord",
-         "msg":   "Pointe à 8,6 °C résolue après 8 min.",
-         "tech":  "Excursion modérée (F-02-02)"},
+         "title": "Resolved moderate excursion (fridge F-02-02)",
+         "site":  "Bengaluru North Demo Hospital",
+         "msg":   "Peak at 8.6 °C resolved after 8 minutes.",
+         "tech":  "Moderate excursion (F-02-02)"},
     ]
 
 
@@ -266,14 +274,14 @@ def recent_alerts() -> list[dict]:
 def excursion_affected_drugs() -> dict:
     """Mapping ``atc_code`` vers ``{fridge, site, lot, doses, drug_name}``.
 
-    Version démo : le scénario plante le lot Influenza dans le frigo critique
-    de Bordeaux. En live, la même fonction joint ``inventory_lots`` aux
+    Demo version: the scenario places the influenza lot in the critical
+    refrigerator at the Mysuru demo site. In live mode, the same function joins ``inventory_lots`` to
     alertes ouvertes.
     """
     return {
         "J07BB02": {
             "fridge":    "F-04-01",
-            "site":      "CHU Bordeaux Pellegrin",
+            "site":      "Mysuru Demo Hospital",
             "lot":       "VAX-2026-0142",
             "doses":     640,
             "drug_name": "Influenza vaccine (inactivated)",
@@ -283,41 +291,46 @@ def excursion_affected_drugs() -> dict:
 
 def telemetry_freshness() -> str:
     """Âge du dernier point de télémétrie reçu (objectif ≤ 5 min)."""
-    return "1 min 32 s"
+    return "1 min 32 sec"
 
 
 # ---------------------------------------------------------------------------
 # Qualité de données : checks d'assets à la Dagster
 # ---------------------------------------------------------------------------
 def asset_checks() -> list[dict]:
+    now = datetime.now(_IST)
+
+    def last_run(ago: timedelta) -> str:
+        return (now - ago).strftime("%Y-%m-%d %H:%M IST")
+
     return [
         {"asset": "raw_telemetry",            "check": "freshness ≤ 5 min",
-         "result": "pass", "value": "1 min 32 s",   "severity": "ok",
-         "last_run": "2026-05-27 09:14 UTC"},
+         "result": "pass", "value": "1 min 32 sec", "severity": "ok",
+         "last_run": last_run(timedelta(minutes=1))},
         {"asset": "raw_telemetry",            "check": "schema unchanged",
          "result": "pass", "value": "12 cols",      "severity": "ok",
-         "last_run": "2026-05-27 09:14 UTC"},
+         "last_run": last_run(timedelta(minutes=1))},
         {"asset": "raw_telemetry",            "check": "temp ∈ [-30, 40] °C",
          "result": "pass", "value": "0 outliers",   "severity": "ok",
-         "last_run": "2026-05-27 09:14 UTC"},
+         "last_run": last_run(timedelta(minutes=1))},
         {"asset": "silver_excursions",        "check": "no duplicate alerts",
          "result": "pass", "value": "0 dup",        "severity": "ok",
-         "last_run": "2026-05-27 09:12 UTC"},
+         "last_run": last_run(timedelta(minutes=3))},
         {"asset": "silver_excursions",        "check": "alert volume vs J-7",
          "result": "warn", "value": "+38 %",        "severity": "warn",
-         "last_run": "2026-05-27 09:12 UTC"},
+         "last_run": last_run(timedelta(minutes=3))},
         {"asset": "gold_shortage_forecast",   "check": "MAPE ≤ 12 %",
          "result": "pass", "value": "7.4 %",        "severity": "ok",
-         "last_run": "2026-05-27 08:30 UTC"},
+         "last_run": last_run(timedelta(hours=1))},
         {"asset": "gold_shortage_forecast",   "check": "freshness ≤ 24 h",
          "result": "pass", "value": "4 h 18 m",     "severity": "ok",
-         "last_run": "2026-05-27 08:30 UTC"},
+         "last_run": last_run(timedelta(hours=1))},
         {"asset": "rag_protocol_index",       "check": "embedding drift ≤ 0.05",
          "result": "pass", "value": "0.018",        "severity": "ok",
-         "last_run": "2026-05-26 22:00 UTC"},
+         "last_run": last_run(timedelta(hours=8))},
         {"asset": "rag_protocol_index",       "check": "PDF ingestion errors",
-         "result": "fail", "value": "1 ANSM PDF",   "severity": "crit",
-         "last_run": "2026-05-26 22:00 UTC"},
+         "result": "fail", "value": "1 demo protocol", "severity": "crit",
+         "last_run": last_run(timedelta(hours=8))},
     ]
 
 
@@ -334,14 +347,18 @@ def dagster_runs() -> list[dict]:
 # Journal d'audit (page de validation)
 # ---------------------------------------------------------------------------
 def audit_log() -> list[dict]:
+    now = datetime.now(_IST)
     return [
-        {"ts": "2026-05-27 09:14:02", "actor": "pharmacist@cochin", "role": "pharmacist",
+        {"ts": (now - timedelta(minutes=3)).strftime("%Y-%m-%d %H:%M:%S IST"),
+         "actor": "pharmacist@bengaluru-demo", "role": "pharmacist",
          "event": "brief_validated", "brief_id": "b71f4a8e2c1d",
-         "drug": "Insulin glargine", "ok": True, "note": "stock vérifié"},
-        {"ts": "2026-05-27 09:11:55", "actor": "nurse@cochin", "role": "nurse",
+         "drug": "Insulin glargine", "ok": True, "note": "stock checked (illustrative record)"},
+        {"ts": (now - timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S IST"),
+         "actor": "nurse@bengaluru-demo", "role": "nurse",
          "event": "5B_check", "brief_id": "b71f4a8e2c1d",
-         "drug": "Insulin glargine", "ok": True, "note": "5/5 cases cochées"},
-        {"ts": "2026-05-27 08:58:21", "actor": "pharmacist@lyon-sud", "role": "pharmacist",
+         "drug": "Insulin glargine", "ok": True, "note": "5/5 checks completed"},
+        {"ts": (now - timedelta(minutes=19)).strftime("%Y-%m-%d %H:%M:%S IST"),
+         "actor": "pharmacist@mysuru-demo", "role": "pharmacist",
          "event": "brief_rejected", "brief_id": "a302d11abf04",
-         "drug": "Influenza vaccine", "ok": False, "note": "stock_check fail"},
+         "drug": "Influenza vaccine", "ok": False, "note": "stock check failed"},
     ]

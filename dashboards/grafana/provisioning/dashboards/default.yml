@@ -3,7 +3,7 @@ apiVersion: 1
 providers:
   - name: Suivi IoT & Prévention des ruptures de médicaments
     orgId: 1
-    folder: Vigistock
+    folder: VaxResilience
     type: file
     disableDeletion: false
     updateIntervalSeconds: 30

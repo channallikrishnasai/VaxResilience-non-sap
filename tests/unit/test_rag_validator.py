@@ -34,7 +34,7 @@ def _good_payload() -> dict:
             }
         ],
         "redistribution_candidates": [
-            {"site": "Lyon-Nord", "surplus_doses": 120},
+            {"site": "Bengaluru North Demo Hospital", "surplus_doses": 120},
         ],
         "confidence":           "medium",
         "insufficient_context": False,
@@ -85,6 +85,6 @@ def test_models_constructable_directly():
     # contrôle de base : les modèles Pydantic acceptent leurs champs documentés
     c = Citation(doc="x.md", page=2)
     a = Alternative(name="Foo", atc="J01CA04", citations=[c])
-    r = RedistributionCandidate(site="Paris-Sud", surplus_doses=50)
+    r = RedistributionCandidate(site="Mysuru Demo Hospital", surplus_doses=50)
     assert a.citations[0].page == 2
     assert r.surplus_doses == 50

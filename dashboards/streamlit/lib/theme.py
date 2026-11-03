@@ -205,11 +205,11 @@ def fridge_state(temp_c: float | None) -> str:
 
 
 # Libellés humains des états : mot métier d'abord, jamais de jargon.
-STATE_LABELS = {"ok": "OK", "warn": "À surveiller", "crit": "Critique", "info": "Info"}
+STATE_LABELS = {"ok": "OK", "warn": "Watch", "crit": "Critical", "info": "Info"}
 
 
 def state_label(state: str) -> str:
-    """Traduit un token d'état en libellé humain français."""
+    """Translate an app state token to a human-readable label."""
     return STATE_LABELS.get(state, state)
 
 

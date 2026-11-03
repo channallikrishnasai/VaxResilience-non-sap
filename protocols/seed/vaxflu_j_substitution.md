@@ -1,5 +1,8 @@
 # VaxFlu-J - Paediatric influenza vaccine substitution protocol
 
+> Synthetic India demo fixture only. This is not a CDSCO document,
+> approved product label, or hospital protocol. Do not use for clinical decisions.
+
 ## 1. Scope
 
 This protocol applies to the paediatric quadrivalent inactivated influenza
@@ -22,14 +25,17 @@ or a cold-chain compromise affecting one or more lots.
 ## 3. Cold-chain compromise handling
 
 Doses from lots flagged as "suspect" after a temperature excursion above
-8 °C for more than 2 hours must be quarantined and reported to ANSM
-within 48 h. Excursion data must be preserved in the incident file.
+8 °C for more than 2 hours must be quarantined pending review under the
+institution's approved cold-chain procedure. Follow the applicable local
+reporting workflow and verify current requirements with qualified
+regulatory staff. Excursion data must be preserved in the incident file.
 
 ## 4. Redistribution principles
 
-When stock at the affected site drops below 15 days of projected demand,
-the regional pharmacy coordinator may authorise redistribution from
-sister sites provided:
+When stock at the affected demo site drops below 15 days of projected
+demand, a fictional regional pharmacy coordinator may consider
+redistribution from demo sister sites. This scenario is not a real
+redistribution protocol. Conditions listed below are illustrative:
 
 - The alternative lot is within expiration (> 30 days remaining shelf life).
 - The shipping cold-chain is certified (insulated cooler, ≤ 4 h transit).

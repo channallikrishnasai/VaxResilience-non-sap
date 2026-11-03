@@ -1,21 +1,13 @@
-"""Vigistock : point d'entrée Streamlit.
+"""Vigistock : Streamlit application entry point.
 
 Architecture
 ------------
-On enregistre les pages via ``st.navigation(..., position="hidden")`` et on
-construit le sidebar NOUS-MÊMES avec ``st.page_link``. Pourquoi :
+Pages are registered via ``st.navigation(..., position="hidden")`` and the
+sidebar is constructed manually with ``st.page_link``.
 
-* La navigation native ne permet ni icônes SVG, ni libellé de section coloré
-  (la section « Pipeline & données » est identifiée en ambre, c'est validé).
-* Les pages restent déclarées en **un seul** endroit, groupées par audience
-  humaine (Pilotage, Aide clinique, Pipeline & données, Projet), pas par
-  ordre alphabétique du système de fichiers.
-
-Structure du sidebar (validée) :
-  EN HAUT   : logo plein (bouclier + flocon) + nom + statut résumé.
-  AU MILIEU : navigation par audience, libellés français parlants.
-  EN BAS    : statut système uniquement, chip ambre « Mode démo ».
-              (À terme : zone réservée à l'identité utilisateur.)
+* Native navigation does not support custom SVG icons or color-coded section labels.
+* Pages stay declared in one place, grouped by audience (Operations, Clinical support,
+  Data pipeline, Project) rather than file system order.
 """
 from __future__ import annotations
 
@@ -26,10 +18,10 @@ from lib.data import M
 from lib.settings import get_settings
 
 # ---------------------------------------------------------------------------
-# 1) Page config : doit être le *tout premier* appel Streamlit.
+# 1) Page config : must be the very first Streamlit call.
 # ---------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Vigistock",
+    page_title="VaxResilience",
     page_icon=":material/health_and_safety:",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -37,16 +29,16 @@ st.set_page_config(
         "Get help": "https://github.com/Lohana-l/vigistock",
         "Report a bug": "https://github.com/Lohana-l/vigistock/issues",
         "About": (
-            "**Vigistock** - Suivi de la chaîne du froid, prévision "
-            "des ruptures de médicaments et aide clinique pour les pharmacies "
-            "hospitalières. Projet portfolio de Lohana Utim, Data Engineer et ex-soignante."
+            "**VaxResilience** - Cold chain monitoring, medication shortage forecasting, "
+            "and clinical decision support for hospital pharmacies. Portfolio project "
+            "by Lohana Utim, Data Engineer and former nurse."
         ),
     },
 )
 
 
 # ---------------------------------------------------------------------------
-# 2) Injecter le design system
+# 2) Inject the design system
 # ---------------------------------------------------------------------------
 style.inject()
 
@@ -54,45 +46,43 @@ s = get_settings()
 
 
 # ---------------------------------------------------------------------------
-# 3) Déclaration des pages : libellés français, groupées par audience humaine.
-#    `key` : clé du conteneur (CSS par item) · `icon` : icône SVG (icons.py).
+# 3) Page declarations: grouped by audience and user-facing labels.
 # ---------------------------------------------------------------------------
 NAV: list[dict] = [
     {
-        "section": "Pilotage", "tone": "brand",
+        "section": "Operations", "tone": "brand",
         "items": [
             {"key": "nav_overview",  "icon": "tower",
-             "page": st.Page("views/01_overview.py",          title="Vue d'ensemble", default=True)},
+             "page": st.Page("views/01_overview.py",          title="Overview", default=True)},
             {"key": "nav_fridges",   "icon": "fridge",
-             "page": st.Page("views/02_cold_chain.py",        title="Réfrigérateurs")},
+             "page": st.Page("views/02_cold_chain.py",        title="Refrigerators")},
             {"key": "nav_forecast",  "icon": "forecast",
-             "page": st.Page("views/03_shortage_forecast.py", title="Prévision des ruptures")},
+             "page": st.Page("views/03_shortage_forecast.py", title="Shortage forecast")},
         ],
     },
     {
-        "section": "Aide clinique", "tone": "brand",
+        "section": "Clinical support", "tone": "brand",
         "items": [
             {"key": "nav_sbar",      "icon": "file-text",
-             "page": st.Page("views/04_clinical_copilot.py",  title="Brief SBAR")},
+             "page": st.Page("views/04_clinical_copilot.py",  title="SBAR brief")},
             {"key": "nav_valid",     "icon": "check-circle",
              "page": st.Page("views/05_validation.py",        title="Validation")},
         ],
     },
     {
-        # Section technique identifiée explicitement, label en ambre (validé).
-        "section": "Pipeline & données", "tone": "secondary",
+        "section": "Data pipeline", "tone": "secondary",
         "items": [
             {"key": "nav_archi",     "icon": "pipeline",
-             "page": st.Page("views/06_architecture.py",      title="Architecture du pipeline")},
+             "page": st.Page("views/06_architecture.py",      title="Pipeline architecture")},
             {"key": "nav_quality",   "icon": "bar-chart",
-             "page": st.Page("views/07_data_quality.py",      title="Qualité des données")},
+             "page": st.Page("views/07_data_quality.py",      title="Data quality")},
         ],
     },
     {
-        "section": "Projet", "tone": "brand",
+        "section": "Project", "tone": "brand",
         "items": [
             {"key": "nav_about",     "icon": "info",
-             "page": st.Page("views/08_about.py",             title="À propos / Stack")},
+             "page": st.Page("views/08_about.py",             title="About / stack")},
         ],
     },
 ]
@@ -102,8 +92,8 @@ nav = st.navigation(_ALL_PAGES, position="hidden")
 
 
 # ---------------------------------------------------------------------------
-# 4) CSS par item de nav : icône SVG en masque + état actif.
-#    (Généré ici car les clés et icônes sont déclarées ci-dessus.)
+# 4) CSS per nav item: SVG icon as mask + active state.
+#    (Generated here because keys and icons are declared above.)
 # ---------------------------------------------------------------------------
 def _nav_css() -> str:
     rules: list[str] = []
@@ -121,12 +111,10 @@ st.markdown(_nav_css(), unsafe_allow_html=True)
 
 
 # ---------------------------------------------------------------------------
-# 5) Sidebar : identité en haut, nav au milieu, statut système en bas.
+# 5) Sidebar: branding at the top, navigation in the middle, system status at the bottom.
 # ---------------------------------------------------------------------------
 with st.sidebar:
-    # -- A. EN HAUT : logo plein + nom + statut résumé (pastille verte) ------
-    # Compteurs calculés depuis la source réellement servie (live ou mock) :
-    # une valeur codée en dur mentirait dès que la flotte change de taille.
+    # Top: full logo + name + summary status
     _fleet = M.fleet_snapshot()
     _n_sites = len({f["site"] for f in _fleet})
     st.markdown(
@@ -134,9 +122,9 @@ with st.sidebar:
         <div class="ms-sidebrand">
           {I.logo(40)}
           <div>
-            <div class="name">Vigistock</div>
+            <div class="name">VaxResilience</div>
             <div class="status">
-              <span class="dot"></span> Surveillance active : {_n_sites} sites, {len(_fleet)} frigos
+              <span class="dot"></span> Active monitoring: {_n_sites} sites, {len(_fleet)} fridges
             </div>
           </div>
         </div>
@@ -144,9 +132,7 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # -- B. NAVIGATION groupée par audience ----------------------------------
-    # Libellés de section sans icône (validé) : texte seul, l'ambre suffit
-    # à identifier la section technique.
+    # Navigation grouped by audience
     for grp in NAV:
         tone_cls = "ms-navlabel secondary" if grp["tone"] == "secondary" else "ms-navlabel"
         st.markdown(
@@ -157,7 +143,7 @@ with st.sidebar:
             with st.container(key=it["key"]):
                 st.page_link(it["page"], label=it["page"].title)
 
-    # État actif : fond vert très clair + texte/icône vert primaire + gras.
+    # Active state styling
     _active = next(
         (it["key"] for grp in NAV for it in grp["items"]
          if it["page"].title == nav.title),
@@ -172,8 +158,7 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
 
-    # -- C. EN BAS : statut système uniquement --------------------------------
-    # Le chip dit HONNÊTEMENT ce qui est servi : démo / stack live / repli.
+    # System status at the bottom
     from lib.data import data_mode
     _dm = data_mode()
     _chip_style = ("background:var(--ms-brand-subtle);"
@@ -199,6 +184,6 @@ with st.sidebar:
 
 
 # ---------------------------------------------------------------------------
-# 6) Lancer la page sélectionnée
+# 6) Launch the selected page
 # ---------------------------------------------------------------------------
 nav.run()

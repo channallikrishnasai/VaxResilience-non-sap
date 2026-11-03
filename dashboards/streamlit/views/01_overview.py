@@ -1,24 +1,20 @@
-"""Tour de contrôle : la page d'accueil.
+"""Operations overview: main dashboard page.
 
-Intention UX (refonte validée)
-------------------------------
-L'utilisateur est un humain pressé (pharmacien, soignant). La page n'est plus
-un mur de métriques : c'est un FIL D'ACTIONS PRIORISÉ à 3 niveaux de lecture,
-à voir et comprendre en 3 secondes :
+UX intent
+---------
+The user is time-pressed (pharmacist, clinician). The page is no longer a wall of
+metrics: it is a PRIORITIZED ACTION FLOW in 3 reading levels, meant to be
+understood in 3 seconds:
 
-1. **ACTION** (« À traiter maintenant ») : deux cartes d'alerte hiérarchisées
-   qui racontent le problème en langage humain, avec des boutons d'action
-   concrets (verbe d'abord) et le pont causal excursion vers rupture (§8).
-2. **CONTEXTE** (« En un coup d'œil ») : 3 KPI sobres, bord supérieur coloré
-   sémantiquement. Aucun jargon technique.
-3. **SANTÉ TECHNIQUE** : une barre fine discrète en bas de page. C'est ici,
-   et seulement ici, que la fierté technique s'exprime sur cette page.
+1. ACTION: "Immediate attention" - two alert cards with human language and direct
+   action buttons.
+2. CONTEXT: "At a glance" - 3 clean KPI tiles with semantic color coding.
+3. TECHNICAL HEALTH: a slim status bar at the bottom of the page.
 
-Comportement live
------------------
-Les KPI et alertes se rafraîchissent toutes les 15 s via
-``st.fragment(run_every=…)`` : seul le fragment se réexécute, la position de
-défilement et les widgets restent en place.
+Live behavior
+-------------
+KPI values and alerts refresh every 15 seconds via ``st.fragment(run_every=…)``;
+only the fragment reruns, preserving scroll position and widget state.
 """
 from __future__ import annotations
 
@@ -33,69 +29,67 @@ from lib.data import M
 from lib.theme import TOK, fridge_state, state_color
 
 # ---------------------------------------------------------------------------
-# Helpers locaux
+# Local helpers
 # ---------------------------------------------------------------------------
-_MOIS_FR = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet",
-            "août", "septembre", "octobre", "novembre", "décembre"]
+_MONTHS_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 
-def _date_fr(iso: str) -> str:
-    """``2026-06-18`` devient ``18 juin``."""
+def _date_en(iso: str) -> str:
+    """Convert ``2026-06-18`` to ``18 Jun``."""
     d = datetime.fromisoformat(iso)
-    return f"{d.day} {_MOIS_FR[d.month - 1]}"
+    return f"{d.day} {_MONTHS_EN[d.month - 1]}"
 
 
-# Libellés courts français des médicaments à risque (pour la carte ambre)
+# Short English labels for at-risk products
 _DRUG_SHORT = {
     "Influenza vaccine (inactivated)": "Influenza",
-    "Insulin glargine":                "Insuline glargine",
-    "Amoxicillin/clavulanate":         "Amoxicilline",
-    "MMR vaccine":                     "MMR",
-    "Insulin detemir":                 "Insuline détémir",
+    "Insulin glargine": "Insulin glargine",
+    "Amoxicillin/clavulanate": "Amoxicillin",
+    "MMR vaccine": "MMR",
+    "Insulin detemir": "Insulin detemir",
 }
 
 
 # ---------------------------------------------------------------------------
-# En-tête de page : la promesse de l'écran en une phrase
+# Page header
 # ---------------------------------------------------------------------------
 kpis = M.kpi_snapshot()
 
 C.page_header(
-    eyebrow="Pilotage (temps réel)",
+    eyebrow="Operations (live)",
     icon="tower",
-    title="Vue d'ensemble",
+    title="Overview",
     subtitle=(
-        f"{kpis['sites_total']} sites hospitaliers, {kpis['fridges_total']} "
-        "réfrigérateurs surveillés en continu. Les actions les plus "
-        "urgentes s'affichent en premier."
+        f"{kpis['sites_total']} hospital sites, {kpis['fridges_total']} refrigerators "
+        "under continuous monitoring. The highest-priority actions appear first."
     ),
 )
 
 
 # ===========================================================================
-# NIVEAU 1 (ACTION) : « À traiter maintenant »
-# Tout est dérivé des données (alertes, lots affectés, prévisions) :
-# en mode live, la carte raconte la VRAIE excursion en cours.
+# LEVEL 1 (ACTION): "Immediate attention"
+# Everything is derived from live data (alerts, affected lots, forecast risk).
 # ===========================================================================
-C.section_header("À traiter maintenant", icon="flag", tone="crit")
+C.section_header("Immediate attention", icon="flag", tone="crit")
 
 shortages = M.shortage_overview()
 at_risk = [d for d in shortages if d["shortage_prob"] >= 0.3]
 nearest = min(d["stockout_date"] for d in shortages) if shortages else None
 risk_names = ", ".join(_DRUG_SHORT.get(d["drug_name"], d["drug_name"]) for d in at_risk)
 
-# Alerte critique la plus récente + lot affecté (pont excursion vers rupture)
+# Most recent critical alert + affected lot (excursion-to-shortage bridge)
 alerts = M.recent_alerts()
 top_crit = next((a for a in alerts if a["level"] == "crit"), None)
 affected = M.excursion_affected_drugs()
 aff_atc, aff = (next(iter(affected.items())) if affected else (None, None))
-# Probabilité de rupture du médicament affecté (lien causal chiffré)
+# Probability of shortage for the affected medication (quantified causal link)
 aff_prob = next((d["shortage_prob"] for d in shortages
                  if aff_atc and d["atc_code"] == aff_atc), None)
 
 col_crit, col_warn = st.columns(2, gap="medium")
 
-# -- Carte CRITIQUE : l'excursion en cours, racontée en langage humain -------
+# -- CRITICAL CARD: the ongoing excursion, told in human language -----------
 with col_crit:
     if top_crit and aff:
         C.alert_card(
@@ -104,31 +98,31 @@ with col_crit:
             title=top_crit["title"].split(" (")[0].strip(),
             body_html=(
                 f"<b>{top_crit['site']}</b> : {top_crit['msg']}<br/>"
-                f"{aff['doses']} doses de {_DRUG_SHORT.get(aff['drug_name'], aff['drug_name'])} "
-                f"menacées (lot {aff['lot']})."
+                f"{aff['doses']} doses of {_DRUG_SHORT.get(aff['drug_name'], aff['drug_name'])} "
+                f"at risk (lot {aff['lot']})."
             ),
         )
-        # Pont causal excursion vers rupture (§8) : l'histoire centrale du produit.
-        prob_txt = (f"<b>risque de rupture : {int(aff_prob * 100)} %</b>"
-                    if aff_prob else "<b>stock déjà sous tension</b>")
+        # Excursion-to-shortage causal bridge (§8): central product story.
+        prob_txt = (f"<b>shortage risk: {int(aff_prob * 100)} %</b>"
+                    if aff_prob else "<b>stock already under pressure</b>")
         C.causal_bridge(
-            f"Ce lot alimente un stock déjà sous tension : {prob_txt} sur "
+            f"This batch feeds stock already under pressure: {prob_txt} for "
             f"{_DRUG_SHORT.get(aff['drug_name'], aff['drug_name'])}."
         )
         with st.container(key="link_bridge_overview"):
-            if st.button("Voir l'impact sur les ruptures", key="btn_bridge_overview"):
+            if st.button("View the impact on shortages", key="btn_bridge_overview"):
                 st.session_state["forecast_focus"] = aff_atc
                 st.switch_page("views/03_shortage_forecast.py")
 
-        # Boutons d'action concrets : un verbe, une décision.
+        # Action buttons: one verb, one decision.
         a1, a2 = st.columns(2, gap="small")
         with a1:
-            if st.button("Mettre le lot en quarantaine", type="primary",
+            if st.button("Quarantine the lot", type="primary",
                          use_container_width=True, key="btn_quarantine_overview"):
-                st.toast(f"Lot {aff['lot']} marqué « suspect » "
-                         f"({aff['doses']} doses bloquées).")
+                st.toast(f"Lot {aff['lot']} marked as suspect "
+                         f"({aff['doses']} doses blocked).")
         with a2:
-            if st.button("Voir le détail 24 h", use_container_width=True,
+            if st.button("View 24h detail", use_container_width=True,
                          key="btn_detail_overview"):
                 st.session_state["selected_fridge"] = aff["fridge"]
                 st.switch_page("views/02_cold_chain.py")
@@ -136,43 +130,41 @@ with col_crit:
         C.alert_card(
             level="resolved",
             icon="check-circle",
-            title="Aucune excursion critique en cours",
-            body_html="Tous les réfrigérateurs sont dans la zone de "
-                      "sécurité 2-8 °C.",
+            title="No critical excursion in progress",
+            body_html="All refrigerators are within the safe 2-8 °C zone.",
         )
 
-# -- Carte À SURVEILLER : ruptures prévues -----------------------------------
+# -- WATCH CARD: expected shortages ------------------------------------------
 with col_warn:
     if at_risk:
         C.alert_card(
             level="warn",
             icon="forecast",
-            title=f"{len(at_risk)} médicaments risquent de manquer",
+            title=f"{len(at_risk)} medications at risk of running out",
             body_html=(
-                f"Prévision sur 14 à 30 jours : {risk_names}.<br/>"
-                f"La rupture la plus proche est estimée au "
-                f"<b>{_date_fr(nearest)}</b>."
+                f"Forecast over 14 to 30 days: {risk_names}.<br/>"
+                f"The nearest stockout is estimated for "
+                f"<b>{_date_en(nearest)}</b>."
             ),
         )
     else:
         C.alert_card(
             level="resolved",
             icon="forecast",
-            title="Aucune rupture prévue",
-            body_html="Aucun médicament suivi ne dépasse 30 % de probabilité "
-                      "de rupture sur l'horizon 14-30 jours.",
+            title="No expected shortages",
+            body_html="No monitored medication exceeds 30% stockout probability over the 14-30 day horizon.",
         )
     with st.container(key="amber_open_forecast"):
-        if st.button("Ouvrir la prévision des ruptures",
+        if st.button("Open the shortage forecast",
                      use_container_width=True, key="btn_open_forecast"):
             st.switch_page("views/03_shortage_forecast.py")
 
 
 # ===========================================================================
-# NIVEAU 2 (CONTEXTE) : « En un coup d'œil »
+# LEVEL 2 (CONTEXT): “At a glance”
 # ===========================================================================
-C.section_header("L'état du réseau en bref", icon="eye",
-                 subtitle="actualisé toutes les 15 secondes")
+C.section_header("Network overview", icon="eye",
+                 subtitle="updated every 15 seconds")
 
 
 @st.fragment(run_every=15)
@@ -180,16 +172,16 @@ def render_kpis() -> None:
     k = M.kpi_snapshot()
     ok_fridges = k["fridges_total"] - k["open_alerts"]
     C.kpi_strip([
-        dict(label="Alertes ouvertes", value=k["open_alerts"], icon="flag",
+        dict(label="Open alerts", value=k["open_alerts"], icon="flag",
              tone="crit" if k["critical_alerts"] else "warn" if k["open_alerts"] else "ok",
              frame="warn",
-             trend=f"{k['critical_alerts']} critique, {k['warn_alerts']} modérées"),
-        dict(label="Lots à vérifier", value=k["suspect_lots"], icon="package",
+             trend=f"{k['critical_alerts']} critical, {k['warn_alerts']} moderate"),
+        dict(label="Lots to review", value=k["suspect_lots"], icon="package",
              tone="warn" if k["suspect_lots"] else "ok", frame="warn",
-             trend="en attente de contrôle"),
-        dict(label="Réfrigérateurs suivis", value=k["fridges_total"], icon="fridge",
+             trend="waiting for review"),
+        dict(label="Refrigerators monitored", value=k["fridges_total"], icon="fridge",
              tone="ok",
-             trend=f"{ok_fridges} OK, {k['open_alerts']} en alerte"),
+             trend=f"{ok_fridges} OK, {k['open_alerts']} in alert"),
     ])
 
 
@@ -197,14 +189,14 @@ render_kpis()
 
 
 # ===========================================================================
-# Corps : frigos à surveiller (gauche) · flux d'alertes + services (droite)
+# Body: refrigerators to monitor (left) • alert feed + services (right)
 # ===========================================================================
 left, right = st.columns([2, 1], gap="large")
 
 with left:
     C.section_header(
-        "Chaîne du froid", icon="fridge",
-        subtitle="frigos urgents, excursions par site",
+        "Cold chain", icon="fridge",
+        subtitle="urgent fridges, excursions by site",
     )
 
     @st.fragment(run_every=15)
@@ -216,8 +208,8 @@ with left:
         )
         attention = [f for f in ranked if fridge_state(f["temp_c"]) != "ok"][:6]
         if not attention:
-            C.callout("<strong>Aucun frigo hors-tolérance.</strong> "
-                      "Tout le réseau est dans la zone de sécurité 2-8 °C.")
+            C.callout("<strong>No fridge is outside tolerance.</strong> "
+                      "The entire network is within the safe 2-8 °C range.")
             return
         for i in range(0, len(attention), 3):
             cols = st.columns(3, gap="small")
@@ -225,39 +217,39 @@ with left:
                 with col:
                     C.fridge_tile(f)
 
-    # Onglets : la page reste courte, chaque vue à un clic.
+    # Tabs: the page stays short; each view is one click away.
     tab_fridges, tab_heat = st.tabs(
-        ["Réfrigérateurs à surveiller", "Excursions par site (24 h)"])
+        ["Refrigerators to monitor", "Excursions by site (24h)"])
 
     with tab_fridges:
         render_critical_fridges()
 
     with tab_heat:
-        st.caption("Minutes hors-tolérance par tranche horaire "
-                   "(illustration, scénario de démo).")
+        st.caption("Minutes out of tolerance by time slot "
+                   "(illustrative demo scenario).")
         fleet_now = M.fleet_snapshot()
         rng = np.random.default_rng(7)
         sites = list({f["site"] for f in fleet_now})
         hours = [f"{h:02d}h" for h in range(24)]
         matrix = rng.poisson(lam=2.0, size=(len(sites), 24))
 
-        # Pannes plantées du scénario de démo, uniquement si le site existe
-        # dans la flotte servie (en live, les noms viennent de la base).
+        # Demo scenario faults, only if the site exists in the served fleet
+        # (in live mode, names come from the database).
         def _plant(site: str, hour: int, minutes: int) -> None:
             if site in sites:
                 matrix[sites.index(site), hour] = minutes
 
-        _plant("CHU Lyon-Sud", 22, 38)
-        _plant("CHU Lyon-Sud", 23, 26)
-        _plant("CHU Bordeaux Pellegrin", 21, 18)
-        _plant("CHU Bordeaux Pellegrin", 22, 42)
-        _plant("CHU Lyon-Nord", 14, 11)
+        _plant("Bengaluru Central Demo Hospital", 22, 38)
+        _plant("Bengaluru Central Demo Hospital", 23, 26)
+        _plant("Mysuru Demo Hospital", 21, 18)
+        _plant("Mysuru Demo Hospital", 22, 42)
+        _plant("Bengaluru North Demo Hospital", 14, 11)
 
         df = pd.DataFrame(matrix, index=sites, columns=hours)
         fig = px.imshow(
             df,
-            labels=dict(x="Heure", y="Site", color="min hors-tolérance"),
-            # Échelle « chaleur » : du blanc froid à l'ambre puis au rouge.
+            labels=dict(x="Hour", y="Site", color="minutes out of tolerance"),
+            # Heat scale: cold white to amber then red.
             color_continuous_scale=[
                 [0.00, "#F8FAFC"],
                 [0.20, TOK.secondary_subtle],
@@ -281,12 +273,11 @@ with left:
 
 
 with right:
-    C.section_header("Activité", icon="activity", subtitle="temps réel")
+    C.section_header("Activity", icon="activity", subtitle="live")
 
     @st.fragment(run_every=15)
     def render_alerts_feed() -> None:
-        # 3 alertes visibles, le reste derrière « Voir plus » : la colonne
-        # reste équilibrée avec celle de gauche.
+        # 3 visible alerts; the rest sit behind “View more” so the column remains balanced.
         alerts = M.recent_alerts()
         for a in alerts[:3]:
             C.feed_item(
@@ -294,14 +285,14 @@ with right:
                 color=state_color(a["level"]), tech=a.get("tech", ""),
             )
         if len(alerts) > 3:
-            # Lien texte (pas un bloc) : bascule l'affichage du reste.
+            # Text link (not a block): toggles the rest of the feed.
             def _toggle_feed() -> None:
                 st.session_state["feed_expanded"] = \
                     not st.session_state.get("feed_expanded", False)
 
             expanded = st.session_state.get("feed_expanded", False)
-            lbl = ("Voir moins" if expanded
-                   else f"Voir plus ({len(alerts) - 3} alertes)")
+            lbl = ("View less" if expanded
+                   else f"View more ({len(alerts) - 3} alerts)")
             with st.container(key="link_more_alerts"):
                 st.button(lbl, key="btn_more_alerts", on_click=_toggle_feed)
             if expanded:
@@ -313,15 +304,15 @@ with right:
                     )
 
     _SERVICE_ROLES = {
-        "Ollama":      "Génération des briefs",
-        "Redpanda":    "Flux de mesures",
-        "TimescaleDB": "Base de données",
-        "ChromaDB":    "Index documentaire",
+        "Ollama":      "Brief generation",
+        "Redpanda":    "Telemetry stream",
+        "TimescaleDB": "Database",
+        "ChromaDB":    "Document index",
         "Dagster":     "Orchestration",
-        "Grafana":     "Supervision technique",
+        "Grafana":     "Technical monitoring",
     }
 
-    tab_feed, tab_svc = st.tabs(["Flux d'alertes", "État des services"])
+    tab_feed, tab_svc = st.tabs(["Alert feed", "Service status"])
 
     with tab_feed:
         render_alerts_feed()
@@ -350,30 +341,30 @@ with right:
 
 
 # ===========================================================================
-# Prochaines actions : où voulez-vous aller ?
+# Next actions: where do you want to go?
 # ===========================================================================
-C.section_header("Prochaines actions", icon="arrow-right",
-                 subtitle="où voulez-vous aller ?")
+C.section_header("Next actions", icon="arrow-right",
+                 subtitle="where do you want to go?")
 
 c1, c2, c3 = st.columns(3, gap="small")
 with c1:
-    if st.button("Voir tous les réfrigérateurs",
+    if st.button("See all refrigerators",
                  use_container_width=True, type="primary"):
         st.switch_page("views/02_cold_chain.py")
 with c2:
-    if st.button("Ouvrir la prévision des ruptures",
+    if st.button("Open the shortage forecast",
                  use_container_width=True, key="btn_next_forecast"):
         st.switch_page("views/03_shortage_forecast.py")
 with c3:
-    if st.button("Préparer un brief SBAR",
+    if st.button("Prepare an SBAR brief",
                  use_container_width=True):
         st.switch_page("views/04_clinical_copilot.py")
 
 
 # ===========================================================================
-# NIVEAU 3 (SANTÉ TECHNIQUE) : barre fine discrète, en bas de page.
+# LEVEL 3 (TECHNICAL HEALTH): a subtle bar at the bottom of the page.
 # ===========================================================================
-C.section_header("Pipeline & données", icon="pipeline", tone="secondary")
+C.section_header("Pipeline & data", icon="pipeline", tone="secondary")
 
 from lib.data import data_mode
 
@@ -383,4 +374,4 @@ with tcol1:
                uptime_pct=kpis["uptime_pct"],
                source_label=data_mode()["label"])
 with tcol2:
-    st.page_link("views/06_architecture.py", label="Architecture du pipeline")
+    st.page_link("views/06_architecture.py", label="Pipeline architecture")

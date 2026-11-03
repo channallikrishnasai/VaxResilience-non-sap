@@ -229,7 +229,7 @@ def logo(size: int = 38) -> str:
     _LOGO_COUNTER += 1
     gid = f"msgrad{_LOGO_COUNTER}"
     return f"""<svg width="{size}" height="{size}" viewBox="0 0 24 24" fill="none"
-     xmlns="http://www.w3.org/2000/svg" aria-label="Vigistock"
+     xmlns="http://www.w3.org/2000/svg" aria-label="VaxResilience"
      style="flex-shrink:0;">
   <defs>
     <linearGradient id="{gid}" x1="0" y1="0" x2="1" y2="1">
@@ -252,7 +252,7 @@ def logo(size: int = 38) -> str:
 def logo_standalone() -> str:
     """Version autonome du logo (fichier ``assets/logo.svg``)."""
     return """<svg width="96" height="96" viewBox="0 0 24 24" fill="none"
-     xmlns="http://www.w3.org/2000/svg" aria-label="Vigistock">
+     xmlns="http://www.w3.org/2000/svg" aria-label="VaxResilience">
   <defs>
     <linearGradient id="msgrad" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#10B981"/>

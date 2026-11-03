@@ -5,7 +5,7 @@
 ```
                                   ┌──────────────────────────────────────┐
                                   │           Public APIs (batch)         │
-                                  │  FDA / openFDA / ANSM / OpenPrescr.   │
+                                  │ FDA / openFDA / ANSM / NHS (global)  │
                                   └────────────┬─────────────────────────┘
                                                │  daily, idempotent
                                                ▼
@@ -54,7 +54,7 @@ We deliberately keep two ingestion paths:
 
 1. **Streaming path** for the IoT telemetry: sub-minute end-to-end
    latency is the whole point of cold-chain monitoring.
-2. **Batch path** for the public data sources - FDA / ANSM update at
+2. **Batch path** for the international public reference sources - FDA / ANSM update at
    most daily, often weekly. Calling them every minute would burn rate
    limits with no benefit.
 
@@ -62,6 +62,11 @@ Both paths land in the **same TimescaleDB**, so the consumer of the data
 (Prophet, Streamlit, Grafana) doesn’t have to know how a row got there.
 This is the lambda pattern done responsibly: shared sink, divergent
 ingestion.
+
+The demo network is synthetic and India-focused (Bengaluru first). No
+India-specific medicine-shortage feed is currently integrated; CDSCO and
+NPPA are reference links only. The existing international feeds must not
+be interpreted as Indian availability data.
 
 ## Why TimescaleDB rather than InfluxDB / Prometheus
 

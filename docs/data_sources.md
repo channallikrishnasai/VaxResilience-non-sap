@@ -2,13 +2,15 @@
 
 A defining goal of this project: **use real public data wherever it
 exists**, synthesise the rest with a documented, defensible model.
-Nothing is fabricated without a paper trail.
+The operational network is India-focused, but its public shortage feeds
+are currently international and are not evidence of Indian availability.
 
 ## Reuse rights
 
-Every source is free, unauthenticated and legally reusable (public domain,
-CC0 or CC-BY). Anyone can clone the repo and reproduce the same flows,
-without an API key or a subscription.
+The integrated public sources below are free or openly accessible, but
+they are not India-specific. Check each source's current reuse terms before
+redistributing its data. Anyone can run the synthetic India demo without
+access to those feeds.
 
 ## Summary
 
@@ -16,11 +18,20 @@ without an API key or a subscription.
 | --- | --- | --- | --- | --- |
 | FDA Drug Shortages | **Real** | `api.fda.gov/drug/shortages.json`: unauthenticated | ~330 active shortages | Daily |
 | openFDA Drug Label | **Real** | `api.fda.gov/drug/label.json`: unauthenticated, 240 req/min anonymous | ~20 k active labels | Weekly |
-| ANSM (France) | **Real** | Public RSS feed + “ruptures de stock” HTML table | ~5 k signalements | Daily |
+| ANSM (France) | **Real, international reference** | Public RSS feed | RSS entries | Daily |
 | OpenPrescribing.net (UK) | **Real** | REST API, CC-BY licence | 10 k practices × 3 years | Monthly |
-| Hospital inventory | **Synthetic** | Seed generator (`scripts/seed_dimensions.py`) | 8 sites × 5 cold-chain drugs, 270 days of dispensing | - |
+| CDSCO (India) | **Reference only** | [Official website](https://cdsco.gov.in/) | No automated data integration | Not integrated |
+| NPPA (India) | **Reference only** | [Official website](https://nppa.gov.in/) | No automated inventory/shortage feed | Not integrated |
+| Hospital inventory | **Synthetic** | Seed generator (`scripts/seed_dimensions.py`) | 8 fictional Indian sites × 5 cold-chain drugs, 270 days of dispensing | - |
 | Fridge telemetry | **Synthetic** | Our SimPy simulator | 8 × 6 fridges × 30 s | - |
-| Clinical substitution protocols | **Synthetic (seed)** + **real (FDA labels)** | Seeded Markdown + downloaded FDA label JSON | ~20 documents | One-off |
+| Clinical demo corpus | **Synthetic (seed)** | Seeded Markdown | ~20 illustrative documents | One-off |
+
+**India-specific shortage limitation:** CDSCO is India's national drug
+regulator; NPPA publishes pharmaceutical pricing information. This
+repository does not currently ingest a structured India-specific
+shortage/availability feed from either authority. Do not treat the
+international FDA, ANSM, or NHS feeds as Indian supply data. The demo's
+Indian inventory and shortage signals are synthetic.
 
 ## Why synthetic is fine for telemetry
 
@@ -34,8 +45,9 @@ distributions are grounded in two documented priors:
 - **WHO PQS E003/RF05** catalogue: compressor failure MTBF figures and
   recovery curves (used as simulator priors, not ingested).
 
-The simulator code (`simulator/model.py`) cites the exact paragraph it
-implements. A reviewer auditing our distributions can check them.
+The simulator code (`simulator/model.py`) cites its general refrigeration
+priors. It does not model city-specific Indian weather or represent any
+real hospital.
 
 ## API access patterns
 

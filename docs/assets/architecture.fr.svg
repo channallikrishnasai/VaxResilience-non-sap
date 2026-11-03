@@ -1,5 +1,5 @@
-<svg viewBox="0 0 1200 700" width="1200" height="700" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma d'architecture Vigistock">
-  <title>Vigistock : chaîne du froid, prévision des ruptures et RAG clinique</title>
+<svg viewBox="0 0 1200 700" width="1200" height="700" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Schéma d'architecture VaxResilience">
+  <title>VaxResilience : chaîne du froid, prévision des ruptures et RAG clinique</title>
   <defs>
     <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.2" fill="#E6EEED"/></pattern>
     <marker id="chT" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M2 1.5 L8 5 L2 8.5" fill="none" stroke="#0F766E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></marker>
@@ -27,7 +27,7 @@
 
   <!-- en-tête -->
   <rect x="48" y="36" width="245" height="26" rx="6" fill="#99F6E4" opacity="0.55" transform="rotate(-0.6 170 49)"/>
-  <text x="56" y="57" class="h1">Vigistock</text>
+  <text x="56" y="57" class="h1">VaxResilience</text>
   <text x="312" y="57" class="h2">: chaîne du froid, prévision des ruptures, RAG clinique</text>
   <text x="56" y="82" class="h2">Streaming + ML + LLM pour les pharmacies hospitalières, 100% open source gratuit</text>
 
@@ -70,8 +70,8 @@
   <text x="205" y="350" class="lab" fill="#7F9591">DONNÉES SANTÉ OUVERTES, SANS CLÉ API</text>
   <rect x="40" y="360" width="330" height="100" rx="12" fill="#F8F9FB" stroke="#D6DAE3" stroke-width="1.5"/>
   <text x="56" y="388" class="bt" fill="#334155">APIs santé publiques</text>
-  <text x="56" y="412" class="bl">pénuries FDA, notices OpenFDA</text>
-  <text x="56" y="430" class="bl">RSS ANSM, OpenPrescribing (NHS)</text>
+  <text x="56" y="412" class="bl">Références internationales FDA / OpenFDA</text>
+  <text x="56" y="430" class="bl">ANSM / NHS (pas des données Inde)</text>
 
   <rect x="430" y="360" width="225" height="100" rx="12" fill="#F0FDFA" stroke="#7BD9CB" stroke-width="1.5"/>
   <text x="446" y="388" class="bt">Ingestion Python</text>
@@ -93,7 +93,7 @@
   <text x="836" y="303" class="bt" fill="#3730A3">Copilote RAG clinique</text>
   <text x="836" y="327" class="bl">Ollama, phi3:mini</text>
   <text x="836" y="345" class="bl">ChromaDB + bge-small</text>
-  <text x="836" y="363" class="bl">monographies FDA / ANSM</text>
+  <text x="836" y="363" class="bl">corpus démo Inde synthétique</text>
   <text x="836" y="381" class="bl">→ brief SBAR + citations</text>
 
   <path d="M792 195 C 802 191, 808 191, 817 195" class="flowI" marker-end="url(#chI)"/>

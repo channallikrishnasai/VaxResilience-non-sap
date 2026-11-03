@@ -34,19 +34,17 @@ from simulator.fleet import make_fridge_id, make_site_id
 
 _SEED = 42
 
-# Libellés de sites : les six premiers reprennent le mock pour que la bascule
-# démo vers live soit visuellement transparente, les suivants complètent la flotte.
-# Coordonnées réelles des établissements : elles servent au calcul de distance
-# des candidats de redistribution dans le brief clinique.
+# Fictional demo hospitals across India; coordinates identify the city only.
+# These are not real hospitals or operational inventory locations.
 _SITE_NAMES = [
-    ("CHU Lyon-Sud",                "Auvergne-Rhône-Alpes", 45.6960, 4.7880),
-    ("CHU Lyon-Nord",               "Auvergne-Rhône-Alpes", 45.8030, 4.8260),
-    ("Hôpital Cochin",              "Île-de-France",        48.8390, 2.3410),
-    ("CHU Bordeaux Pellegrin",      "Nouvelle-Aquitaine",   44.8260, -0.6040),
-    ("CHU Toulouse Rangueil",       "Occitanie",            43.5610, 1.4520),
-    ("Pharmacie Centrale Grenoble", "Auvergne-Rhône-Alpes", 45.1750, 5.7280),
-    ("CHU Lille Salengro",          "Hauts-de-France",      50.6090, 3.0340),
-    ("CHU Nantes Hôtel-Dieu",       "Pays de la Loire",     47.2120, -1.5540),
+    ("Bengaluru Central Demo Hospital", "Karnataka",       12.9716, 77.5946),
+    ("Bengaluru North Demo Hospital",   "Karnataka",       13.0358, 77.5970),
+    ("Bengaluru South Demo Hospital",   "Karnataka",       12.9177, 77.6233),
+    ("Mysuru Demo Hospital",            "Karnataka",       12.2958, 76.6394),
+    ("Hyderabad Demo Hospital",         "Telangana",       17.3850, 78.4867),
+    ("Chennai Demo Hospital",           "Tamil Nadu",      13.0827, 80.2707),
+    ("Mumbai Demo Hospital",            "Maharashtra",     19.0760, 72.8777),
+    ("New Delhi Demo Hospital",         "Delhi",           28.6139, 77.2090),
 ]
 
 # Médicaments chaîne du froid : mêmes couples (nom, ATC) que le contrat mock.
@@ -69,7 +67,7 @@ def _seed_sites_and_fridges(cur, n_sites: int, fridges_per_site: int) -> None:
             """
             INSERT INTO silver.dim_sites
                 (site_id, site_name, country, region, latitude, longitude)
-            VALUES (%s, %s, 'FR', %s, %s, %s)
+            VALUES (%s, %s, 'IN', %s, %s, %s)
             ON CONFLICT (site_id) DO NOTHING
             """,
             (site_id, name, region, lat, lon),

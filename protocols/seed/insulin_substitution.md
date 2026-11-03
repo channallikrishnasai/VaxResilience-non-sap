@@ -1,5 +1,8 @@
 # Insulin: shortage substitution guidance
 
+> Synthetic India demo fixture only. Not a CDSCO document, approved product
+> label, or hospital protocol. Do not use for clinical decisions or dosing.
+
 ## 1. Scope
 
 Applies to basal and rapid-acting insulin preparations dispensed from
@@ -35,4 +38,5 @@ between hospitals requires:
 
 - Unbroken temperature log.
 - Receiving pharmacist sign-off.
-- Regulatory documentation (decree 2023-XYZ in France).
+- Applicable local regulatory and institutional approvals, to be verified
+  by qualified Indian regulatory and clinical reviewers before any real use.

@@ -1,6 +1,6 @@
 <div align="center">
 
-# Vigistock
+# VaxResilience
 
 ### Suivi IoT & Prévention des ruptures de médicaments
 
@@ -50,15 +50,15 @@ Pour les pharmacies hospitalières. Streaming, ML et LLM local, de bout en bout,
 
 ## Pourquoi ce projet
 
-Ce projet est inspiré d'expériences de terrain en tant que soignante, où une rupture de médicament est un vrai problème : un frigo qui dérive hors plage sans que personne ne s'en aperçoive, un lot de vaccins mis en quarantaine trop tard, et un médecin de garde qui téléphone aux hôpitaux voisins pour trouver une substitution.
+VaxResilience uses an India-focused synthetic hospital network, centered on Bengaluru, to demonstrate how a medication shortage response could connect cold-chain monitoring, inventory forecasting, and clinical review.
 
-L'ampleur du problème est bien documentée. La FDA américaine a recensé 323 ruptures actives au T1 2024, le chiffre le plus élevé en dix ans, et la plateforme de suivi de l'EMA liste en permanence environ 250 ruptures actives en UE. Les défaillances de chaîne du froid en sont une cause récurrente : l'OMS estime que 25 % des vaccins sont dégradés à leur arrivée aux patients, principalement à cause d'excursions de température détectées trop tard.
+Les hôpitaux, stocks, signaux de pénurie et télémétries de démonstration sont fictifs. Le projet ne dispose pas actuellement d'un flux indien automatisé de pénuries médicamenteuses : les sources FDA, ANSM et NHS conservées dans le pipeline sont des références internationales, pas des données sur les pénuries en Inde. CDSCO et NPPA sont documentés comme sources officielles de référence, mais ne sont pas présentés comme des flux intégrés.
 
-Aujourd'hui, le professionnel de santé qui doit réagir jongle avec trois outils déconnectés : un dashboard frigo, un système d'inventaire et une pile de PDF de protocoles de substitution. Ce projet les relie en un seul pipeline événementiel qui détecte l'excursion, prédit la rupture en aval et rédige un brief de substitution sourcé.
+Les documents cliniques de démonstration ne sont pas des recommandations médicales indiennes. Toute décision réelle exige une vérification par un professionnel qualifié selon les informations produit approuvées par CDSCO et les protocoles institutionnels applicables.
 
 ## Ce que fait le pipeline
 
-Une flotte de frigos simulée envoie sa télémétrie toutes les 30 secondes. Quand un frigo sort trop longtemps de la plage 2-8 °C, les lots concernés deviennent suspects, la prévision de demande est mise à jour, et l'équipe soignante reçoit un brief actionnable appuyé sur les documents officiels du médicament. De bout en bout, un signal capteur devient un plan d'action clinique en moins d'une minute, avec citations.
+Une flotte simulée de 48 réfrigérateurs sur huit sites de démonstration fictifs en Inde envoie sa télémétrie toutes les 30 secondes. Les signaux de stock et les documents cliniques de démonstration sont synthétiques. Le système illustre le flux de bout en bout; il ne constitue ni une source de pénurie indienne ni un outil de décision clinique.
 
 <p align="center">
   <img src="docs/assets/how-it-works.fr.svg" alt="Du signal capteur à l'action clinique, en cinq étapes" width="780">
@@ -69,7 +69,7 @@ Une flotte de frigos simulée envoie sa télémétrie toutes les 30 secondes. Qu
 | 1. Capter | Le simulateur SimPy envoie température et humidité toutes les 30 s vers Redpanda. | `simulator/` |
 | 2. Détecter | Un consumer streaming applique un Z-score glissant et des seuils de durée, marque l'excursion `BREAKAGE_RISK` et flague le lot de vaccins comme suspect. | `streaming/consumer.py`, `streaming/anomaly.py` |
 | 3. Prévoir | Prophet réentraîne le modèle de demande régional, soustrait les doses suspectes et prédit la date de rupture de stock. | `ml/shortage_forecast.py` |
-| 4. Recommander | Un LLM local (Ollama) récupère les monographies FDA et ANSM pertinentes dans ChromaDB et rédige un brief de substitution avec citations. | `llm/` |
+| 4. Recommander | Un LLM local (Ollama) récupère le corpus de démonstration synthétique dans ChromaDB et rédige un brief avec citations signalées comme fictives. | `llm/` |
 | 5. Agir | Grafana déclenche l'alerte en temps réel ; l'application Streamlit présente un brief SBAR avec alternatives et stocks excédentaires à proximité. | `dashboards/` |
 
 ## Démarrage rapide
@@ -112,7 +112,7 @@ Une fois la stack démarrée, le dashboard affiche directement les vraies sortie
 ## Architecture
 
 <p align="center">
-  <img src="docs/assets/architecture.fr.svg" alt="Architecture Vigistock : capter, streamer, détecter, stocker, prédire, agir" width="980">
+  <img src="docs/assets/architecture.fr.svg" alt="Architecture VaxResilience : capter, streamer, détecter, stocker, prédire, agir" width="980">
 </p>
 
 Dagster orchestre la partie batch : les assets d'ingestion, la prévision nocturne, le rafraîchissement de l'index RAG et les contrôles de qualité de données sont tous des assets software-defined. La partie streaming tourne indépendamment, donc une API publique lente ne retarde jamais une alerte. Le diagramme complet et les choix associés sont dans [`docs/architecture.md`](docs/architecture.md).
@@ -137,7 +137,7 @@ Un blueprint Terraform optionnel pour un déploiement AWS se trouve dans [`infra
 
 ## Sources de données
 
-Toutes les sources sont publiques, sans authentification et légalement réutilisables : n'importe qui peut cloner le repo et reproduire les mêmes flux.
+Les sources publiques intégrées au pipeline sont des références internationales; elles ne représentent pas des pénuries indiennes.
 
 | Source | Type | Point d'accès | Licence | Fréquence |
 | --- | --- | --- | --- | --- |
@@ -146,8 +146,10 @@ Toutes les sources sont publiques, sans authentification et légalement réutili
 | ANSM (France) | Flux RSS | `ansm.sante.fr/actualites.rss` | Données publiques | Quotidien |
 | OpenPrescribing (NHS) | API REST | `openprescribing.net/api/1.0` | CC BY 4.0 | Hebdomadaire |
 | Télémétrie IoT | Simulateur SimPy | local (Redpanda) | Code du projet | À la demande |
+| CDSCO | Site officiel de l'autorité réglementaire indienne | `cdsco.gov.in` | Référence seulement; aucun flux de pénurie intégré | Non intégré |
+| NPPA | Site officiel de l'autorité indienne de tarification pharmaceutique | `nppa.gov.in` | Référence seulement; aucune donnée de stock intégrée | Non intégré |
 
-La télémétrie des frigos est synthétique par nécessité : les hôpitaux ne publient pas leurs données opérationnelles. La physique du simulateur (plages de fonctionnement, temps de maintien, taux de panne des compresseurs) suit les spécifications PQS de l'OMS, détaillées dans [`docs/data_sources.md`](docs/data_sources.md).
+Les noms des sites, coordonnées de ville, inventaires et télémétries indiens sont des données de démonstration synthétiques. Les sources internationales listées ci-dessus restent séparées et doivent être identifiées comme telles. Voir [`docs/data_sources.md`](docs/data_sources.md) pour les limites de provenance.
 
 ## L'application
 
@@ -248,5 +250,5 @@ C'est un projet de portfolio. Il tourne de bout en bout sur un laptop, les flux 
 ---
 
 <p align="center">
-  Réalisé par <strong>Lohana Utim</strong>, Vigistock
+  Réalisé par <strong>Lohana Utim</strong>, VaxResilience
 </p>

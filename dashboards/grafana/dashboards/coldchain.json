@@ -12,7 +12,7 @@
       }
     ]
   },
-  "description": "Real-time cold-chain telemetry: per fridge temperature, active alerts, and 7-day trends.",
+  "description": "India-only cold-chain view. Non-India records are excluded; panels remain empty until India site data is present in TimescaleDB.",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -44,7 +44,7 @@
           "datasource": { "type": "postgres", "uid": "ds-timescale" },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) AS critical FROM silver.alerts WHERE closed_at IS NULL AND severity IN ('BREAKAGE_RISK','CRITICAL')"
+          "rawSql": "SELECT COUNT(*) AS critical FROM silver.alerts a JOIN silver.dim_sites s ON s.site_id = a.site_id WHERE s.country = 'IN' AND a.closed_at IS NULL AND a.severity IN ('BREAKAGE_RISK','CRITICAL')"
         }
       ],
       "title": "Critical alerts now",
@@ -68,7 +68,7 @@
           "datasource": { "type": "postgres", "uid": "ds-timescale" },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(DISTINCT fridge_id) AS active FROM silver.telemetry_raw WHERE event_ts > NOW() - INTERVAL '10 minutes'"
+          "rawSql": "SELECT COUNT(DISTINCT t.fridge_id) AS active FROM silver.telemetry_raw t JOIN silver.dim_fridges f ON f.fridge_id = t.fridge_id JOIN silver.dim_sites s ON s.site_id = f.site_id WHERE s.country = 'IN' AND t.event_ts > NOW() - INTERVAL '10 minutes'"
         }
       ],
       "title": "Fridges reporting (10m)",
@@ -98,7 +98,7 @@
           "datasource": { "type": "postgres", "uid": "ds-timescale" },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) AS suspect FROM silver.inventory_lots WHERE suspect"
+          "rawSql": "SELECT COUNT(*) AS suspect FROM silver.inventory_lots l JOIN silver.dim_sites s ON s.site_id = l.site_id WHERE s.country = 'IN' AND l.suspect"
         }
       ],
       "title": "Suspect lots",
@@ -128,7 +128,7 @@
           "datasource": { "type": "postgres", "uid": "ds-timescale" },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT COUNT(*) AS at_risk FROM silver.forecasts WHERE forecast_ts > NOW() - INTERVAL '24 hours' AND shortage_prob >= 0.5"
+          "rawSql": "SELECT COUNT(*) AS at_risk FROM silver.forecasts f JOIN silver.dim_sites s ON s.site_id = f.site_id WHERE s.country = 'IN' AND f.forecast_ts > NOW() - INTERVAL '24 hours' AND f.shortage_prob >= 0.5"
         }
       ],
       "title": "Drugs ≥50% stockout risk",
@@ -163,7 +163,7 @@
           "datasource": { "type": "postgres", "uid": "ds-timescale" },
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT bucket AS time, fridge_id AS metric, avg_temp_c FROM silver.telemetry_5m WHERE $__timeFilter(bucket) AND ('$fridge' = 'all' OR fridge_id = '$fridge') ORDER BY bucket"
+          "rawSql": "SELECT t.bucket AS time, t.fridge_id AS metric, t.avg_temp_c FROM silver.telemetry_5m t JOIN silver.dim_fridges f ON f.fridge_id = t.fridge_id JOIN silver.dim_sites s ON s.site_id = f.site_id WHERE s.country = 'IN' AND $__timeFilter(t.bucket) AND ('$fridge' = 'all' OR t.fridge_id = '$fridge') ORDER BY t.bucket"
         }
       ],
       "title": "Fridge temperature (5-min avg, °C)",
@@ -199,7 +199,7 @@
           "datasource": { "type": "postgres", "uid": "ds-timescale" },
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT opened_at, severity, fridge_id, site_name, duration_sec/60 AS duration_minutes, peak_temp_c FROM gold.v_alerts_active ORDER BY opened_at DESC LIMIT 50"
+          "rawSql": "SELECT a.opened_at, a.severity, a.fridge_id, a.site_name, a.duration_sec/60 AS duration_minutes, a.peak_temp_c FROM gold.v_alerts_active a JOIN silver.dim_sites s ON s.site_id = a.site_id WHERE s.country = 'IN' ORDER BY a.opened_at DESC LIMIT 50"
         }
       ],
       "title": "Active alerts",
@@ -230,7 +230,7 @@
           "datasource": { "type": "postgres", "uid": "ds-timescale" },
           "format": "time_series",
           "rawQuery": true,
-          "rawSql": "SELECT time_bucket('1 hour', opened_at) AS time, severity AS metric, COUNT(*) AS n FROM silver.alerts WHERE $__timeFilter(opened_at) GROUP BY time, severity ORDER BY time"
+          "rawSql": "SELECT time_bucket('1 hour', a.opened_at) AS time, a.severity AS metric, COUNT(*) AS n FROM silver.alerts a JOIN silver.dim_sites s ON s.site_id = a.site_id WHERE s.country = 'IN' AND $__timeFilter(a.opened_at) GROUP BY time, a.severity ORDER BY time"
         }
       ],
       "title": "Alert volume by severity (hourly)",
@@ -244,14 +244,14 @@
     "list": [
       {
         "datasource": { "type": "postgres", "uid": "ds-timescale" },
-        "definition": "SELECT 'all' UNION ALL SELECT fridge_id FROM silver.dim_fridges ORDER BY 1",
+        "definition": "SELECT 'all' UNION ALL SELECT f.fridge_id FROM silver.dim_fridges f JOIN silver.dim_sites s ON s.site_id = f.site_id WHERE s.country = 'IN' ORDER BY 1",
         "hide": 0,
         "includeAll": false,
         "label": "Fridge",
         "multi": false,
         "name": "fridge",
         "options": [],
-        "query": "SELECT 'all' UNION ALL SELECT fridge_id FROM silver.dim_fridges ORDER BY 1",
+        "query": "SELECT 'all' UNION ALL SELECT f.fridge_id FROM silver.dim_fridges f JOIN silver.dim_sites s ON s.site_id = f.site_id WHERE s.country = 'IN' ORDER BY 1",
         "refresh": 1,
         "type": "query"
       }
@@ -259,8 +259,8 @@
   },
   "time": { "from": "now-6h", "to": "now" },
   "timepicker": {},
-  "timezone": "",
-  "title": "Cold-Chain — Vigistock",
+  "timezone": "Asia/Kolkata",
+  "title": "Cold-Chain — VaxResilience",
   "uid": "coldchain-vigistock",
   "version": 1,
   "weekStart": ""

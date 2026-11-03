@@ -1,17 +1,17 @@
-"""Réfrigérateurs : inventaire complet de la flotte avec drill-down.
+"""Refrigerators: complete fleet inventory with drill-down.
 
-Intention UX
-------------
-Liste dense, filtres rapides, détail zoomable, layout *maître/détail* :
+UX intent
+---------
+Dense list, quick filters, zoomable detail, *master/detail* layout:
 
-* **Barre de filtres en haut** : site + état + tri, sur une seule ligne.
-* **Grille maître** : chaque frigo en tuile, triée par criticité pour que
-  l'œil tombe sur ce qui compte sans défiler.
-* **Panneau de détail** : 24 h de température avec bandes de tolérance,
-  lots affectés, action de quarantaine, et le pont causal excursion vers
-  rupture (§8) quand le frigo est en alerte.
+* **Filter bar at the top**: site + status + sort on a single line.
+* **Main grid**: each fridge as a tile, sorted by criticality so the eye lands
+  on what matters without scrolling.
+* **Detail panel**: 24h temperature with tolerance bands, affected lots,
+  quarantine action, and the excursion-to-shortage causal link (§8) when the
+  fridge is in alert.
 
-Langage : libellés humains partout, le seuil technique passe en infobulle.
+Language: human labels throughout; technical thresholds stay in the tooltip.
 """
 from __future__ import annotations
 
@@ -30,67 +30,65 @@ from lib.theme import (
 )
 
 # ---------------------------------------------------------------------------
-# En-tête de page
+# Page header
 # ---------------------------------------------------------------------------
 C.page_header(
-    eyebrow="Pilotage : chaîne du froid",
+    eyebrow="Operations: cold chain",
     icon="fridge",
-    title="Réfrigérateurs",
-    subtitle="L'état de chaque réfrigérateur du réseau, les plus urgents d'abord.",
+    title="Refrigerators",
+    subtitle="Current state of every fridge in the network, most urgent first.",
     tip=(
-        "Zone de sécurité 2-8 °C (référence OMS PQS E003). "
-        "Au-delà de 8 °C : à surveiller. Au-delà de 10 °C : critique, "
-        "le lot doit être contrôlé."
+        "Safe zone 2-8 °C (WHO PQS E003 reference). "
+        "Above 8 °C: monitor. Above 10 °C: critical, the lot must be checked."
     ),
 )
 
 
 # ---------------------------------------------------------------------------
-# Barre de filtres (conservée : Site / État / Tri)
+# Filter bar (kept: Site / Status / Sort)
 # ---------------------------------------------------------------------------
 fleet = M.fleet_snapshot()
-sites = ["Tous les sites", *sorted({f["site"] for f in fleet})]
+sites = ["All sites", *sorted({f["site"] for f in fleet})]
 
-# Filtres dans un panneau-carte : la zone de commande est identifiable
-# d'un coup d'œil (clé "panel_*" : surface carte, voir style.py).
-with st.container(key="panel_filtres_frigos"):
+# Filters in a card panel: command area is visible at a glance.
+with st.container(key="panel_fridges_filters"):
     f_col1, f_col2, f_col3, f_col4 = st.columns([2, 1.5, 1.5, 1])
 
     with f_col1:
         site = st.selectbox("Site", sites, index=0)
     with f_col2:
         state_filter = st.multiselect(
-            "État", ["ok", "warn", "crit"], default=["warn", "crit"],
+            "Status", ["ok", "warn", "crit"], default=["warn", "crit"],
             format_func=state_label,
         )
     with f_col3:
         sort_by = st.selectbox(
-            "Tri", ["Criticité (déc.)", "Température (déc.)", "ID frigo"],
+            "Sort", ["Criticality (desc.)", "Temperature (desc.)", "Fridge ID"],
         )
     with f_col4:
         st.write("")
         st.write("")
-        if st.button("Rafraîchir", use_container_width=True):
+        if st.button("Refresh", use_container_width=True):
             st.rerun()
 
 
-# Application des filtres
-filtered = [f for f in fleet if site == "Tous les sites" or f["site"] == site]
+# Apply filters
+filtered = [f for f in fleet if site == "All sites" or f["site"] == site]
 if state_filter:
     filtered = [f for f in filtered if fridge_state(f["temp_c"]) in state_filter]
 
-# Application du tri
-if sort_by == "Criticité (déc.)":
+# Apply sort
+if sort_by == "Criticality (desc.)":
     rank = {"crit": 0, "warn": 1, "ok": 2}
     filtered.sort(key=lambda f: (rank[fridge_state(f["temp_c"])], -f["temp_c"]))
-elif sort_by == "Température (déc.)":
+elif sort_by == "Temperature (desc.)":
     filtered.sort(key=lambda f: -f["temp_c"])
 else:
     filtered.sort(key=lambda f: f["fridge_id"])
 
 
 # ---------------------------------------------------------------------------
-# Ligne de compteurs (bord supérieur sémantique)
+# KPI row (semantic top border)
 # ---------------------------------------------------------------------------
 counts = {"ok": 0, "warn": 0, "crit": 0}
 for f in filtered:
@@ -98,23 +96,21 @@ for f in filtered:
 
 c1, c2, c3, c4 = st.columns(4, gap="small")
 with c1:
-    C.kpi_card(label="Frigos affichés", value=len(filtered), icon="fridge",
-               trend=f"sur {len({f['site'] for f in filtered})} sites")
+    C.kpi_card(label="Fridges shown", value=len(filtered), icon="fridge",
+               trend=f"across {len({f['site'] for f in filtered})} sites")
 with c2:
-    # Chiffre par défaut si tous les frigos affichés sont en zone,
-    # ambre sinon (y compris 0 en zone).
     _ok_tone = ("ok" if filtered and counts["ok"] == len(filtered) else "warn")
     C.kpi_card(label="OK", value=counts["ok"], icon="check-circle",
                tone=_ok_tone,
-               trend="dans la zone de sécurité 2-8 °C")
+               trend="within the safe zone 2-8 °C")
 with c3:
-    C.kpi_card(label="À surveiller", value=counts["warn"], icon="alert-triangle",
+    C.kpi_card(label="Monitor", value=counts["warn"], icon="alert-triangle",
                tone="warn" if counts["warn"] else "ok", frame="warn",
-               trend="frigos au-dessus de 8 °C")
+               trend="fridges above 8 °C")
 with c4:
-    C.kpi_card(label="Critiques", value=counts["crit"], icon="thermometer",
+    C.kpi_card(label="Critical", value=counts["crit"], icon="thermometer",
                tone="crit" if counts["crit"] else "ok", frame="crit",
-               trend="frigos au-dessus de 10 °C, lots à contrôler")
+               trend="fridges above 10 °C, lots to review")
 
 
 # ---------------------------------------------------------------------------
@@ -123,16 +119,16 @@ with c4:
 # Grille pleine largeur, détail en dessous : plus de colonne orpheline.
 with st.container():
     C.section_header(
-        "Grille des frigos", icon="fridge",
-        subtitle=f"{len(filtered)} résultats",
-        right="cliquez sur « Voir le détail 24 h »",
+        "Fridge grid", icon="fridge",
+        subtitle=f"{len(filtered)} results",
+        right="click \"View 24h detail\"",
     )
 
     if "selected_fridge" not in st.session_state:
         st.session_state.selected_fridge = filtered[0]["fridge_id"] if filtered else None
 
     if not filtered:
-        C.callout("Aucun frigo ne correspond aux filtres choisis.")
+        C.callout("No refrigerator matches the selected filters.")
     else:
         for i in range(0, len(filtered), 3):
             row = st.columns(3, gap="small")
@@ -149,16 +145,16 @@ with st.container():
     selected = next((f for f in fleet if f["fridge_id"] == sel), None)
 
     if not selected:
-        C.callout("Sélectionnez un frigo pour ouvrir son détail 24 h.")
+        C.callout("Select a fridge to open its 24h detail.")
     else:
         C.section_header(
-            f"Détail du frigo {selected['fridge_id']}", icon="search",
-            subtitle=f"{selected['site']}, {selected['lots']} lots actifs",
-            right=f"dernier relevé {C.fmt_heure(selected['last_seen'])}",
+            f"Fridge detail {selected['fridge_id']}", icon="search",
+            subtitle=f"{selected['site']}, {selected['lots']} active lots",
+            right=f"last reading {C.fmt_heure(selected['last_seen'])}",
         )
 
-        # Priorité d'abord : le pont causal excursion vers rupture (§8) est la
-        # première chose visible si CE frigo héberge un lot sous tension.
+        # Priority first: the excursion-to-shortage causal bridge (§8) is the
+        # first thing visible if this fridge hosts a lot under pressure.
         sel_state = fridge_state(selected["temp_c"])
         _aff_here = next(
             ((atc, a) for atc, a in M.excursion_affected_drugs().items()
@@ -169,42 +165,42 @@ with st.container():
             _atc, _aff = _aff_here
             _prob = next((d["shortage_prob"] for d in M.shortage_overview()
                           if d["atc_code"] == _atc), None)
-            _prob_txt = (f"<b>risque de rupture : {int(_prob * 100)} %</b>"
-                         if _prob else "<b>stock déjà sous tension</b>")
+            _prob_txt = (f"<b>stockout risk: {int(_prob * 100)} %</b>"
+                         if _prob else "<b>stock already under pressure</b>")
             C.causal_bridge(
-                f"Ce frigo stocke le lot {_aff['lot']} ({_aff['doses']} doses) "
-                f"qui alimente un stock déjà sous tension : {_prob_txt} sur "
+                f"This fridge stores lot {_aff['lot']} ({_aff['doses']} doses) "
+                f"that feeds stock already under pressure: {_prob_txt} for "
                 f"{_aff['drug_name']}."
             )
             with st.container(key="link_bridge_fridge"):
-                if st.button("Voir l'impact sur les ruptures",
+                if st.button("View impact on shortages",
                              key="btn_bridge_fridge"):
                     st.session_state["forecast_focus"] = _atc
                     st.switch_page("views/03_shortage_forecast.py")
 
-        # Onglets : courbe d'abord, lots & actions à un clic, le panneau
-        # de détail tient à l'écran sans défilement.
-        tab_temp, tab_lots = st.tabs(["Température 24 h", "Lots & actions"])
+        # Tabs: temperature first, lots & actions second; the detail panel fits
+        # on one screen without scrolling.
+        tab_temp, tab_lots = st.tabs(["24h temperature", "Lots & actions"])
 
         with tab_temp:
-            # Graphique 24 h avec bandes de tolérance -------------------------
+            # 24h chart with tolerance bands -----------------------------------
             history = M.fridge_24h(selected["fridge_id"])
             df = pd.DataFrame(history)
             df["ts"] = pd.to_datetime(df["ts"])
 
             fig = go.Figure()
 
-            # bande de tolérance 2-8 °C (vert sain)
+            # safe tolerance band 2-8 °C (green)
             fig.add_hrect(y0=TEMP_OK_LOW, y1=TEMP_OK_HIGH,
                           fillcolor="rgba(22, 163, 74, .06)", line_width=0)
-            # bande « à surveiller » 8-10 °C (ambre)
+            # watch band 8-10 °C (amber)
             fig.add_hrect(y0=TEMP_OK_HIGH, y1=10,
                           fillcolor="rgba(180, 83, 9, .08)", line_width=0)
-            # bande critique >10 °C (rouge)
+            # critical band >10 °C (red)
             fig.add_hrect(y0=10, y1=TEMP_CRIT_HIGH + 1,
                           fillcolor="rgba(220, 38, 38, .07)", line_width=0)
 
-            # Lignes de seuil
+            # Threshold lines
             for y, color, dash in [
                 (TEMP_OK_LOW, TOK.text_tertiary, "dot"),
                 (TEMP_OK_HIGH, TOK.warn, "dash"),
@@ -220,7 +216,7 @@ with st.container():
                 fill="tozeroy",
                 fillcolor="rgba(15, 118, 110, .06)",
                 hovertemplate="%{x|%H:%M}<br><b>%{y:.2f} °C</b><extra></extra>",
-                name="Température",
+                name="Temperature",
             ))
 
             fig.update_layout(
@@ -238,7 +234,7 @@ with st.container():
             st.plotly_chart(fig, use_container_width=True,
                             config={"displayModeBar": False})
 
-            # Ligne de mini-stats : une simple ligne de texte, pas des blocs.
+            # mini-stats line: plain text, no dense blocks.
             vals = df["temp"].astype(float)
             min_v, max_v, mean_v = vals.min(), vals.max(), vals.mean()
             excursion_minutes = int((vals > TEMP_OK_HIGH).sum() * 5)
@@ -248,7 +244,7 @@ with st.container():
             _exc_color = ("var(--ms-crit)" if excursion_minutes
                           else "var(--ms-ok)")
             _max_note = (f' <span style="color:var(--ms-crit);font-size:.78rem;">'
-                         f'(+{max_v - TEMP_OK_HIGH:.1f} au-dessus du seuil)</span>'
+                         f'(+{max_v - TEMP_OK_HIGH:.1f} above threshold)</span>'
                          if max_v > TEMP_OK_HIGH else "")
             st.markdown(
                 f"""
@@ -256,19 +252,19 @@ with st.container():
                             margin:.6rem 0 .2rem;font-size:.9rem;">
                   <div><span style="color:var(--ms-text-3);font-size:.72rem;
                        text-transform:uppercase;letter-spacing:.05em;
-                       font-weight:700;">Min (24 h)</span><br/>
+                       font-weight:700;">Min (24h)</span><br/>
                        <b>{min_v:.1f} °C</b></div>
                   <div><span style="color:var(--ms-text-3);font-size:.72rem;
                        text-transform:uppercase;letter-spacing:.05em;
-                       font-weight:700;">Max (24 h)</span><br/>
+                       font-weight:700;">Max (24h)</span><br/>
                        <b style="color:{_max_color};">{max_v:.1f} °C</b>{_max_note}</div>
                   <div><span style="color:var(--ms-text-3);font-size:.72rem;
                        text-transform:uppercase;letter-spacing:.05em;
-                       font-weight:700;">Moyenne</span><br/>
+                       font-weight:700;">Mean</span><br/>
                        <b>{mean_v:.1f} °C</b></div>
                   <div><span style="color:var(--ms-text-3);font-size:.72rem;
                        text-transform:uppercase;letter-spacing:.05em;
-                       font-weight:700;">Hors-tolérance</span><br/>
+                       font-weight:700;">Out of range</span><br/>
                        <b style="color:{_exc_color};">{excursion_minutes} min</b></div>
                 </div>
                 """,
@@ -276,10 +272,10 @@ with st.container():
             )
 
         with tab_lots:
-            # Lots affectés ----------------------------------------------------
+            # Affected lots ---------------------------------------------------
             lots_df = pd.DataFrame([
                 {"Lot": f"LOT-{selected['fridge_id']}-{i:03d}",
-                 "Médicament": d[0],
+                 "Medication": d[0],
                  "ATC": d[1],
                  "Doses": (selected["lots"] * 47) // (i + 1),
                  "Exp.": f"2027-{((i * 3) % 11) + 1:02d}-15"}
@@ -290,12 +286,12 @@ with st.container():
             # Actions ----------------------------------------------------------
             a1, a2 = st.columns(2)
             with a1:
-                if st.button("Mettre le lot en quarantaine",
+                if st.button("Quarantine the lot",
                              use_container_width=True, type="primary",
                              disabled=sel_state == "ok"):
-                    st.toast(f"Lots de {selected['fridge_id']} marqués « suspects ».")
+                    st.toast(f"Lots from {selected['fridge_id']} marked as suspect.")
             with a2:
-                if st.button("Préparer un brief de substitution",
+                if st.button("Prepare a substitution brief",
                              use_container_width=True):
                     st.session_state["copilot_drug"] = M.DRUGS[0][0]
                     st.switch_page("views/04_clinical_copilot.py")

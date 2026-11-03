@@ -1,15 +1,15 @@
-"""À propos : profil autrice, cadrage du problème, stack, gouvernance.
+"""About: author profile, problem framing, stack, governance.
 
-Intention UX
-------------
-C'est la surface *portfolio*. Un visiteur qui arrive ici dans les deux
-premières minutes doit voir :
+UX intent
+---------
+This is the *portfolio* surface. A visitor arriving in the first two minutes
+should see:
 
-1. Qui a construit ça et pourquoi (profil double data-engineer / soignante).
-2. Quel problème concret ça résout (un paragraphe).
-3. La stack, présentée comme une grille compacte.
-4. Gouvernance & avertissements (portfolio, pas dispositif médical).
-5. Où aller ensuite (CTAs vers les pages clés).
+1. Who built this and why (dual data engineer / former nurse profile).
+2. What concrete problem it solves (one paragraph).
+3. The stack shown as a compact grid.
+4. Governance and warnings (portfolio, not a medical device).
+5. Where to go next (CTAs to the key pages).
 """
 from __future__ import annotations
 
@@ -18,109 +18,103 @@ from lib import components as C
 from lib import icons as I
 
 # ---------------------------------------------------------------------------
-# En-tête
+# Header
 # ---------------------------------------------------------------------------
 C.hero(
-    eyebrow="Projet : portfolio data engineering",
-    title="Vigistock : chaîne du froid, ruptures, aide clinique",
+    eyebrow="Project: data engineering portfolio",
+    title="VaxResilience: cold chain, shortages, clinical support",
     subtitle=(
-        "Un projet de portfolio qui mêle streaming temps réel, ML "
-        "(Prophet), RAG sur LLM local et orchestration Dagster, résolvant "
-        "un problème hospitalier concret avec une stack 100 % open source."
+        "A portfolio project blending real-time streaming, ML "
+        "(Prophet), local LLM RAG, and Dagster orchestration to solve a "
+        "concrete hospital problem using a 100% open-source stack."
     ),
     meta={
-        "AUTRICE":     "Lohana Utim",
-        "PARCOURS":    "Data Engineer, ex-soignante (6 ans)",
-        "STACK":       "Python, Postgres, Kafka, Ollama",
-        "STATUT":      "Portfolio, tourne sur un laptop",
+        "AUTHOR": "Lohana Utim",
+        "BACKGROUND": "Data Engineer, former nurse (6 years)",
+        "STACK": "Python, Postgres, Kafka, Ollama",
+        "STATUS": "Portfolio, runs on a laptop",
     },
 )
 
 
 # ---------------------------------------------------------------------------
-# Cadrage du problème
+# Problem framing
 # ---------------------------------------------------------------------------
 left, right = st.columns([1.6, 1], gap="large")
 
 with left:
-    C.section_header("L'histoire du projet", icon="book-open",
-                     subtitle="trois lectures, du concret au technique")
+    C.section_header("The project story", icon="book-open",
+                     subtitle="three reads: from concrete to technical")
 
     tab_pb, tab_story, tab_de = st.tabs(
-        ["Le problème", "Le scénario de démo", "Ce que montre le projet"])
+        ["The problem", "Demo scenario", "What the project shows"])
 
     with tab_pb:
         st.markdown(
             """
-            > *« Lundi, un frigo de pharmacie à Lyon est monté à 14 °C pendant
-            > 4 heures. Vendredi, trois hôpitaux du même réseau étaient en
-            > rupture du vaccin antigrippal pédiatrique et le médecin de garde
-            > a dû appeler dix services pour trouver un substitut. »*
+            > *"On Monday, a demo hospital pharmacy fridge in Bengaluru rose to 14 °C for
+            > 4 hours. By Friday, three fictional hospitals in the demo network were out of
+            > pediatric influenza vaccine and the on-call doctor had to call ten
+            > services to find a substitute."*
 
-            Les ruptures de médicaments ne sont pas une menace abstraite. La
-            **FDA américaine recensait 323 pénuries actives au T1 2024**, le
-            plus haut chiffre en dix ans. La **plateforme européenne de
-            surveillance EMA** liste en permanence environ 250 pénuries
-            actives. Les défaillances de chaîne du froid en sont une cause
-            racine fréquente : **l'OMS estime à 25 % la part des vaccins
-            dégradés** avant administration, majoritairement à cause
-            d'excursions thermiques qui n'ont été remarquées que trop tard.
+            This is an **illustrative India-focused scenario**, not a report about a
+            real Bengaluru hospital or a current Indian medicine shortage. The
+            repository has no automated India-specific shortage feed. Its FDA, ANSM,
+            and NHS integrations are international references; CDSCO and NPPA are
+            listed as official Indian reference sources but are not integrated feeds.
 
-            Le ou la pharmacien(ne) qui doit aujourd'hui réagir à une rupture
-            jongle entre trois outils silotés : un dashboard frigo, un
-            système d'inventaire, et une pile de PDF de protocoles de
-            substitution. **Vigistock rassemble les trois** en un
-            seul pipeline événementiel qui détecte l'excursion, prédit la
-            rupture aval, et rédige le brief clinique de substitution.
+            The pharmacist or nurse reacting to a shortage today juggles three siloed
+            tools: a fridge dashboard, an inventory system, and a pile of PDF
+            substitution protocols. **VaxResilience demonstrates how these could be
+            brought together** in a
+            single event pipeline that detects the excursion, predicts downstream
+            stockout risk, and drafts an illustrative brief. The hospital names,
+            stock, and telemetry shown here are illustrative, not live data.
             """
         )
 
     with tab_story:
         st.markdown(
             """
-            | Étape | Ce qui se passe | Où dans le code |
+            | Step | What happens | Where in the code |
             |---|---|---|
-            | **1. Sense** | Un capteur frigo à Lyon publie température + humidité toutes les 30 s sur Redpanda. | `simulator/` |
-            | **2. Detect** | Un consumer Python tague une excursion >8 °C de plus de 2 h en `BREAKAGE_RISK` et marque le lot suspect. | `streaming/consumer.py` |
-            | **3. Forecast** | Prophet réentraine le modèle de demande de la région, retire les doses suspectes, prédit la rupture dans 9 jours. | `ml/shortage_forecast.py` |
-            | **4. Recommend** | Ollama (phi3:mini) lit les monographies FDA + ANSM via RAG ChromaDB et rédige un brief SBAR de substitution. | `llm/rag/` |
-            | **5. Alert** | Grafana lève l'alerte IoT en temps réel ; Streamlit affiche le brief au pharmacien. | `dashboards/streamlit/` |
+            | **1. Sense** | A simulated fridge at a fictional Bengaluru site publishes temperature + humidity every 30 s via Redpanda. | `simulator/` |
+            | **2. Detect** | A Python consumer flags an excursion >8 °C lasting more than 2 h as `BREAKAGE_RISK` and marks the suspect batch. | `streaming/consumer.py` |
+            | **3. Forecast** | Prophet retrains the regional demand model, removes suspect doses, and predicts a stockout in 9 days. | `ml/shortage_forecast.py` |
+            | **4. Recommend** | Ollama (phi3:mini) retrieves example documents through ChromaDB RAG and drafts an illustrative SBAR brief. | `llm/rag/` |
+            | **5. Alert** | Grafana raises the IoT alert in real time; Streamlit shows the brief to the pharmacist. | `dashboards/streamlit/` |
 
-            En résumé : **une dérive de capteur devient un plan d'action
-            clinique en moins d'une minute, sources à l'appui.**
+            In short: **a sensor drift becomes a clinical action plan in under a minute, with sources attached.**
             """
         )
 
     with tab_de:
         st.markdown(
             """
-            Ce repo montre, dans un seul projet :
+            This repo shows, in one project:
 
-            - **Streaming temps réel** avec sémantique at-least-once
-              (Redpanda puis consumer Python puis hypertable Timescale +
+            - **Real-time streaming** with at-least-once semantics
+              (Redpanda, then Python consumer, then hypertable Timescale +
               continuous aggregates).
-            - **Lambda architecture bien faite** : streaming pour la
-              télémétrie, batch pour les APIs publiques lentes, les deux
-              dans le même time-series store.
-            - **Détection d'anomalie en flight** (rolling Z-score + seuil
-              de durée), pas en post-hoc.
-            - **ML production-shape** : Prophet réentraîné sur schedule
-              Dagster, prédictions écrites en Postgres, évaluées via
-              backtests.
-            - **Pattern RAG moderne** : chunk, embed, vector store,
-              retrieval, LLM, avec citations à la source PDF.
-            - **Data governance santé** : patterns compatibles HIPAA &
-              RGPD documentés dans `docs/governance_hipaa_rgpd.md`. Aucun
-              PHI ne quitte le périmètre : le LLM est local.
-            - **CI/CD avec services** (Redpanda + Timescale testcontainers
-              dans GitHub Actions).
+            - **A well-designed lambda architecture**: streaming for telemetry,
+              batch for slow public APIs; both in the same time-series store.
+            - **Anomaly detection in flight** (rolling Z-score + duration threshold),
+              not post-hoc.
+            - **Production-shaped ML**: Prophet retrained on a Dagster schedule,
+              predictions written to Postgres and evaluated through backtests.
+            - **Modern RAG pattern**: chunk, embed, vector store, retrieval, LLM,
+              with source citations from PDF references.
+            - **Healthcare data governance**: HIPAA & GDPR-aligned patterns are
+              documented in `docs/governance_hipaa_rgpd.md`. No PHI leaves the
+              perimeter: the LLM is local.
+            - **CI/CD with services** (Redpanda + Timescale testcontainers in GitHub
+              Actions).
             """
         )
 
 
-
 with right:
-    C.section_header("Profil", icon="user")
+    C.section_header("Profile", icon="user")
     st.markdown(
         f"""
         <div style="background:#FFFFFF;border:1px solid var(--ms-border);
@@ -130,55 +124,52 @@ with right:
             {I.logo(44)}
             <div>
               <div style="font-weight:700;color:var(--ms-text);">Lohana Utim</div>
-              <div style="color:var(--ms-text-2);font-size:.85rem;">Data Engineer, ex-soignante</div>
+              <div style="color:var(--ms-text-2);font-size:.85rem;">Data Engineer, former nurse</div>
             </div>
           </div>
           <div style="margin-top:.85rem;color:var(--ms-text-2);font-size:.875rem;
                       line-height:1.8;">
-            Profil double :<br/>
+            Dual profile:<br/>
             <strong>Data Engineer</strong><br/>
             <strong>Project management</strong><br/>
-            <strong>6 ans d'expérience terrain en milieu hospitalier</strong>
+            <strong>6 years of field experience in hospital settings</strong>
           </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    C.section_header("Stack technique", icon="layers")
+    C.section_header("Technical stack", icon="layers")
     items = [
-        ("Streaming",     "Redpanda (Kafka API)",              "zap"),
-        ("Stockage",      "TimescaleDB + MinIO",               "database"),
+        ("Streaming", "Redpanda (Kafka API)", "zap"),
+        ("Storage", "TimescaleDB + MinIO", "database"),
         ("Orchestration", "Dagster (software-defined assets)", "pipeline"),
-        ("ML",            "Prophet + scikit-learn",            "forecast"),
-        ("LLM",           "Ollama (phi3:mini)",                "chip"),
-        ("Vector store",  "ChromaDB + bge-small",              "search"),
-        ("Dashboards",    "Streamlit, Plotly, Grafana",        "bar-chart"),
-        ("Tests",         "pytest + testcontainers",           "check-circle"),
-        ("CI",            "GitHub Actions",                    "refresh"),
+        ("ML", "Prophet + scikit-learn", "forecast"),
+        ("LLM", "Ollama (phi3:mini)", "chip"),
+        ("Vector store", "ChromaDB + bge-small", "search"),
+        ("Dashboards", "Streamlit, Plotly, Grafana", "bar-chart"),
+        ("Tests", "pytest + testcontainers", "check-circle"),
+        ("CI", "GitHub Actions", "refresh"),
     ]
     for name, role, icon_name in items:
         C.stack_item(name, role, icon_name)
 
-    C.section_header("Conformité", icon="shield")
+    C.section_header("Compliance", icon="shield")
     C.callout(
-        "<strong>HIPAA / RGPD</strong> : aucun PHI ne quitte le périmètre, "
-        "LLM local, journal d'audit en ajout seul. Voir "
+        "        <strong>Privacy-focused demo</strong>: no patient data is used, the LLM is local, and the audit trail is append-only. This is not a legal compliance claim. See "
         "<code>docs/governance_hipaa_rgpd.md</code>.",
     )
     C.callout(
-        "<strong>Avertissement</strong> : ce projet est un portfolio. "
-        "Il <em>n'est pas</em> un dispositif médical, pas certifié CE/FDA, "
-        "et ne doit pas être utilisé en production hospitalière.",
+        "<strong>Warning</strong>: this project is a portfolio demo. It is <em>not</em> a medical device, is not CDSCO-approved or clinically validated, and must not be used for patient care or hospital operations.",
         variant="alert",
     )
 
 
 # ---------------------------------------------------------------------------
-# CTAs vers les pages clés
+# CTAs to key pages
 # ---------------------------------------------------------------------------
-C.section_header("Continuer la visite", icon="arrow-right",
-                 subtitle="trois angles d'entrée")
+C.section_header("Continue the tour", icon="arrow-right",
+                 subtitle="three entry points")
 
 c1, c2, c3 = st.columns(3, gap="small")
 with c1:
@@ -189,17 +180,17 @@ with c1:
           <div style="font-size:.7rem;color:var(--ms-secondary);text-transform:uppercase;
                       letter-spacing:.08em;font-weight:700;">Architecture</div>
           <div style="font-weight:700;color:var(--ms-text);margin-top:.25rem;">
-            L'architecture du pipeline
+            The pipeline architecture
           </div>
           <div style="color:var(--ms-text-2);font-size:.875rem;margin:.5rem 0;">
-            Pipeline détaillé, cloud-mapping, choix techniques motivés.
+            Detailed pipeline, cloud mapping, and motivated technical choices.
           </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
     with st.container(key="link_visit_archi"):
-        if st.button("Ouvrir l'architecture du pipeline", key="btn_visit_archi"):
+        if st.button("Open the pipeline architecture", key="btn_visit_archi"):
             st.switch_page("views/06_architecture.py")
 
 with c2:
@@ -210,17 +201,17 @@ with c2:
           <div style="font-size:.7rem;color:var(--ms-secondary);text-transform:uppercase;
                       letter-spacing:.08em;font-weight:700;">Data engineering</div>
           <div style="font-weight:700;color:var(--ms-text);margin-top:.25rem;">
-            La qualité des données
+            Data quality
           </div>
           <div style="color:var(--ms-text-2);font-size:.875rem;margin:.5rem 0;">
-            Asset checks Dagster, contrats de fraîcheur, drift RAG.
+            Dagster asset checks, freshness contracts, and RAG drift.
           </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
     with st.container(key="link_visit_quality"):
-        if st.button("Ouvrir la qualité des données", key="btn_visit_quality"):
+        if st.button("Open data quality", key="btn_visit_quality"):
             st.switch_page("views/07_data_quality.py")
 
 with c3:
@@ -229,17 +220,17 @@ with c3:
         <div style="background:#FFFFFF;border:1px solid var(--ms-border);
                     border-radius:var(--ms-radius-md);padding:1rem;height:100%;">
           <div style="font-size:.7rem;color:var(--ms-brand);text-transform:uppercase;
-                      letter-spacing:.08em;font-weight:700;">Clinique</div>
+                      letter-spacing:.08em;font-weight:700;">Clinical</div>
           <div style="font-weight:700;color:var(--ms-text);margin-top:.25rem;">
-            Le brief SBAR
+            The SBAR brief
           </div>
           <div style="color:var(--ms-text-2);font-size:.875rem;margin:.5rem 0;">
-            Brief de substitution en direct, validation 4 critères + 5B.
+            Live substitution brief, 4-criteria + 5-right validation.
           </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
     with st.container(key="link_visit_sbar"):
-        if st.button("Ouvrir le brief SBAR", key="btn_visit_sbar"):
+        if st.button("Open the SBAR brief", key="btn_visit_sbar"):
             st.switch_page("views/04_clinical_copilot.py")

@@ -1,6 +1,6 @@
 <div align="center">
 
-# Vigistock
+# VaxResilience
 
 ### IoT monitoring & drug-shortage prevention
 
@@ -51,15 +51,15 @@ For hospital pharmacies. Streaming, ML and a local LLM, end to end, built entire
 
 ## Why this project
 
-This project is rooted in field experience as a caregiver, where a drug shortage is anything but abstract: a fridge that silently drifts out of range, a vaccine lot quarantined too late, and an on-call doctor phoning nearby hospitals to find a substitute.
+VaxResilience uses an India-focused synthetic hospital network, centered on Bengaluru, to demonstrate how a medication-shortage response could connect cold-chain monitoring, inventory forecasting, and clinical review.
 
-The scale of the problem is well documented. The U.S. FDA tracked 323 active shortages in Q1 2024, the highest figure in a decade, and the EMA shortage platform lists around 250 active EU shortages at any time. Cold-chain failures are a recurring root cause: the WHO estimates that 25 % of vaccines are degraded by the time they reach patients, mostly because of temperature excursions nobody noticed in time.
+The demonstration hospitals, inventory, shortage signals, and telemetry are fictional. The project does not currently have an automated India-specific medicine-shortage feed: the FDA, ANSM, and NHS sources retained in the pipeline are international references, not data about shortages in India. CDSCO and NPPA are documented as official Indian reference sources but are not represented as integrated data feeds.
 
-Today, the pharmacist who has to react juggles three disconnected tools: a fridge dashboard, an inventory system, and a stack of PDF substitution protocols. This project connects them into a single event-driven pipeline that detects the excursion, predicts the downstream shortage, and drafts a sourced substitution brief.
+The clinical demo documents are not Indian medical recommendations. Any real decision requires review by a qualified professional against CDSCO-approved product information and applicable institutional protocols.
 
 ## What the pipeline does
 
-A simulated fridge fleet reports telemetry every 30 seconds. When a fridge leaves the 2-8 °C range for too long, the affected lots become suspect, the demand forecast is updated, and the pharmacist receives an actionable brief grounded in official drug documents. End to end, a sensor blip becomes a clinical action plan in under a minute, with citations.
+A simulated fleet of 48 refrigerators across eight fictional Indian demo sites reports telemetry every 30 seconds. Inventory signals and clinical demo documents are synthetic. The system illustrates an end-to-end flow; it is not an Indian shortage data source or a clinical decision tool.
 
 <p align="center">
   <img src="docs/assets/how-it-works.en.svg" alt="From sensor signal to clinical action, in five steps" width="780">
@@ -70,7 +70,7 @@ A simulated fridge fleet reports telemetry every 30 seconds. When a fridge leave
 | 1. Sense | The SimPy simulator ships temperature and humidity readings every 30 s to Redpanda. | `simulator/` |
 | 2. Detect | A streaming consumer applies a rolling Z-score plus duration thresholds, flags the excursion as `BREAKAGE_RISK` and marks the affected vaccine lot as suspect. | `streaming/consumer.py`, `streaming/anomaly.py` |
 | 3. Forecast | Prophet retrains the regional demand model, subtracts the suspect doses and predicts the stock-out date. | `ml/shortage_forecast.py` |
-| 4. Recommend | A local LLM (Ollama) retrieves the relevant FDA and ANSM monographs from ChromaDB and drafts a substitution brief with citations. | `llm/` |
+| 4. Recommend | A local LLM (Ollama) retrieves the synthetic demo corpus from ChromaDB and drafts a brief with citations marked as illustrative. | `llm/` |
 | 5. Act | Grafana raises the real-time alert; the Streamlit app shows the pharmacist an SBAR brief with alternatives and nearby surplus stock. | `dashboards/` |
 
 ## Quick start
@@ -120,7 +120,7 @@ with `make nuke` before running `make up` again.
 ## Architecture
 
 <p align="center">
-  <img src="docs/assets/architecture.en.svg" alt="Vigistock architecture: sense, stream, detect, store, predict, act" width="980">
+  <img src="docs/assets/architecture.en.svg" alt="VaxResilience architecture: sense, stream, detect, store, predict, act" width="980">
 </p>
 
 Dagster orchestrates the batch side: ingestion assets, the nightly forecast, the RAG index refresh and the data-quality checks are all software-defined assets. The streaming side runs independently, so a slow public API never delays an alert. The full diagram and the reasoning behind it are in [`docs/architecture.md`](docs/architecture.md).
@@ -145,7 +145,7 @@ An optional Terraform blueprint for an AWS deployment lives in [`infra/terraform
 
 ## Data sources
 
-Every source is public, requires no authentication, and is legal to reuse, so anyone can clone the repo and reproduce the same flows.
+The public sources integrated into the pipeline are international references; they do not represent medicine shortages in India.
 
 | Source | Type | Endpoint | License | Frequency |
 | --- | --- | --- | --- | --- |
@@ -154,8 +154,10 @@ Every source is public, requires no authentication, and is legal to reuse, so an
 | ANSM (France) | RSS feed | `ansm.sante.fr/actualites.rss` | Public data | Daily |
 | OpenPrescribing (NHS) | REST API | `openprescribing.net/api/1.0` | CC BY 4.0 | Weekly |
 | IoT telemetry | SimPy simulator | local (Redpanda) | Project code | On demand |
+| CDSCO | Official Indian drug regulator website | `cdsco.gov.in` | Reference only; no shortage feed integrated | Not integrated |
+| NPPA | Official Indian pharmaceutical pricing authority website | `nppa.gov.in` | Reference only; no inventory data integrated | Not integrated |
 
-The fridge telemetry is synthetic by necessity: hospitals do not publish operational data. The simulator's physics (operating ranges, hold-over times, compressor failure rates) follows the WHO PQS specifications, detailed in [`docs/data_sources.md`](docs/data_sources.md).
+Indian demo site names, city coordinates, inventory, and telemetry are synthetic. The international sources listed above remain separate and must be identified as such. See [`docs/data_sources.md`](docs/data_sources.md) for provenance limitations.
 
 ## The pharmacist application
 
@@ -242,5 +244,5 @@ This is a portfolio project. It runs end to end on a laptop, the public data flo
 ---
 
 <p align="center">
-  Built by <strong>Lohana Utim</strong>, Vigistock
+  Built by <strong>Lohana Utim</strong>, VaxResilience
 </p>

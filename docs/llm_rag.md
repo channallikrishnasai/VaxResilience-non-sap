@@ -34,7 +34,8 @@ protocols/ (PDF)  ──▶  pypdf text extraction
 
 ## Why RAG and not fine-tuning
 
-- The corpus changes every time ANSM / FDA updates a monograph:
+- The current seed corpus is illustrative and synthetic. FDA/ANSM reference
+  ingestion is international and does not provide Indian product guidance:
   fine-tuning would go stale in days.
 - We need **verbatim citations** (page, section) to ever be defensible
   in a clinical setting; retrieval gives us that for free.
