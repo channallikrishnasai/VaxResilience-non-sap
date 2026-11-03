@@ -2,7 +2,7 @@
 
 **Branch:** `feat/sap-foundation-monitoring`  
 **Roadmap:** Official [`PHASES.md`](docs/official-specification/PHASES.md)  
-**Current phase:** IMP-03 is in progress; IMP-02 retains the specification and baseline blockers listed below. The draft local CAP domain model and fixture schemas cover all currently specified entities except two unresolved fixture collections. Seed/reset remains blocked pending an authoritative baseline fixture. Commit `7d10090` was pushed to `origin/feat/sap-foundation-monitoring`; no BTP deployment was performed.
+**Current phase:** IMP-03 is in progress; IMP-02 retains the specification and baseline blockers listed below. The draft local CAP domain model and fixture schemas cover all currently specified entities except two unresolved fixture collections. Seed/reset remains blocked pending an authoritative baseline fixture. Commit `b70234b` is the latest pushed commit on `origin/feat/sap-foundation-monitoring`; no BTP deployment was performed.
 
 ## Foundation verification
 
@@ -229,4 +229,12 @@ Fixture and schema JSON now reject duplicate object keys and non-standard `NaN`/
 
 No BTP deployment or SAP-hosted demo was performed. Cloud Foundry CLI and MBT are unavailable in this environment; deployment target/account and unresolved official decisions remain prerequisites. Local SAPUI5 browser rendering has not been independently verified; the automated CAP HTTP integration test verifies the UI shell response and action wiring only.
 
-The feature branch push completed successfully: remote `refs/heads/feat/sap-foundation-monitoring` resolved to `7d100904b647e6dbf337168e38d350de1076b0ea`. The unrelated `docs/sap-integration/` and `docs/sap-architecture/` additions were excluded from the commit because their text describes a separate live S/4HANA Integration Suite deployment and is not evidence for this application.
+The feature branch push completed successfully; remote `refs/heads/feat/sap-foundation-monitoring` last resolved to `b70234b95a7fac30778105799bb307fcadffb9d6`. The unrelated `docs/sap-integration/` and `docs/sap-architecture/` additions were excluded from the commits because their text describes a separate live S/4HANA Integration Suite deployment and is not evidence for this application.
+
+### IMP-04 SAPUI5 runtime-load failure state
+
+Added a hidden accessible `role="alert"` fallback that becomes visible if the pinned `ui5.sap.com` bootstrap script fails to load. Its message directs the user to check connectivity and states that no operational data/action is available. A unit regression executes the capture-phase load-error handler, verifies unrelated resource errors do not reveal it, and verifies the SAPUI5 bootstrap error does. This improves failure behavior; it does not verify a successful browser render. `npm test`: **37 passed, 0 failed** (6.98s); `npm run build`: **passed** (11.93s).
+
+### Dependency audit finding
+
+Current `npm audit` reports two high findings because `@sap/cds-dk@10.2.0` bundles `body-parser@2.3.0`, affected by GHSA-27r3-jxmh-p828. Production-only audit (`npm audit --omit=dev`) finds **0 vulnerabilities**. `npm audit fix --dry-run` confirms npm cannot update the bundled dependency; npm registry metadata shows 10.2.0 is the latest available CAP 10 CLI in the configured registry. Downgrading to 9.9.7 would cross a major version and is not an acceptable automatic fix for this CAP 10 project. Revisit when SAP publishes a compatible fixed CLI release; do not represent the full dependency audit as clean.

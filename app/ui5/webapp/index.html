@@ -6,6 +6,13 @@
   <title>VaxResilience | Supply Chain Control Tower</title>
   <script src="/ui/module-router.js"></script>
   <script src="/ui/api-client.js"></script>
+  <script>
+    window.addEventListener('error', function (event) {
+      if (!event.target || event.target.id !== 'sap-ui-bootstrap') return;
+      var fallback = document.getElementById('ui5-load-error');
+      if (fallback) fallback.hidden = false;
+    }, true);
+  </script>
   <script id="sap-ui-bootstrap" src="https://ui5.sap.com/1.148.12/resources/sap-ui-core.js"
     data-sap-ui-theme="sap_horizon" data-sap-ui-libs="sap.m,sap.ui.core,sap.tnt"
     data-sap-ui-compatVersion="edge" data-sap-ui-async="true"
@@ -13,6 +20,10 @@
     data-sap-ui-resourceroots='{"vaxresilience":"/ui"}'></script>
 </head>
 <body class="sapUiBody">
+  <section id="ui5-load-error" role="alert" hidden>
+    <h1>VaxResilience is unavailable</h1>
+    <p>The SAPUI5 runtime could not be loaded. Check the network connection and reload this page. No operational data or action is available.</p>
+  </section>
   <div id="content" data-sap-ui-component data-name="vaxresilience" data-id="vaxresilience-component"></div>
 </body>
 </html>

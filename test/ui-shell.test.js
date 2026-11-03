@@ -39,6 +39,29 @@ test('shell presents unavailable profile, incident, search, and notification con
   assert.match(controller, /historical fixture events are not treated as opening state/);
 });
 
+test('shell exposes a visible accessible fallback if the SAPUI5 runtime fails to load', () => {
+  const inlineScripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+  assert.equal(inlineScripts.length, 1);
+  assert.match(html, /<section id="ui5-load-error" role="alert" hidden>/);
+  assert.match(html, /SAPUI5 runtime could not be loaded/);
+
+  let errorHandler;
+  const fallback = { hidden: true };
+  const context = {
+    window: { addEventListener: (name, callback, capture) => {
+      assert.equal(name, 'error');
+      assert.equal(capture, true);
+      errorHandler = callback;
+    } },
+    document: { getElementById: (id) => id === 'ui5-load-error' ? fallback : null }
+  };
+  vm.runInNewContext(inlineScripts[0][1], context);
+  errorHandler({ target: { id: 'unrelated-script' } });
+  assert.equal(fallback.hidden, true);
+  errorHandler({ target: { id: 'sap-ui-bootstrap' } });
+  assert.equal(fallback.hidden, false);
+});
+
 test('frontend shell contains no credentials or direct provider endpoints', () => {
   const webapp = path.join(__dirname, '../app/ui5/webapp');
   const apiClient = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/api-client.js'), 'utf8');

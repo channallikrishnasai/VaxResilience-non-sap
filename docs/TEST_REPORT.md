@@ -1,6 +1,6 @@
 # Test report
 
-Results below distinguish historical failures from final reruns. Commands were run in the Windows workspace on branch `feat/sap-foundation-monitoring`. No BTP deployment or GitHub push occurred.
+Results below distinguish historical failures from final reruns. Commands were run in the Windows workspace on branch `feat/sap-foundation-monitoring`. No BTP deployment occurred. The initial report predates the later verified GitHub push, which is recorded in [`IMPLEMENTATION_PROGRESS.md`](../IMPLEMENTATION_PROGRESS.md).
 
 | Command | Actual output/result | Status |
 |---|---|---|
@@ -510,3 +510,23 @@ Both fixture and schema files use strict JSON parsing; no fixture contents or bu
 | `.venv\Scripts\python.exe scripts\validate_synthetic_fixtures.py` | 157 schema-validated records; exit 1 because `calculationAssumptions` and `productionPlans` still have no approved record schemas. | BLOCKED / FAIL-CLOSED |
 
 No BTP deployment or SAP-hosted demo was performed. Cloud Foundry CLI and MBT are unavailable in this environment; deployment target/account and unresolved official decisions remain prerequisites. Local SAPUI5 browser rendering has not been independently verified; the automated CAP HTTP integration test verifies the UI shell response and action wiring only.
+
+### IMP-04 SAPUI5 runtime-load fallback — 2026-11-03
+
+| Command/check | Actual output/result | Status |
+|---|---|---|
+| `npm test` | 37 passed, 0 failed; 6.98s. Includes regression execution of the SAPUI5 bootstrap error handler and the existing CAP HTTP/UI shell/action integration test. | PASS |
+| `npm run build` | CAP production build completed in 11.93s. | PASS |
+| Browser rendering | Not exercised; this change only verifies the bootstrap failure handler and delivered HTML structure. | NOT VERIFIED |
+
+The shell now displays a screen-reader-announced load error if the external SAPUI5 bootstrap cannot be fetched. It leaves the existing monitor/API behavior unchanged.
+
+### Dependency security audit — 2026-11-03
+
+| Command/check | Actual output/result | Status |
+|---|---|---|
+| `npm audit` | 2 high findings: `@sap/cds-dk` bundles `body-parser@2.3.0`, vulnerable per GHSA-27r3-jxmh-p828. | FAIL / UPSTREAM BLOCKER |
+| `npm audit --omit=dev` | `found 0 vulnerabilities`. | PASS |
+| `npm audit fix --dry-run` | Reports the affected parser is bundled in `@sap/cds-dk` and cannot be updated automatically; proposed automatic fix downgrades the CLI to 9.9.7 (major-version mismatch). | NO SAFE AUTOMATIC FIX |
+
+The package override does not replace dependencies embedded in the CLI tarball. Do not claim the complete dependency tree is vulnerability-free. Reassess against a compatible SAP CAP CLI release with the bundled parser fixed.

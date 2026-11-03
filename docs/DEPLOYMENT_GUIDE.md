@@ -9,20 +9,18 @@
 ## Start CAP locally
 
 ```powershell
-npm install
+npm ci
 npm exec cds -- deploy --to sqlite:db.sqlite
 npm run watch
 ```
 
-`package-lock.json` is tracked. `npm ci` completed once before the authentication dependency was added, but a later clean install hit a Windows `EPERM` while recreating `node_modules`; `npm install` restored the final dependency set successfully. Recheck `npm ci` on the target developer platform before treating clean installs as verified.
+`package-lock.json` is tracked. A fresh `npm ci` completed successfully in the current Windows worktree. An earlier clean-install attempt did report `EPERM` while recreating `node_modules`; the cause remains undiagnosed and has not recurred in later clean installs.
 
 CAP's development profile uses local SQLite and mock identities. Open `http://localhost:4004/healthz`, `http://localhost:4004/readyz`, `http://localhost:4004/api/v1/monitoring/Messages`, or `http://localhost:4004/ui/`. The UI's **Create demo failure** control inserts an explicitly synthetic shipment-status event; **Simulate retry** only records a local attempt. No completed disruption scenario is seeded.
 
 For a production build check, run `npm run build`. For the local unit tests, run `npm test`.
 
 ## SAP deployment prerequisites
-
-`npm ci` completed successfully on the current Windows worktree from the tracked lockfile after a prior Windows clean-install attempt reported `EPERM` while recreating `node_modules`. The root cause of that earlier filesystem error was not established; the successful clean install verifies the present lockfile/install path, not that the original cause has been diagnosed. If it recurs, capture the full npm/Windows error and process/file-lock evidence before assigning a cause.
 
 No deployment has been performed. Before a BTP deployment, verify the correct account, subaccount, region, Cloud Foundry org/space, quotas, entitlements, HANA service/binding, identity configuration, Work Zone access, and build/release ownership. The observed local environment did not provide `cf` or `mbt` executables or authenticated org/space evidence. Configure environment-specific bindings through the platform's approved mechanisms; never add credentials or tenant-specific endpoints to Git.
 
