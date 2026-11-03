@@ -30,12 +30,13 @@ test('SAPUI5 shell exposes the eight official modules in roadmap order', () => {
   assert.match(appController, /setSelectedKey\(active\)/);
 });
 
-test('shell presents unavailable profile, incident, search, and notification context without inventing a role', () => {
+test('shell presents unavailable profile and incident context without inventing a role or notification source', () => {
   const controller = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/controller/Module.controller.js'), 'utf8');
   assert.match(appView, /Profile and role unavailable/);
   assert.match(appView, /No active incident/);
-  assert.match(appView, /Search unavailable[^\n]+enabled="false"/);
-  assert.match(appView, /Notifications unavailable[^\n]+enabled="false"/);
+  assert.match(appView, /SearchField id="moduleSearch"[^\n]+placeholder="Find a module"/);
+  assert.match(appView, /business record search is unavailable/);
+  assert.match(appView, /Button text="Notifications"[^\n]+press="onNotifications"/);
   assert.match(controller, /historical fixture events are not treated as opening state/);
 });
 
@@ -238,6 +239,49 @@ test('shell controller routes module selections, toggles navigation, and marks t
   assert.deepEqual(JSON.parse(JSON.stringify(calls.at(-1))), ['navTo', 'home', {}, true]);
 });
 
+test('global search navigates only to unique module matches and leaves record search unavailable', () => {
+  const messages = [];
+  const routeHelper = loadRouterApi();
+  const definition = loadControllerDefinition(appController, routeHelper, {
+    'sap/ui/core/mvc/Controller': { extend: (_name, implementation) => implementation },
+    'sap/m/MessageToast': { show: (message) => messages.push(message) }
+  });
+  const calls = [];
+  const controller = {
+    _router: { navTo: (...args) => calls.push(args) },
+    onNavigationSelect: definition.onNavigationSelect,
+    onGlobalSearch: definition.onGlobalSearch
+  };
+
+  expectedModules.forEach((moduleId) => definition.onGlobalSearch.call(controller, {
+    getParameter: () => routeHelper.moduleNames[moduleId]
+  }));
+  assert.equal(calls.length, expectedModules.length);
+  assert.deepEqual(JSON.parse(JSON.stringify(calls)), [
+    ['home'],
+    ...expectedModules.slice(1).map((moduleId) => ['module', { module: moduleId }])
+  ]);
+
+  definition.onGlobalSearch.call(controller, { getParameter: () => 'inventory' });
+  assert.equal(calls.length, expectedModules.length + 1);
+  assert.deepEqual(JSON.parse(JSON.stringify(calls.at(-1))), ['module', { module: 'inventory-manufacturing' }]);
+  definition.onGlobalSearch.call(controller, { getParameter: () => 'a' });
+  assert.equal(calls.length, expectedModules.length + 1);
+  assert.match(messages.at(-1), /ambiguous/);
+  definition.onGlobalSearch.call(controller, { getParameter: () => 'nonexistent' });
+  assert.match(messages.at(-1), /module names only/);
+});
+
+test('notification action reports the disconnected state and does not fabricate notifications', () => {
+  const messages = [];
+  const definition = loadControllerDefinition(appController, loadRouterApi(), {
+    'sap/ui/core/mvc/Controller': { extend: (_name, implementation) => implementation },
+    'sap/m/MessageToast': { show: (message) => messages.push(message) }
+  });
+  definition.onNotifications();
+  assert.deepEqual(messages, ['Notifications are unavailable because no notification source is connected.']);
+});
+
 test('historical archive requires explicit entry and closing returns to the empty foundation', () => {
   const source = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/controller/Module.controller.js'), 'utf8');
   let definition;
@@ -334,12 +378,16 @@ test('historical archive rendering is read-only, source-labelled, and excludes u
   assert.deepEqual(captured.buttons.map((button) => button.settings.text), ['Close historical archive']);
 });
 
-function loadControllerDefinition(source, routeHelper = loadRouterApi()) {
+function loadControllerDefinition(source, routeHelper = loadRouterApi(), overrides = {}) {
   let definition;
+  const dependencies = {
+    'sap/ui/core/mvc/Controller': { extend: (_name, implementation) => implementation },
+    'sap/m/MessageToast': { show: () => {} },
+    ...overrides
+  };
   const context = {
-    sap: { ui: { define: (_dependencies, factory) => {
-      const Controller = { extend: (_name, implementation) => implementation };
-      definition = factory(Controller);
+    sap: { ui: { define: (names, factory) => {
+      definition = factory(...names.map((name) => dependencies[name]));
     } } },
     window: { VaxResilienceRouter: routeHelper, location: { hash: '' } }
   };

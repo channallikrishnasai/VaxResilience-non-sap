@@ -1,4 +1,4 @@
-sap.ui.define(['sap/ui/core/mvc/Controller'], function (Controller) {
+sap.ui.define(['sap/ui/core/mvc/Controller', 'sap/m/MessageToast'], function (Controller, MessageToast) {
   'use strict';
 
   var MODULES = [
@@ -32,6 +32,28 @@ sap.ui.define(['sap/ui/core/mvc/Controller'], function (Controller) {
       if (MODULES.indexOf(key) < 0) return;
       if (key === 'executive-dashboard') this._router.navTo('home');
       else this._router.navTo('module', { module: key });
+    },
+
+    onGlobalSearch: function (event) {
+      var query = String(event.getParameter('query') || '').trim().toLocaleLowerCase();
+      if (!query) return;
+
+      var moduleNames = window.VaxResilienceRouter.moduleNames;
+      var matches = MODULES.filter(function (moduleId) {
+        return moduleId.toLowerCase().indexOf(query) >= 0 || moduleNames[moduleId].toLowerCase().indexOf(query) >= 0;
+      });
+      if (matches.length === 1) {
+        this.onNavigationSelect({ getParameter: function () { return { getKey: function () { return matches[0]; } }; } });
+        return;
+      }
+
+      MessageToast.show(matches.length > 0
+        ? 'Search is ambiguous. Refine the module name. Business record search is unavailable.'
+        : 'No module matches. Search covers module names only; business record search is unavailable.');
+    },
+
+    onNotifications: function () {
+      MessageToast.show('Notifications are unavailable because no notification source is connected.');
     },
 
     _syncNavigation: function (event) {

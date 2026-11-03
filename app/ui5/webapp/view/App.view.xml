@@ -12,8 +12,9 @@
         <ToolbarSpacer />
         <Text text="Synthetic demonstration" />
         <Text text="No active incident" />
-        <Button text="Search unavailable" type="Transparent" enabled="false" />
-        <Button text="Notifications unavailable" type="Transparent" enabled="false" />
+        <SearchField id="moduleSearch" width="14rem" placeholder="Find a module" tooltip="Search module names only; business record search is unavailable"
+          search="onGlobalSearch" />
+        <Button text="Notifications" icon="sap-icon://bell" type="Transparent" tooltip="Notifications unavailable: no notification source is connected" press="onNotifications" />
         <Text text="Profile and role unavailable" />
       </tnt:ToolHeader>
     </tnt:header>

@@ -531,7 +531,7 @@ The shell now displays a screen-reader-announced load error if the external SAPU
 
 The package override does not replace dependencies embedded in the CLI tarball. Do not claim the complete dependency tree is vulnerability-free. Reassess against a compatible SAP CAP CLI release with the bundled parser fixed.
 
-The latest verified feature-code push is `f7413cb9c04e6725e2dc4c9809a10fe28c2f3304` on `origin/feat/sap-foundation-monitoring`.
+The prior verified feature-code push at this report entry was `eb1724e5be6bf151de16856755a76492f7041ea2` on `origin/feat/sap-foundation-monitoring`; later increments are recorded below.
 
 ### PHASES.md scenario test coverage audit — 2026-11-03
 
@@ -582,3 +582,14 @@ Passing foundational tests do not constitute acceptance of T-01 through T-20 as 
 The UI now offers an explicit read-only archive of selected historical synthetic fixtures across the eight roadmap modules. It is not baseline/current state and is not a seed/reset mechanism. Collections without approved schemas and dependent records are excluded and disclosed in the UI. The CAP production build now includes the UI files at the path served by the production server. CAP's development HTTP suite verifies static UI/archive assets and monitoring/action endpoints; a real browser render and a deployed SAP-hosted demo remain unverified.
 
 git diff --check | Exit code 0 after archive/build documentation updates. | PASS |
+
+### IMP-04 module navigation search and notification unavailable state — 2026-11-03
+
+| Command/check | Actual output/result | Status |
+|---|---|---|
+| `npm test` | 46 passed, 0 failed; 8.75s. Includes unique/ambiguous/no-match module search behavior and explicit disconnected-notification behavior. | PASS |
+| `npm run build` | CAP production build completed in 20.30s; postbuild UI copy completed; exit 0. | PASS |
+| XML parse of `app/ui5/webapp/view/App.view.xml` | Well-formed XML. | PASS |
+| `git diff --check` | Exit code 0. | PASS |
+
+The shell search now locates only module names/IDs and navigates only for a unique match. It does not search business records. The notification affordance now reports that no notification source is connected instead of being a dead disabled control. Identity/profile and role remain explicitly unavailable. These controller tests and XML parsing do not prove browser rendering; no browser or SAP-hosted demo was exercised.
