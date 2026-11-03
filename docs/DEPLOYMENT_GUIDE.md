@@ -22,6 +22,8 @@ For a production build check, run `npm run build`. For the local unit tests, run
 
 ## SAP deployment prerequisites
 
+`npm ci` completed successfully on the current Windows worktree from the tracked lockfile after a prior Windows clean-install attempt reported `EPERM` while recreating `node_modules`. The root cause of that earlier filesystem error was not established; the successful clean install verifies the present lockfile/install path, not that the original cause has been diagnosed. If it recurs, capture the full npm/Windows error and process/file-lock evidence before assigning a cause.
+
 No deployment has been performed. Before a BTP deployment, verify the correct account, subaccount, region, Cloud Foundry org/space, quotas, entitlements, HANA service/binding, identity configuration, Work Zone access, and build/release ownership. The observed local environment did not provide `cf` or `mbt` executables or authenticated org/space evidence. Configure environment-specific bindings through the platform's approved mechanisms; never add credentials or tenant-specific endpoints to Git.
 
 The production profile targets HANA and JWT authentication but is not a complete production deployment configuration. Complete open decisions D-07, D-10, D-11, D-13, D-17 and security review, then add and validate the approved MTA/service descriptors and HANA migration/seed strategy. No deployment command has been run. Never use `cf undeploy`.
