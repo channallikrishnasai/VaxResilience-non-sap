@@ -66,6 +66,10 @@
     if (manifest.dataMode !== 'synthetic' || typeof manifest.fictionalDisclaimer !== 'string' || !manifest.fictionalDisclaimer) {
       throw new TypeError('Archive manifest is not explicitly synthetic and fictional');
     }
+    if (moduleId === 'executive-dashboard' &&
+        (!manifest.scenarioFacts || typeof manifest.scenarioFacts !== 'object' || Array.isArray(manifest.scenarioFacts))) {
+      throw new TypeError('Historical dashboard scenario facts are missing or malformed');
+    }
 
     return {
       manifest,

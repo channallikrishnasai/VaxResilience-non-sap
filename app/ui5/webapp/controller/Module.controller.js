@@ -127,35 +127,8 @@ sap.ui.define([
           this._showFixtureCollections(archive.collections);
           return;
         }
-
-        var rows = [];
-        archive.collections.forEach(function (collection) {
-          collection.records.forEach(function (record, index) {
-            rows.push({ collection: collection.name, recordNumber: index + 1, contents: JSON.stringify(record) });
-          });
-        });
-        if (moduleId === 'executive-dashboard') {
-          Object.keys(archive.manifest.scenarioFacts).forEach(function (fact) {
-            rows.unshift({ collection: 'scenarioFacts', recordNumber: fact, contents: String(archive.manifest.scenarioFacts[fact]) });
-          });
-        }
-
-        var model = new JSONModel({ records: rows });
-        var table = new Table({
-          growing: true,
-          growingThreshold: 20,
-          noDataText: 'No validated fixture records are available for this module.',
-          columns: [
-            new Column({ header: new Text({ text: 'Fixture collection' }) }),
-            new Column({ header: new Text({ text: 'Record' }) }),
-            new Column({ header: new Text({ text: 'Source fixture values (JSON)' }) })
-          ],
-          items: { path: '/records', template: new ColumnListItem({ cells: [
-            new Text({ text: '{collection}' }), new Text({ text: '{recordNumber}' }), new Text({ text: '{contents}', wrapping: true })
-          ] }) }
-        });
-        table.setModel(model);
-        page.addContent(table);
+        this._showHistoricalDashboard(archive.manifest.scenarioFacts);
+        this._showFixtureCollections(archive.collections);
       } catch (_error) {
         if (generation !== this._archiveGeneration || !this._archiveOpen || moduleId !== this._currentModule) return;
         message.setText('Historical fixture records could not be loaded. Close the archive to return to the empty operational foundation.');
@@ -182,6 +155,26 @@ sap.ui.define([
           type: 'Warning', showIcon: true, showCloseButton: false
         }));
       }
+    },
+
+    _showHistoricalDashboard: function (scenarioFacts) {
+      var facts = Object.keys(scenarioFacts).map(function (field) {
+        var value = scenarioFacts[field];
+        return {
+          field: field,
+          sourceValue: value === null || value === undefined
+            ? 'Not provided in source'
+            : typeof value === 'object' ? JSON.stringify(value) : String(value)
+        };
+      });
+      this._page.addContent(new MessageStrip({
+        text: 'Historical source-manifest facts only. Values are not recalculated. Day-based fields retain their source names; calendar/production-day interpretation is unresolved (D-01). This is not current incident state.',
+        type: 'Information', showIcon: true, showCloseButton: false
+      }));
+      this._page.addContent(new Title({ text: 'Scenario manifest facts', level: 'H3' }));
+      this._page.addContent(this._archiveTable(facts, [
+        ['field', 'Manifest field'], ['sourceValue', 'Source value']
+      ], 'The source manifest has no scenario facts.'));
     },
 
     _archiveTable: function (records, fields, emptyText) {

@@ -270,3 +270,9 @@ Verification: `npm test` passed **51/51** (9.57s); `npm run build` passed (CAP b
 ### Cross-project verification after IMP-04/05 UI increments — 2026-11-03
 
 Current branch verification: Node/CAP suite **51 passed** (9.57s); CAP production build **passed** (15.09s); Python **102 passed** (15.06s, one existing pandas DB-API warning). Strict fixture validation schema-validated 157 records and returned exit 1 for unresolved schemas `calculationAssumptions` and `productionPlans`. No Python source was changed. This does not clear the IMP-02 baseline/schema blockers or complete later phase exit criteria.
+
+### IMP-04 historical dashboard source-fact view — 2026-11-03
+
+The explicit historical dashboard archive now presents scenario-manifest facts as source field/value rows, then source fixture collections as independently filterable tables. It does not recalculate coverage/gap or imply a current incident; the screen explains D-01's unresolved calendar/production-day basis. The archive client rejects a malformed dashboard `scenarioFacts` object.
+
+Verification: `npm test` passed **52/52** (9.78s); `npm run build` passed (CAP build 12.73s plus UI copy); modified UI XML parsed as well formed; production UI index and Digital Twin script were present; `git diff --check` passed. SAP deployment remains unperformed. Added an SAP BTP setup checklist to `docs/DEPLOYMENT_GUIDE.md`; it documents prerequisites and conditional steps, not a claim of tenant setup.

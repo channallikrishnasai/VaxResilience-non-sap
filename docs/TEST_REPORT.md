@@ -627,3 +627,15 @@ For non-dashboard modules in the opt-in historical archive, source collections n
 | `git diff --check` | Exit code 0 before this status-only documentation update. | PASS |
 
 No Python source or business logic changed in the UI increments. The strict validator result is not a passing validation of all fixture records; the two collection schemas require official field/semantics decisions.
+
+### IMP-04 historical dashboard facts and SAP setup guidance — 2026-11-03
+
+| Command/check | Actual output/result | Status |
+|---|---|---|
+| `npm test` | 52 passed, 0 failed; 9.78s. Includes malformed manifest rejection and source-fact display without recalculation. | PASS |
+| `npm run build` | CAP production build completed in 12.73s; postbuild UI copy exited 0. | PASS |
+| XML parse of `app/ui5/webapp/view/App.view.xml` | Well-formed XML. | PASS |
+| Production artifact check | `gen/production/app/ui5/webapp/index.html` and `digital-twin-model.js` exist. | PASS |
+| `git diff --check` | Exit code 0 before status documentation changes. | PASS |
+
+The new setup checklist records SAP Cockpit, Cloud Foundry, HANA/HDI, CAP facets, build/deploy, runtime verification, and Work Zone launch steps. It explicitly records that `mta.yaml`/`xs-security.json` and `cf`/`mbt` are absent locally and that no SAP deployment has been performed. D-11/D-13/D-17 still gate a tenant-specific deployment.

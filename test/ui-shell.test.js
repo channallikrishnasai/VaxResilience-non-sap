@@ -296,15 +296,15 @@ test('historical archive requires explicit entry and closing returns to the empt
 
   const renderCalls = [];
   const controller = {
-    _currentModule: 'executive-dashboard',
+    _currentModule: 'inventory-manufacturing',
     _renderModule: (...args) => renderCalls.push(args)
   };
   definition._openHistoricalArchive.call(controller);
   assert.equal(controller._archiveOpen, true);
-  assert.deepEqual(renderCalls.pop(), ['executive-dashboard', true]);
+  assert.deepEqual(renderCalls.pop(), ['inventory-manufacturing', true]);
   definition._closeHistoricalArchive.call(controller);
   assert.equal(controller._archiveOpen, false);
-  assert.deepEqual(renderCalls.pop(), ['executive-dashboard', true]);
+  assert.deepEqual(renderCalls.pop(), ['inventory-manufacturing', true]);
 });
 
 test('historical archive rendering is read-only, source-labelled, and excludes unresolved collections', async () => {
@@ -315,9 +315,11 @@ test('historical archive rendering is read-only, source-labelled, and excludes u
     if (capture) capture(this);
   };
   const Text = control();
-  Text.prototype.setText = function (text) { this.settings.text = text; };
+  Text.prototype.setText = function (text) { this.settings.text = text; captured.text = text; };
   const Button = control((item) => captured.buttons.push(item));
   const MessageStrip = control((item) => captured.messages.push(item));
+  const Label = control();
+  Label.prototype.setLabelFor = function (target) { this.labelFor = target; };
   const Table = control((item) => {
     captured.tables.push(item);
     item.setModel = (model) => { item.model = model; };
@@ -326,7 +328,7 @@ test('historical archive rendering is read-only, source-labelled, and excludes u
   const dependencies = {
     'sap/m/MessageStrip': MessageStrip,
     'sap/m/Title': control(),
-    'sap/m/Label': control(),
+    'sap/m/Label': Label,
     'sap/m/Text': Text,
     'sap/m/Table': Table,
     'sap/m/Column': control(),
@@ -353,7 +355,8 @@ test('historical archive rendering is read-only, source-labelled, and excludes u
     _page: page,
     _archiveGeneration: 1,
     _archiveOpen: true,
-    _currentModule: 'executive-dashboard',
+    _currentModule: 'inventory-manufacturing',
+    _showFixtureCollections: definition._showFixtureCollections,
     _closeHistoricalArchive() {},
     window: context.window
   };
@@ -367,16 +370,15 @@ test('historical archive rendering is read-only, source-labelled, and excludes u
       omittedCollections: ['calculationAssumptions', 'productionPlans']
     })
   };
-  await definition._showHistoricalArchive.call(controller, 'executive-dashboard');
+  await definition._showHistoricalArchive.call(controller, 'inventory-manufacturing');
+  assert.doesNotMatch(captured.text, /could not be loaded/, captured.error);
 
   assert.match(captured.messages[0].settings.text, /not opening or current operational state/);
   assert.equal(captured.messages[0].settings.type, 'Warning');
-  assert.match(captured.messages[1].settings.text, /Scenario facts are synthetic comparisons/);
+  assert.match(captured.messages[1].settings.text, /Stock and qualification records/);
   assert.match(captured.messages[2].settings.text, /calculationAssumptions and productionPlans/);
   assert.equal(captured.tables.length, 1);
-  assert.deepEqual(JSON.parse(JSON.stringify(captured.tables[0].model.data.records)), [{
-    collection: 'routes', recordNumber: 1, contents: JSON.stringify(record)
-  }]);
+  assert.deepEqual(JSON.parse(JSON.stringify(captured.tables[0].model.data.records)), [{ routeId: record.routeId, dataMode: record.dataMode }]);
   assert.deepEqual(captured.buttons.map((button) => button.settings.text), ['Close historical archive']);
 });
 
@@ -451,6 +453,38 @@ test('historical fixture collections render source fields and filter rows withou
   field.settings.liveChange({ getParameter: () => 'medicine b' });
   assert.deepEqual(JSON.parse(JSON.stringify(table.model.data.records.map((record) => record.productId))), ['PRD-B']);
   assert.deepEqual(original.map((record) => record.productId), ['PRD-A', 'PRD-B']);
+});
+
+test('historical dashboard displays manifest facts verbatim and explains unresolved day basis', () => {
+  const source = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/controller/Module.controller.js'), 'utf8');
+  const controls = [];
+  const control = function (settings = {}) {
+    this.settings = settings;
+    controls.push(this);
+  };
+  control.prototype.setModel = function (model) { this.model = model; };
+  function JSONModel(data) { this.data = data; }
+  let definition;
+  const context = { sap: { ui: { define: (_names, factory) => {
+    const Controller = { extend: (_name, implementation) => implementation };
+    definition = factory(Controller, ...Array(11).fill(control), JSONModel);
+  } } } };
+  vm.runInNewContext(source, context);
+
+  const facts = { delayDays: 30, inventoryCoverageDays: 20, potentialGapDays: 10, gapInterpretation: 'Synthetic exposure estimate only.' };
+  const page = { contents: [], addContent(item) { this.contents.push(item); } };
+  definition._showHistoricalDashboard.call({ _page: page, _archiveTable: definition._archiveTable }, facts);
+
+  const table = controls.find((item) => item.settings.items && item.settings.items.path === '/records');
+  assert.ok(table);
+  assert.deepEqual(JSON.parse(JSON.stringify(table.model.data.records)), [
+    { field: 'delayDays', sourceValue: '30' },
+    { field: 'inventoryCoverageDays', sourceValue: '20' },
+    { field: 'potentialGapDays', sourceValue: '10' },
+    { field: 'gapInterpretation', sourceValue: 'Synthetic exposure estimate only.' }
+  ]);
+  assert.ok(page.contents.some((item) => item.settings && /not recalculated/.test(item.settings.text || '')));
+  assert.ok(page.contents.some((item) => item.settings && /D-01/.test(item.settings.text || '')));
 });
 
 function loadControllerDefinition(source, routeHelper = loadRouterApi(), overrides = {}) {

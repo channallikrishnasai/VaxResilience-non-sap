@@ -88,6 +88,14 @@ test('archive rejects unknown modules, failed fetches, non-synthetic manifests, 
   const failed = createArchiveClient(async () => ({ ok: false, status: 503, json: async () => ({}) }));
   await assert.rejects(failed.load('executive-dashboard'), /Archive unavailable \(HTTP 503\)/);
 
+  const malformedDashboardManifest = createArchiveClient(async (url) => {
+    const file = path.basename(url);
+    const body = JSON.parse(fs.readFileSync(path.join(webRoot, file), 'utf8'));
+    if (file === 'manifest.json') body.scenarioFacts = [];
+    return { ok: true, status: 200, json: async () => body };
+  });
+  await assert.rejects(malformedDashboardManifest.load('executive-dashboard'), /scenario facts are missing or malformed/);
+
   const invalidManifest = createArchiveClient(async () => ({
     ok: true, status: 200, json: async () => ({ dataMode: 'live', fictionalDisclaimer: '' })
   }));
