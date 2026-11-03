@@ -57,3 +57,89 @@
   font-size: 1rem;
   overflow-wrap: anywhere;
 }
+
+.vr-scenario-panel {
+  margin: 0.5rem 1.25rem 1.25rem;
+  padding: 1.25rem;
+  gap: 0.65rem;
+  border: 1px solid var(--sapGroup_ContentBorderColor, #d9dfe3);
+  border-radius: 0.75rem;
+  background: linear-gradient(120deg, var(--sapGroup_ContentBackground, #fff), #f4f8fb);
+  box-shadow: var(--sapContent_Shadow0, 0 1px 2px rgba(0, 0, 0, 0.08));
+}
+
+.vr-scenario-panel > .sapMTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.vr-scenario-panel > .sapMText {
+  color: var(--sapContent_LabelColor, #52616e);
+  line-height: 1.5;
+}
+
+.vr-scenario-metric {
+  box-sizing: border-box;
+  flex: 1 1 12rem;
+  min-width: 11rem;
+  margin: 0.2rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--sapGroup_ContentBorderColor, #d9dfe3);
+  border-radius: 0.5rem;
+  background: var(--sapBackgroundColor, #fff);
+}
+
+.vr-scenario-metric .sapMLabel {
+  color: var(--sapContent_LabelColor, #52616e);
+}
+
+.vr-scenario-metric .sapMText {
+  margin-top: 0.3rem;
+  color: var(--sapTextColor, #1d2d3e);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.vr-chart-grid {
+  margin: 0 1rem 1rem;
+  gap: 0.5rem;
+}
+
+.vr-chart-panel {
+  box-sizing: border-box;
+  flex: 1 1 22rem;
+  min-width: min(100%, 20rem);
+  margin: 0.35rem;
+  padding: 1rem;
+  gap: 0.55rem;
+  border: 1px solid var(--sapGroup_ContentBorderColor, #d9dfe3);
+  border-radius: 0.65rem;
+  background: var(--sapGroup_ContentBackground, #fff);
+}
+
+.vr-chart-panel > .sapMTitle {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.vr-chart-row {
+  width: 100%;
+  gap: 0.75rem;
+}
+
+.vr-chart-row .sapMLabel {
+  flex: 0 0 42%;
+  min-width: 7rem;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .vr-scenario-panel {
+    margin: 0.25rem 0.75rem 1rem;
+    padding: 0.9rem;
+  }
+
+  .vr-page-intro {
+    margin: 0.9rem 0.75rem;
+  }
+}

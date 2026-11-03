@@ -651,3 +651,15 @@ The new setup checklist records SAP Cockpit, Cloud Foundry, HANA/HDI, CAP facets
 | Live local browser preview | Not verified. A second server could not bind port 4004 (`EADDRINUSE`) and the browser origin approval was declined. | NOT VERIFIED |
 
 The dashboard's message totals and activity table come from CAP MonitoringService. Its optional traffic action calls the same-origin CAP API for eight synthetic failures and four local simulated retries. CAP integration tests independently exercise message creation and retry over HTTP. Records remain marked `SIMULATION`; the dashboard says no external provider is connected. This does not establish live SAP Integration Suite, BTP deployment, or SAP-hosted browser behavior.
+
+## BharatMed scenario dashboard and Sarvam readiness — 2026-11-03
+
+| Command/check | Actual result | Status |
+|---|---|---|
+| `npm test` | `54` tests, `54` passed, `0` failed; duration `11442.9952ms`. Includes CAP HTTP smoke test, eight synthetic API message creations/four simulated retries, fixture-derived dashboard checks, CAP status/activity chart aggregation, and the AI Command Centre's simulated call presentation. | PASS |
+| `npm run build` | `build completed in 12443 ms`; postbuild UI copy ran and shell exit code was `0`. | PASS |
+| `git diff --check` | Exit code `0`; Git reported only expected LF-to-CRLF conversion notices on modified working files. | PASS |
+| Browser visual render and actual SAPUI5 interactions | Not performed; previous browser access was blocked. | NOT VERIFIED |
+| Sarvam API/phone integration | No Sarvam request was made. The page displays the source scenario call as `completed_simulated`; no live-call control exists. The API key pasted in chat was not used or saved. | NOT IMPLEMENTED |
+
+The dashboard presents synthetic BharatMed material quantities and day-basis caveats, plus CAP message status and activity counts derived from the API. A simulated scenario call is not represented as an AI-generated Sarvam result. Sarvam setup prerequisites and official documentation links are recorded in [`SARVAM_VOICE_SETUP.md`](SARVAM_VOICE_SETUP.md). The posted key should be revoked and replaced; live voice work also requires a configured Voice Agents workspace/agent, telephony or browser channel, and approved call/consent policy decisions.

@@ -15,7 +15,7 @@
     ]),
     'ai-command-centre': Object.freeze([
       ['agent-activity.json', 'agents'], ['agent-activity.json', 'agentExecutions'],
-      ['agent-activity.json', 'toolInvocations']
+      ['agent-activity.json', 'toolInvocations'], ['agent-activity.json', 'voiceCalls']
     ]),
     'inventory-manufacturing': Object.freeze([
       ['products.json', 'products'], ['products.json', 'materials'],

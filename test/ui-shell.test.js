@@ -140,6 +140,7 @@ test('monitor table builds responsive columns with aligned row cells', () => {
     'sap/m/Toolbar': makeControl('Toolbar'),
     'sap/m/VBox': makeControl('VBox'),
     'sap/m/FlexBox': makeControl('FlexBox'),
+    'sap/m/ProgressIndicator': makeControl('ProgressIndicator'),
     'sap/ui/model/json/JSONModel': JSONModel
   };
   let definition;
@@ -292,7 +293,7 @@ test('historical archive requires explicit entry and closing returns to the empt
   const StubControl = function StubControl() {};
   const context = { sap: { ui: { define: (_dependencies, factory) => {
     const Controller = { extend: (_name, implementation) => implementation };
-    definition = factory(Controller, ...Array(13).fill(StubControl), StubControl);
+    definition = factory(Controller, ...Array(14).fill(StubControl), StubControl);
   } } } };
   vm.runInNewContext(source, context);
 
@@ -341,6 +342,7 @@ test('historical archive rendering is read-only, source-labelled, and excludes u
     'sap/m/Toolbar': control(),
     'sap/m/VBox': control(),
     'sap/m/FlexBox': control(),
+    'sap/m/ProgressIndicator': control(),
     'sap/ui/model/json/JSONModel': JSONModel
   };
   let definition;
@@ -398,7 +400,7 @@ test('historical Digital Twin renders explicit entity and relationship tables wi
   let definition;
   const context = { sap: { ui: { define: (_names, factory) => {
     const Controller = { extend: (_name, implementation) => implementation };
-    definition = factory(Controller, ...Array(13).fill(control), JSONModel);
+    definition = factory(Controller, ...Array(14).fill(control), JSONModel);
   } } } };
   vm.runInNewContext(source, context);
 
@@ -435,7 +437,7 @@ test('historical fixture collections render source fields and filter rows withou
   let definition;
   const context = { sap: { ui: { define: (_names, factory) => {
     const Controller = { extend: (_name, implementation) => implementation };
-    definition = factory(Controller, ...Array(13).fill(control), JSONModel);
+    definition = factory(Controller, ...Array(14).fill(control), JSONModel);
   } } } };
   vm.runInNewContext(source, context);
 
@@ -471,7 +473,7 @@ test('historical dashboard displays manifest facts verbatim and explains unresol
   let definition;
   const context = { sap: { ui: { define: (_names, factory) => {
     const Controller = { extend: (_name, implementation) => implementation };
-    definition = factory(Controller, ...Array(13).fill(control), JSONModel);
+    definition = factory(Controller, ...Array(14).fill(control), JSONModel);
   } } } };
   vm.runInNewContext(source, context);
 
@@ -499,7 +501,7 @@ test('operations dashboard sample traffic creates eight synthetic API messages a
   const context = {
     sap: { ui: { define: (_dependencies, factory) => {
       const Controller = { extend: (_name, implementation) => implementation };
-      definition = factory(Controller, ...Array(13).fill(function StubControl() {}), function JSONModel() {});
+      definition = factory(Controller, ...Array(14).fill(function StubControl() {}), function JSONModel() {});
     } } },
     window: { VaxResilienceApi: {
       createDemoFailure: async () => {
@@ -512,19 +514,66 @@ test('operations dashboard sample traffic creates eight synthetic API messages a
     } }
   };
   vm.runInNewContext(source, context);
+  const chartData = definition._aggregateDashboardCharts([
+    { status: 'FAILED', modifiedAt: '2026-11-03T09:00:00Z' },
+    { status: 'FAILED', modifiedAt: '2026-11-03T10:00:00Z' },
+    { status: 'SIMULATED', modifiedAt: '2026-11-01T12:00:00Z' },
+    { status: 'FAILED', modifiedAt: 'invalid' }
+  ], '2026-11-03T16:00:00Z');
+  assert.deepEqual(JSON.parse(JSON.stringify(chartData.statuses.map(({ label, count }) => ({ label, count })))), [
+    { label: 'FAILED', count: 3 }, { label: 'SIMULATED', count: 1 }
+  ]);
+  assert.deepEqual(JSON.parse(JSON.stringify(chartData.activity.filter((row) => row.count).map(({ label, count }) => ({ label, count })))), [
+    { label: '11-01', count: 1 }, { label: '11-03', count: 2 }
+  ]);
   const values = {};
   const model = { setProperty: (key, value) => { values[key] = value; } };
   const busy = [];
   const table = { setBusy: (value) => busy.push(value), setNoDataText() {} };
   await definition._generateDashboardTraffic.call({
     _dashboardGeneration: 0,
-    _loadDashboardMessages: definition._loadDashboardMessages
+    _loadDashboardMessages: definition._loadDashboardMessages,
+    _renderDashboardCharts: () => {}
   }, model, table);
   assert.equal(ids.length, 8);
   assert.deepEqual(retries, ['message-2', 'message-4', 'message-6', 'message-8']);
   assert.match(values['/sampleNotice'], /eight clearly labeled synthetic CAP messages/);
   assert.equal(values['/total'], '8');
   assert.deepEqual(busy, [true, true, false]);
+});
+
+test('AI Command Centre presents the source scenario call as simulated and keeps Sarvam outbound disabled', async () => {
+  const source = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/controller/Module.controller.js'), 'utf8');
+  let definition;
+  const makeControl = function (settings = {}) {
+    this.settings = settings;
+    this.items = settings.items || [];
+    this.addStyleClass = () => {};
+    this.addItem = (item) => this.items.push(item);
+    this.removeAllItems = () => { this.items = []; };
+    this.setBusy = () => {};
+    this.setText = (text) => { this.settings.text = text; };
+    this.setModel = (model) => { this.model = model; };
+  };
+  function JSONModel(data) { this.data = data; }
+  const scenario = JSON.parse(fs.readFileSync(path.join(__dirname, '../docs/official-specification/data/synthetic/agent-activity.json'), 'utf8'));
+  const context = {
+    sap: { ui: { define: (_dependencies, factory) => {
+      const Controller = { extend: (_name, implementation) => implementation };
+      definition = factory(Controller, ...Array(14).fill(makeControl), JSONModel);
+    } } },
+    window: { VaxResilienceArchive: { load: async () => ({ collections: [{ name: 'voiceCalls', records: scenario.voiceCalls }] }) } }
+  };
+  vm.runInNewContext(source, context);
+  const page = { contents: [], addContent(item) { this.contents.push(item); } };
+  const controller = { _page: page, _currentModule: 'ai-command-centre', _voiceGeneration: 0, _archiveOpen: false, _archiveTable: definition._archiveTable };
+  await definition._showVoiceAgentConsole.call(controller);
+  const statusCard = page.contents.find((item) => item.items && item.items.some((child) => child.settings && /SARVAM VOICE AGENT/.test(child.settings.text || '')));
+  const table = page.contents.find((item) => item.settings && item.settings.items && item.settings.items.path === '/records');
+  assert.deepEqual(JSON.parse(JSON.stringify(table.model.data.records)), [scenario.voiceCalls[0]]);
+  assert.ok(statusCard.items.some((item) => /SARVAM VOICE AGENT · NOT CONNECTED/.test(item.settings.text || '')));
+  assert.ok(page.contents.some((item) => item.settings && /completed_simulated/.test(item.settings.text || '')));
+  assert.ok(page.contents.some((item) => item.settings && /No Sarvam request or phone call was made/.test(item.settings.text || '')));
 });
 
 function loadControllerDefinition(source, routeHelper = loadRouterApi(), overrides = {}) {
