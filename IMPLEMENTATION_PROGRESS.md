@@ -266,3 +266,7 @@ Verification: `npm test` passed **50/50** (9.78s), including model, UI table, an
 Changed the explicit historical archive from one opaque JSON row list to per-collection tables with columns drawn directly from the source fixture fields, read-only local filtering, and growing rows. Nested values are shown as JSON and source nulls are labelled unavailable; no field semantics, calculations, or state transitions are inferred. Dashboard context remains separate and explicitly historical.
 
 Verification: `npm test` passed **51/51** (9.57s); `npm run build` passed (CAP build 15.09s plus production UI copy); the UI view parses as XML; `git diff --check` passed. Live CAP-backed core modules, state reset, role enforcement, and browser rendering are still outstanding.
+
+### Cross-project verification after IMP-04/05 UI increments — 2026-11-03
+
+Current branch verification: Node/CAP suite **51 passed** (9.57s); CAP production build **passed** (15.09s); Python **102 passed** (15.06s, one existing pandas DB-API warning). Strict fixture validation schema-validated 157 records and returned exit 1 for unresolved schemas `calculationAssumptions` and `productionPlans`. No Python source was changed. This does not clear the IMP-02 baseline/schema blockers or complete later phase exit criteria.

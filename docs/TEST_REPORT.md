@@ -615,3 +615,15 @@ IMP-05 progress is partial: when the user explicitly opens the historical archiv
 | `git diff --check` | Exit code 0. | PASS |
 
 For non-dashboard modules in the opt-in historical archive, source collections now render as field-based tables with per-collection in-memory filtering and growing rows. Nested fixture values are represented as JSON; null values remain explicitly unavailable in the source. Filtering changes only the displayed view and never writes to CAP or alters fixture records. The dashboard continues to identify itself as historical synthetic context. This is still not equivalent to the live CAP-backed modules or the verified, authenticated user journeys required for IMP-05 exit.
+
+### Current cross-project regression and fixture-validation check — 2026-11-03
+
+| Command/check | Actual output/result | Status |
+|---|---|---|
+| `npm test` | 51 passed, 0 failed; 9.57s. | PASS |
+| `npm run build` | CAP production build completed in 15.09s; production UI-copy step exited 0. | PASS |
+| `.venv\Scripts\python.exe -m pytest -q` | 102 passed, 0 failed; 15.06s; one existing pandas DB-API warning. | PASS |
+| `.venv\Scripts\python.exe scripts\validate_synthetic_fixtures.py` | 157 schema-validated records; exit 1 for unmapped `calculationAssumptions` and `productionPlans`. | BLOCKED / FAIL-CLOSED |
+| `git diff --check` | Exit code 0 before this status-only documentation update. | PASS |
+
+No Python source or business logic changed in the UI increments. The strict validator result is not a passing validation of all fixture records; the two collection schemas require official field/semantics decisions.
