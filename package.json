@@ -1,0 +1,26 @@
+{
+  "name": "vaxresilience",
+  "version": "0.1.0",
+  "private": true,
+  "description": "SAP CAP foundation and synthetic integration operations for VaxResilience",
+  "engines": { "node": ">=22.12" },
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds watch",
+    "build": "cds build --production --dest production",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@cap-js/hana": "^3.1.2",
+    "@sap/cds": "^10.2.2",
+    "@sap/xssec": "^4.16.0",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^3.1.2",
+    "@sap/cds-dk": "^10.2.0"
+  },
+  "overrides": {
+    "body-parser": "^2.4.0"
+  }
+}

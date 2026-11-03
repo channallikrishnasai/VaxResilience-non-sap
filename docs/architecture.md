@@ -1,5 +1,24 @@
 # Architecture
 
+## VaxResilience enterprise application boundary
+
+```text
+SAP Build Work Zone (planned)
+        ↓
+SAPUI5 browser client
+        ↓ authenticated requests (identity not yet configured)
+SAP CAP / Node.js — API, authorization, workflow and audit boundary
+        ├── SQLite local development / HANA Cloud planned, not verified
+        ├── Existing Python application — no CAP-facing API contract yet
+        ├── AI Core / Generative AI Hub — planned, not connected
+        ├── Build Process Automation — planned, not connected
+        └── external adapters — synthetic/local only
+```
+
+CAP and the existing Python application are separate runtimes today. The Python Streamlit, simulation, ingestion, forecasting, orchestration, and RAG implementation remains in Python. It has no reviewed service API for CAP, so no process call or credential exchange is implemented. CAP's draft domain model and local MonitoringService are detailed in [`sap-architecture/ARCHITECTURE.md`](sap-architecture/ARCHITECTURE.md). The monitoring HTTP layer validates and returns `X-Correlation-ID`; this provides request tracing only and does not authenticate a caller.
+
+This enterprise boundary supplements the Python processing architecture below. It does not claim that SAP, HANA, identity, AI, workflow, or external services are connected. See [`OPEN_DECISIONS.md`](OPEN_DECISIONS.md) for owner decisions required before enabling those dependencies.
+
 ## High-level diagram
 
 ```

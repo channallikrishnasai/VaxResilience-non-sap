@@ -1,0 +1,19 @@
+{
+  "requires": {
+    "db": {
+      "kind": "sqlite",
+      "credentials": { "url": "db.sqlite" }
+    }
+  },
+  "[production]": {
+    "requires": {
+      "db": { "kind": "hana" },
+      "auth": { "kind": "jwt" }
+    }
+  },
+  "[development]": {
+    "requires": {
+      "auth": { "kind": "mocked" }
+    }
+  }
+}

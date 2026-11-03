@@ -62,3 +62,10 @@ grafana-data/
 
 # Notes personnelles (jamais publiees)
 notes/
+
+# --- CAP / SAP artifacts ---
+node_modules/
+db.sqlite
+db.sqlite-shm
+db.sqlite-wal
+gen/

@@ -17,3 +17,5 @@ pip-audit==2.7.3
 
 # --- Hooks locaux ---
 pre-commit==4.0.1
+chardet==5.2.0
+jsonschema==4.26.0

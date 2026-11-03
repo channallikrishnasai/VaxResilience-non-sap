@@ -1,0 +1,40 @@
+<mvc:View
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:tnt="sap.tnt"
+  controllerName="vaxresilience.controller.App"
+  displayBlock="true">
+  <tnt:ToolPage id="toolPage" sideExpanded="true">
+    <tnt:header>
+      <tnt:ToolHeader>
+        <Button icon="sap-icon://menu2" type="Transparent" tooltip="Toggle navigation" press="onToggleNavigation" />
+        <Title text="VaxResilience" level="H1" />
+        <ToolbarSpacer />
+        <Text text="Synthetic demonstration" />
+        <Text text="No active incident" />
+        <Button text="Search unavailable" type="Transparent" enabled="false" />
+        <Button text="Notifications unavailable" type="Transparent" enabled="false" />
+        <Text text="Profile and role unavailable" />
+      </tnt:ToolHeader>
+    </tnt:header>
+    <tnt:sideContent>
+      <tnt:SideNavigation>
+        <tnt:item>
+          <tnt:NavigationList id="moduleNavigation" itemSelect="onNavigationSelect">
+            <tnt:NavigationListItem key="executive-dashboard" text="Executive Dashboard" />
+            <tnt:NavigationListItem key="supply-chain-digital-twin" text="Supply Chain Digital Twin" />
+            <tnt:NavigationListItem key="ai-command-centre" text="AI Command Centre" />
+            <tnt:NavigationListItem key="inventory-manufacturing" text="Inventory &amp; Manufacturing" />
+            <tnt:NavigationListItem key="customers-orders" text="Customers &amp; Orders" />
+            <tnt:NavigationListItem key="approvals-decisions" text="Approvals &amp; Decisions" />
+            <tnt:NavigationListItem key="risk-compliance-audit" text="Risk, Compliance &amp; Audit" />
+            <tnt:NavigationListItem key="resilience-impact-analytics" text="Resilience &amp; Impact Analytics" />
+          </tnt:NavigationList>
+        </tnt:item>
+      </tnt:SideNavigation>
+    </tnt:sideContent>
+    <tnt:mainContents>
+      <NavContainer id="app" />
+    </tnt:mainContents>
+  </tnt:ToolPage>
+</mvc:View>

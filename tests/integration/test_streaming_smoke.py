@@ -106,4 +106,4 @@ def test_alert_visible_in_gold_view(pg_dsn):
         )
         rows = cur.fetchall()
     assert rows, "l'alerte doit être visible via la vue gold (JOIN dims inclus)"
-    assert rows[0][0] == "Site de test"
+    assert rows[0][0] == "India Demo Site"
