@@ -2,253 +2,247 @@
 
 # VaxResilience
 
-### Suivi IoT & Prévention des ruptures de médicaments
+### IoT monitoring & drug-shortage prevention
 
-**Monitoring chaîne du froid temps réel, prévision des ruptures, assistant RAG clinique**
+**Real-time cold-chain monitoring, drug-shortage forecasting, clinical RAG assistant**
 
-Pour les pharmacies hospitalières. Streaming, ML et LLM local, de bout en bout, uniquement avec des composants open source.
+For hospital pharmacies. Streaming, ML and a local LLM, end to end, built entirely on open-source components.
 
-![Santé](https://img.shields.io/badge/Domaine-Sant%C3%A9-166534)
+![Healthcare](https://img.shields.io/badge/Domain-Healthcare-166534)
 
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
 ![Streamlit](https://img.shields.io/badge/Streamlit-app-FF4B4B?logo=streamlit&logoColor=white)
-![Redpanda](https://img.shields.io/badge/Redpanda-API_Kafka-DC2626?logo=apachekafka&logoColor=white)
+![Redpanda](https://img.shields.io/badge/Redpanda-Kafka_API-DC2626?logo=apachekafka&logoColor=white)
 ![TimescaleDB](https://img.shields.io/badge/TimescaleDB-Postgres-FDB515?logo=timescale&logoColor=black)
 ![Dagster](https://img.shields.io/badge/Dagster-assets-654FF0)
-![Prophet](https://img.shields.io/badge/Prophet-pr%C3%A9vision-0467DF)
+![Prophet](https://img.shields.io/badge/Prophet-forecasting-0467DF)
 
-![Ollama](https://img.shields.io/badge/Ollama-LLM_local-000000?logo=ollama&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-local_LLM-000000?logo=ollama&logoColor=white)
 ![ChromaDB](https://img.shields.io/badge/ChromaDB-vector_store-FC6C04)
 ![Grafana](https://img.shields.io/badge/Grafana-dashboards-F46800?logo=grafana&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-compose-2496ED?logo=docker&logoColor=white)
-![Terraform](https://img.shields.io/badge/Terraform-blueprint_AWS-844FBA?logo=terraform&logoColor=white)
-![pytest](https://img.shields.io/badge/pytest-unitaires_+_int%C3%A9gration-0A9EDC?logo=pytest&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-AWS_blueprint-844FBA?logo=terraform&logoColor=white)
+![pytest](https://img.shields.io/badge/pytest-unit_+_integration-0A9EDC?logo=pytest&logoColor=white)
 
-**Français** - [English](README.en.md)
+**English** - [Français](README.fr.md)
 
 </div>
 
 <p align="center">
-  <img src="docs/assets/tour.gif" alt="Visite guidée du dashboard, servi par le pipeline live" width="920">
+  <img src="docs/assets/tour.gif" alt="Guided tour of the pharmacist dashboard, served by the live pipeline" width="920">
 </p>
 
-## Sommaire
+## Table of contents
 
-- [Pourquoi ce projet](#pourquoi-ce-projet)
-- [Ce que fait le pipeline](#ce-que-fait-le-pipeline)
-- [Démarrage rapide](#démarrage-rapide)
+- [Why this project](#why-this-project)
+- [What the pipeline does](#what-the-pipeline-does)
+- [Quick start](#quick-start)
 - [Architecture](#architecture)
-- [Stack et portabilité](#stack-et-portabilité)
-- [Sources de données](#sources-de-données)
-- [L'application](#lapplication)
-- [Observabilité et orchestration](#observabilité-et-orchestration)
-- [Tests et CI](#tests-et-ci)
-- [Structure du repo](#structure-du-repo)
-- [Notes](#notes)
-- [Périmètre et limites](#périmètre-et-limites)
+- [Stack and portability](#stack-and-portability)
+- [Data sources](#data-sources)
+- [The pharmacist application](#the-pharmacist-application)
+- [Observability and orchestration](#observability-and-orchestration)
+- [Tests and CI](#tests-and-ci)
+- [Repository layout](#repository-layout)
+- [Engineering notes](#engineering-notes)
+- [Scope and limitations](#scope-and-limitations)
 - [Documentation](#documentation)
+- [About](#about)
 
-## Pourquoi ce projet
+## Why this project
 
-VaxResilience uses an India-focused synthetic hospital network, centered on Bengaluru, to demonstrate how a medication shortage response could connect cold-chain monitoring, inventory forecasting, and clinical review.
+VaxResilience uses an India-focused synthetic hospital network, centered on Bengaluru, to demonstrate how a medication-shortage response could connect cold-chain monitoring, inventory forecasting, and clinical review.
 
-Les hôpitaux, stocks, signaux de pénurie et télémétries de démonstration sont fictifs. Le projet ne dispose pas actuellement d'un flux indien automatisé de pénuries médicamenteuses : les sources FDA, ANSM et NHS conservées dans le pipeline sont des références internationales, pas des données sur les pénuries en Inde. CDSCO et NPPA sont documentés comme sources officielles de référence, mais ne sont pas présentés comme des flux intégrés.
+The demonstration hospitals, inventory, shortage signals, and telemetry are fictional. The project does not currently have an automated India-specific medicine-shortage feed: the FDA, ANSM, and NHS sources retained in the pipeline are international references, not data about shortages in India. CDSCO and NPPA are documented as official Indian reference sources but are not represented as integrated data feeds.
 
-Les documents cliniques de démonstration ne sont pas des recommandations médicales indiennes. Toute décision réelle exige une vérification par un professionnel qualifié selon les informations produit approuvées par CDSCO et les protocoles institutionnels applicables.
+The clinical demo documents are not Indian medical recommendations. Any real decision requires review by a qualified professional against CDSCO-approved product information and applicable institutional protocols.
 
-## Ce que fait le pipeline
+## What the pipeline does
 
-Une flotte simulée de 48 réfrigérateurs sur huit sites de démonstration fictifs en Inde envoie sa télémétrie toutes les 30 secondes. Les signaux de stock et les documents cliniques de démonstration sont synthétiques. Le système illustre le flux de bout en bout; il ne constitue ni une source de pénurie indienne ni un outil de décision clinique.
+A simulated fleet of 48 refrigerators across eight fictional Indian demo sites reports telemetry every 30 seconds. Inventory signals and clinical demo documents are synthetic. The system illustrates an end-to-end flow; it is not an Indian shortage data source or a clinical decision tool.
 
 <p align="center">
-  <img src="docs/assets/how-it-works.fr.svg" alt="Du signal capteur à l'action clinique, en cinq étapes" width="780">
+  <img src="docs/assets/how-it-works.en.svg" alt="From sensor signal to clinical action, in five steps" width="780">
 </p>
 
-| Étape | Ce qui se passe | Code |
+| Step | What happens | Code |
 | --- | --- | --- |
-| 1. Capter | Le simulateur SimPy envoie température et humidité toutes les 30 s vers Redpanda. | `simulator/` |
-| 2. Détecter | Un consumer streaming applique un Z-score glissant et des seuils de durée, marque l'excursion `BREAKAGE_RISK` et flague le lot de vaccins comme suspect. | `streaming/consumer.py`, `streaming/anomaly.py` |
-| 3. Prévoir | Prophet réentraîne le modèle de demande régional, soustrait les doses suspectes et prédit la date de rupture de stock. | `ml/shortage_forecast.py` |
-| 4. Recommander | Un LLM local (Ollama) récupère le corpus de démonstration synthétique dans ChromaDB et rédige un brief avec citations signalées comme fictives. | `llm/` |
-| 5. Agir | Grafana déclenche l'alerte en temps réel ; l'application Streamlit présente un brief SBAR avec alternatives et stocks excédentaires à proximité. | `dashboards/` |
+| 1. Sense | The SimPy simulator ships temperature and humidity readings every 30 s to Redpanda. | `simulator/` |
+| 2. Detect | A streaming consumer applies a rolling Z-score plus duration thresholds, flags the excursion as `BREAKAGE_RISK` and marks the affected vaccine lot as suspect. | `streaming/consumer.py`, `streaming/anomaly.py` |
+| 3. Forecast | Prophet retrains the regional demand model, subtracts the suspect doses and predicts the stock-out date. | `ml/shortage_forecast.py` |
+| 4. Recommend | A local LLM (Ollama) retrieves the synthetic demo corpus from ChromaDB and drafts a brief with citations marked as illustrative. | `llm/` |
+| 5. Act | Grafana raises the real-time alert; the Streamlit app shows the pharmacist an SBAR brief with alternatives and nearby surplus stock. | `dashboards/` |
 
-## Démarrage rapide
+## Quick start
 
-**Cycle de vie de la stack**
+Prerequisites: Docker Desktop with at least 8 GB of RAM allocated. No cloud account, no API key.
 
-- `make up` : démarre toute la stack (Redpanda, TimescaleDB, Grafana, Ollama, Streamlit et Dagster) en arrière-plan, puis affiche les URLs d'accès.
-- `make down` : arrête la stack en conservant les volumes (les données restent intactes au prochain démarrage).
-- `make nuke` : arrête tout et supprime les volumes, pour repartir d'un environnement totalement vierge.
-- `make logs` : suit en direct les logs de tous les conteneurs.
-- `make help` : liste toutes les cibles du Makefile avec leur description.
+```bash
+make up             # full stack: the database is initialised and seeded (db-init),
+                    # the IoT simulator and the streaming consumer start as services,
+                    # the Ollama models are pulled on first start
+```
 
-Redémarrer proprement : `make down && make up`.
+A single command is enough. `make up` starts the full pipeline: `db-init` applies the schema and seeds the reference data (sites, fridges, drugs, lots, dispensing history), the simulator pushes telemetry into Redpanda, and the streaming consumer fills TimescaleDB continuously. The dashboard then shows the real pipeline output, not a frozen demo. Live mode is the default (`USE_MOCK_DATA=false`), with automatic fallback to the mock if the database is unavailable.
 
-Puis ouvrir :
+Then open:
 
 | URL | Service |
 | --- | --- |
-| http://localhost:8501 | Application Streamlit pour les professionnels de santé |
-| http://localhost:3000 | Dashboards Grafana IoT temps réel (admin / admin) |
-| http://localhost:3001 | UI d'orchestration Dagster |
+| http://localhost:8501 | Streamlit pharmacist app (live data) |
+| http://localhost:3000 | Grafana real-time IoT dashboards (admin / admin) |
+| http://localhost:3001 | Dagster orchestration UI |
 
-**Alimenter le pipeline de données**
+Check that live data is being served:
 
-- `make pipeline` : pipeline batch complet qui applique le schéma, seede les référentiels, lance l'ingestion open data puis la prévision Prophet.
-- `make ingest` : relance uniquement l'ingestion des sources publiques (FDA Drug Shortages, openFDA, RSS ANSM, OpenPrescribing).
-- `make forecast` : relance uniquement la prévision de rupture Prophet sur les données déjà ingérées.
-- `make seed` : recharge les données de référence (sites, réfrigérateurs, médicaments, lots, historique de dispensation).
-- `make schema` : (ré)applique le schéma TimescaleDB (hypertables et agrégats continus).
-- `make index-rag` : (ré)indexe les protocoles cliniques dans ChromaDB pour le copilote RAG.
-- `make pull-models` : télécharge le modèle de chat local Ollama (phi3:mini).
+```bash
+docker compose logs streamlit | grep -i "repli"   # no line expected
+docker compose exec timescaledb psql -U vigistock -d vigistock \
+  -c "SELECT COUNT(*) FROM silver.telemetry_raw"  # grows on every tick
+```
 
-**Lancer l'application seule, sans Docker**
+To trigger the open-data ingestion and the forecast without waiting for the
+nightly schedule: `make pipeline` (schema + seed + ingest + Prophet).
 
-- `make install` : installe les dépendances Python dans le virtualenv actif.
-- `make app` : démarre l'application Streamlit en local, sans la stack Docker.
+To run the Streamlit app without Docker:
 
-Une fois la stack démarrée, le dashboard affiche directement les vraies sorties du pipeline, en temps réel.
+```bash
+pip install -r requirements.txt
+make app            # streamlit run dashboards/streamlit/app.py
+```
+
+To tear everything down: `make down` (keeps volumes) or `make nuke` (clean slate). `make help` lists every target.
+
+Migration note: the images now run unprivileged (user `app`). If a
+`dagster-home` volume created by an older version exists, recreate it once
+with `make nuke` before running `make up` again.
 
 ## Architecture
 
 <p align="center">
-  <img src="docs/assets/architecture.fr.svg" alt="Architecture VaxResilience : capter, streamer, détecter, stocker, prédire, agir" width="980">
+  <img src="docs/assets/architecture.en.svg" alt="VaxResilience architecture: sense, stream, detect, store, predict, act" width="980">
 </p>
 
-Dagster orchestre la partie batch : les assets d'ingestion, la prévision nocturne, le rafraîchissement de l'index RAG et les contrôles de qualité de données sont tous des assets software-defined. La partie streaming tourne indépendamment, donc une API publique lente ne retarde jamais une alerte. Le diagramme complet et les choix associés sont dans [`docs/architecture.md`](docs/architecture.md).
+Dagster orchestrates the batch side: ingestion assets, the nightly forecast, the RAG index refresh and the data-quality checks are all software-defined assets. The streaming side runs independently, so a slow public API never delays an alert. The full diagram and the reasoning behind it are in [`docs/architecture.md`](docs/architecture.md).
 
-## Stack et portabilité
+## Stack and portability
 
-Chaque composant a été choisi pour exposer une API standard : chacun peut être remplacé par un service cloud managé via la configuration, sans réécriture.
+Every component was picked for exposing a standard API, so each one can be swapped for a managed cloud service through configuration, not a rewrite.
 
-| Couche | Dans ce repo | Équivalents managés |
+| Layer | In this repo | Managed equivalents |
 | --- | --- | --- |
-| Bus streaming | Redpanda (API Kafka) | Amazon MSK, Confluent Cloud, Azure Event Hubs |
-| Base time-series | TimescaleDB (extension Postgres) | Amazon Timestream, GCP Bigtable, Azure Data Explorer |
-| Orchestrateur | Dagster (assets software-defined) | Dagster Cloud, MWAA, Cloud Composer |
-| Prévision | Prophet | SageMaker Forecast, Vertex AI Forecast |
+| Streaming bus | Redpanda (Kafka API) | Amazon MSK, Confluent Cloud, Azure Event Hubs |
+| Time-series DB | TimescaleDB (Postgres extension) | Amazon Timestream, GCP Bigtable, Azure Data Explorer |
+| Orchestrator | Dagster (software-defined assets) | Dagster Cloud, MWAA, Cloud Composer |
+| Forecasting | Prophet | SageMaker Forecast, Vertex AI Forecast |
 | LLM | Ollama (phi3:mini), local | Bedrock, Vertex AI, Azure OpenAI |
 | Vector store | ChromaDB | OpenSearch, pgvector, Azure AI Search |
 | Embeddings | bge-small-en, local | Bedrock Titan, text-embedding-3-small |
-| Dashboards temps réel | Grafana | Managed Grafana, Cloud Monitoring |
-| Couche app | Streamlit | Streamlit Cloud, App Runner, Cloud Run |
+| Real-time dashboards | Grafana | Managed Grafana, Cloud Monitoring |
+| App layer | Streamlit | Streamlit Cloud, App Runner, Cloud Run |
 
-Un blueprint Terraform optionnel pour un déploiement AWS se trouve dans [`infra/terraform/`](infra/terraform/).
+An optional Terraform blueprint for an AWS deployment lives in [`infra/terraform/`](infra/terraform/).
 
-## Sources de données
+## Data sources
 
-Les sources publiques intégrées au pipeline sont des références internationales; elles ne représentent pas des pénuries indiennes.
+The public sources integrated into the pipeline are international references; they do not represent medicine shortages in India.
 
-| Source | Type | Point d'accès | Licence | Fréquence |
+| Source | Type | Endpoint | License | Frequency |
 | --- | --- | --- | --- | --- |
-| FDA Drug Shortages | API REST | `api.fda.gov/drug/shortages.json` | Domaine public | Temps réel |
-| openFDA Drug Labels | API REST | `api.fda.gov/drug/label.json` | CC0 | Temps réel |
-| ANSM (France) | Flux RSS | `ansm.sante.fr/actualites.rss` | Données publiques | Quotidien |
-| OpenPrescribing (NHS) | API REST | `openprescribing.net/api/1.0` | CC BY 4.0 | Hebdomadaire |
-| Télémétrie IoT | Simulateur SimPy | local (Redpanda) | Code du projet | À la demande |
-| CDSCO | Site officiel de l'autorité réglementaire indienne | `cdsco.gov.in` | Référence seulement; aucun flux de pénurie intégré | Non intégré |
-| NPPA | Site officiel de l'autorité indienne de tarification pharmaceutique | `nppa.gov.in` | Référence seulement; aucune donnée de stock intégrée | Non intégré |
+| FDA Drug Shortages | REST API | `api.fda.gov/drug/shortages.json` | Public domain | Real time |
+| openFDA Drug Labels | REST API | `api.fda.gov/drug/label.json` | CC0 | Real time |
+| ANSM (France) | RSS feed | `ansm.sante.fr/actualites.rss` | Public data | Daily |
+| OpenPrescribing (NHS) | REST API | `openprescribing.net/api/1.0` | CC BY 4.0 | Weekly |
+| IoT telemetry | SimPy simulator | local (Redpanda) | Project code | On demand |
+| CDSCO | Official Indian drug regulator website | `cdsco.gov.in` | Reference only; no shortage feed integrated | Not integrated |
+| NPPA | Official Indian pharmaceutical pricing authority website | `nppa.gov.in` | Reference only; no inventory data integrated | Not integrated |
 
-Les noms des sites, coordonnées de ville, inventaires et télémétries indiens sont des données de démonstration synthétiques. Les sources internationales listées ci-dessus restent séparées et doivent être identifiées comme telles. Voir [`docs/data_sources.md`](docs/data_sources.md) pour les limites de provenance.
+Indian demo site names, city coordinates, inventory, and telemetry are synthetic. The international sources listed above remain separate and must be identified as such. See [`docs/data_sources.md`](docs/data_sources.md) for provenance limitations.
 
-## L'application
+## The pharmacist application
 
-L'interface est une application Streamlit multipage (`dashboards/streamlit/`), branchée sur la même couche de données que Grafana et Dagster. Elle est pensée comme un produit, pas comme une démo :
+The UI is a multi-page Streamlit application (`dashboards/streamlit/`) wired to the same data layer as Grafana and Dagster. It is built as a product rather than a demo: a single design system (`lib/theme.py`, `lib/style.py`, `lib/components.py`), a WCAG AA palette, auto-refresh through `st.fragment`, and token-by-token LLM streaming with `st.write_stream`.
 
-- Un design system unique (`lib/theme.py`, `lib/style.py`, `lib/components.py`).
-- Une palette accessible WCAG AA.
-- Un rafraîchissement automatique via `st.fragment`.
-- Un streaming du LLM mot à mot avec `st.write_stream`.
-
-| Vue d'ensemble : KPIs live, pont causal excursion vers rupture | Réfrigérateurs : master/detail, bandes 24 h |
+| Overview : live KPIs, excursion-to-shortage causal bridge | Cold-chain fleet : master/detail, 24 h bands |
 | --- | --- |
-| ![Vue d'ensemble](docs/assets/screen-overview.png) | ![Réfrigérateurs](docs/assets/screen-cold-chain.png) |
-| **Prévision des ruptures : courbes Prophet, confiance 80 %** | **Copilote clinique : brief SBAR streamé, citations** |
-| ![Prévision](docs/assets/screen-forecast.png) | ![Copilote](docs/assets/screen-copilot.png) |
+| ![Overview](docs/assets/screen-overview.png) | ![Cold chain](docs/assets/screen-cold-chain.png) |
+| **Shortage forecast : Prophet curves, 80 % confidence** | **Clinical copilot : streamed SBAR brief, citations** |
+| ![Forecast](docs/assets/screen-forecast.png) | ![Copilot](docs/assets/screen-copilot.png) |
 
 <p align="center">
-  <img src="docs/assets/screen-data-quality.png" alt="Qualité des données : asset checks Dagster et drift RAG" width="860">
+  <img src="docs/assets/screen-data-quality.png" alt="Data quality: Dagster asset checks and RAG drift" width="860">
 </p>
 
-Les huit pages de l'application :
+The eight pages: Overview (live KPIs, critical fridges, alert feed), Cold-chain fleet (master/detail, 24 h tolerance bands, lot quarantine), Shortage forecast (Prophet curves with 80 % confidence intervals), Clinical Copilot (streamed SBAR brief, alternatives, RAG citations), Validation (pharmacist gate plus bedside nurse checklist, audit log), Architecture, Data quality (Dagster asset checks, RAG drift), and About.
 
-- **Vue d'ensemble** : KPIs temps réel (frigos en alerte, lots suspects, risque de rupture), liste des réfrigérateurs critiques et flux d'alertes en direct, avec le lien causal excursion → rupture mis en avant.
-- **Flotte chaîne du froid** : vue master/detail par réfrigérateur, courbes de température sur 24 h avec bandes de tolérance 2-8 °C, et mise en quarantaine des lots exposés à une excursion.
-- **Prévision de rupture** : courbes Prophet par médicament et par site, intervalles de confiance à 80 %, date de rupture estimée une fois les doses compromises retirées du stock disponible.
-- **Copilote clinique** : génération d'un brief de substitution au format SBAR, streamé mot à mot, avec alternatives thérapeutiques et citations sourcées des monographies officielles (RAG ancré, sans hallucination).
-- **Validation** : double contrôle en deux temps (gate pharmacien puis checklist infirmière au chevet, règle des 5B), avec journal d'audit horodaté de chaque décision.
-- **Architecture** : schéma interactif du pipeline de bout en bout, du capteur frigo jusqu'au brief clinique.
-- **Qualité des données** : asset checks Dagster (fraîcheur, complétude, conformité de schéma) et suivi du drift du corpus RAG.
-- **À propos** : contexte métier, sources de données et démarche du projet.
+## Observability and orchestration
 
-## Observabilité et orchestration
+The same data layer feeds three surfaces, one per audience: Grafana for real-time monitoring (ops), Dagster for orchestration (engineering), and the Streamlit app for the pharmacist.
 
-La même couche de données alimente trois surfaces, une par public : Grafana pour le monitoring temps réel (ops), Dagster pour l'orchestration (engineering) et l'app Streamlit pour les professionnels de santé.
-
-| Grafana : chaîne du froid temps réel, lag Kafka, alertes | Dagster : graphe d'assets, runs, asset checks |
+| Grafana: real-time cold chain, Kafka lag, alerts | Dagster: asset graph, runs, asset checks |
 | --- | --- |
 | ![Grafana](docs/assets/screen-grafana.png) | ![Dagster](docs/assets/screen-dagster.png) |
 
-## Tests et CI
+## Tests and CI
 
 ```bash
-make test                # tests unitaires (rapides, sans Docker)
-make test-integration    # tests d'intégration (nécessite la stack en marche)
-make ci                  # ce que la CI exécute : lint + tests unitaires
+make test                # unit tests (fast, no Docker)
+make test-integration    # integration tests (needs the running stack)
+make ci                  # what CI runs: lint + unit tests
 ```
 
-Le workflow GitHub Actions lance lint et tests unitaires (avec couverture) à chaque push, puis les tests d'intégration contre de vrais conteneurs via testcontainers. Un job sécurité dédié exécute bandit (bloquant en sévérité haute) et pip-audit ; le workflow docker-build construit les deux images et les scanne avec Trivy.
+The GitHub Actions workflow runs lint and unit tests (with coverage) on every push, then the integration tests against real containers via testcontainers. A dedicated security job runs bandit (blocking on high severity) and pip-audit; the docker-build workflow builds both images and scans them with Trivy.
 
-## Structure du repo
+## Repository layout
 
 ```
 vigistock/
-├── simulator/              # générateur de télémétrie chaîne du froid (SimPy)
-├── streaming/              # consumer Redpanda + détection d'anomalies
-├── ingestion/              # extracteurs batch FDA, openFDA, ANSM, OpenPrescribing
-├── ml/                     # prévision Prophet + cascade de rupture
-├── llm/                    # RAG : chunking, indexeur ChromaDB, client Ollama
-├── orchestration/dagster/  # assets software-defined, schedules, sensors, checks
+├── simulator/              # SimPy cold-chain telemetry generator
+├── streaming/              # Redpanda consumer + anomaly detection
+├── ingestion/              # FDA, openFDA, ANSM, OpenPrescribing batch extractors
+├── ml/                     # Prophet forecasting + shortage cascade
+├── llm/                    # RAG: chunking, ChromaDB indexer, Ollama client
+├── orchestration/dagster/  # software-defined assets, schedules, sensors, checks
 ├── dashboards/
-│   ├── streamlit/          # UI professionnels de santé (8 pages, design system)
-│   └── grafana/            # dashboards temps réel provisionnés
-├── sql/                    # DDL TimescaleDB : hypertables, agrégats continus
-├── protocols/              # protocoles de substitution seed (corpus RAG)
-├── notebooks/              # analyses exploratoires
-├── tests/                  # unitaires + intégration (testcontainers)
-├── infra/                  # blueprint Terraform optionnel (AWS)
-├── scripts/                # utilitaires
-├── docs/                   # architecture, sources de données, gouvernance, notes LLM
+│   ├── streamlit/          # pharmacist UI (8 pages, design system)
+│   └── grafana/            # provisioned real-time dashboards
+├── sql/                    # TimescaleDB DDL: hypertables, continuous aggregates
+├── protocols/              # seed substitution protocols (RAG corpus)
+├── notebooks/              # exploratory analysis
+├── tests/                  # unit + integration (testcontainers)
+├── infra/                  # optional Terraform blueprint (AWS)
+├── scripts/                # utilities
+├── docs/                   # architecture, data sources, governance, LLM notes
 ├── docker-compose.yml
-└── Makefile                # make help liste toutes les cibles
+└── Makefile                # make help lists every target
 ```
 
-## Notes
+## Engineering notes
 
-Quelques points d'implémentation qui ont reçu une attention particulière :
+A few implementation details that received particular attention:
 
-- Livraison at-least-once de Redpanda vers TimescaleDB, avec des upserts idempotents pour qu'un rejeu ne duplique jamais de lignes.
-- Détection d'anomalies en vol (Z-score glissant et seuil de durée), pas en batch après coup.
-- Une architecture lambda : streaming pour la télémétrie, batch pour les APIs publiques lentes, les deux alimentant le même store time-series.
-- Du ML en conditions de production : Prophet réentraîné sur un schedule Dagster, prédictions réécrites dans Postgres et évaluées par backtests.
-- Un RAG ancré : chaque affirmation du brief de substitution doit citer un chunk récupéré, et un validateur rejette les briefs dont les citations ne correspondent pas au corpus.
-- Gouvernance des données de santé : aucune donnée de santé personnelle ne sort du périmètre, car le LLM et les embeddings tournent en local. Le raisonnement HIPAA et RGPD est documenté dans [`docs/governance_hipaa_rgpd.md`](docs/governance_hipaa_rgpd.md).
+- At-least-once delivery from Redpanda to TimescaleDB, with idempotent upserts so replays never duplicate rows.
+- Anomaly detection in flight (rolling Z-score plus duration threshold), not as an after-the-fact batch job.
+- A lambda layout: streaming for telemetry, batch for the slow public APIs, both feeding the same time-series store.
+- Production-shaped ML: Prophet retrained on a Dagster schedule, predictions written back to Postgres and evaluated with backtests.
+- A grounded RAG: every claim in the substitution brief must cite a retrieved chunk, and a validator rejects briefs whose citations do not match the corpus.
+- Healthcare data governance: no personal health information ever leaves the perimeter, because the LLM and the embeddings run locally. The HIPAA and GDPR reasoning is documented in [`docs/governance_hipaa_rgpd.md`](docs/governance_hipaa_rgpd.md).
 
-## Périmètre et limites
+## Scope and limitations
 
-C'est un projet de portfolio. Il tourne de bout en bout sur un laptop, les flux de données publiques sont réels, et les composants streaming et LLM sont conçus comme en production (retries, backpressure, idempotence). Ce n'est pas un dispositif médical et il ne doit pas servir à de vraies décisions cliniques ; voir [`docs/governance_hipaa_rgpd.md`](docs/governance_hipaa_rgpd.md) pour l'avertissement explicite.
+This is a portfolio project. It runs end to end on a laptop, the public data flows are real, and the streaming and LLM components are production-shaped (retries, backpressure, idempotence). It is not a medical device and must not be used for actual clinical decisions; see [`docs/governance_hipaa_rgpd.md`](docs/governance_hipaa_rgpd.md) for the explicit disclaimer.
 
 ## Documentation
 
-| Document | Contenu |
+| Document | Contents |
 | --- | --- |
-| [`docs/architecture.md`](docs/architecture.md) | Topologie complète et justification des choix techniques. |
-| [`docs/data_sources.md`](docs/data_sources.md) | Sources de données publiques, licences et simulateur (specs PQS OMS). |
-| [`docs/llm_rag.md`](docs/llm_rag.md) | Pipeline RAG : chunking, index ChromaDB, validation des citations. |
-| [`docs/governance_hipaa_rgpd.md`](docs/governance_hipaa_rgpd.md) | Posture HIPAA / RGPD, droits des personnes, politique de rétention. |
+| [`docs/architecture.md`](docs/architecture.md) | Full topology and rationale for the technical choices. |
+| [`docs/data_sources.md`](docs/data_sources.md) | Public data sources, licences and the simulator (WHO PQS specs). |
+| [`docs/llm_rag.md`](docs/llm_rag.md) | RAG pipeline: chunking, ChromaDB index, citation validation. |
+| [`docs/governance_hipaa_rgpd.md`](docs/governance_hipaa_rgpd.md) | HIPAA / GDPR posture, data-subject rights, retention policy. |
 
 ---
 
 <p align="center">
-  Réalisé par <strong>Lohana Utim</strong>, VaxResilience
+  Built by <strong>Lohana Utim</strong>, VaxResilience
 </p>
