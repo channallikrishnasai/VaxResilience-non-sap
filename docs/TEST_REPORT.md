@@ -530,3 +530,5 @@ The shell now displays a screen-reader-announced load error if the external SAPU
 | `npm audit fix --dry-run` | Reports the affected parser is bundled in `@sap/cds-dk` and cannot be updated automatically; proposed automatic fix downgrades the CLI to 9.9.7 (major-version mismatch). | NO SAFE AUTOMATIC FIX |
 
 The package override does not replace dependencies embedded in the CLI tarball. Do not claim the complete dependency tree is vulnerability-free. Reassess against a compatible SAP CAP CLI release with the bundled parser fixed.
+
+The latest verified feature-code push is `f7413cb9c04e6725e2dc4c9809a10fe28c2f3304` on `origin/feat/sap-foundation-monitoring`.
