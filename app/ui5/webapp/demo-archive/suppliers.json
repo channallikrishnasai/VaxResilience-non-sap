@@ -1,0 +1,193 @@
+{
+  "dataMode": "synthetic",
+  "suppliers": [
+    {
+      "supplierId": "SUP-CN-001",
+      "organizationId": "ORG-BM-001",
+      "name": "Suzhou Paracetamol Ingredients Ltd. (Fictional)",
+      "countryCode": "CN",
+      "city": "Suzhou",
+      "supplierState": "suspended",
+      "sourceStatus": "synthetic",
+      "dataMode": "synthetic"
+    },
+    {
+      "supplierId": "SUP-IN-001",
+      "organizationId": "ORG-BM-001",
+      "name": "Hyderabad API Supply Cooperative (Fictional)",
+      "countryCode": "IN",
+      "city": "Hyderabad",
+      "supplierState": "qualified_demo_only",
+      "sourceStatus": "synthetic",
+      "dataMode": "synthetic"
+    }
+  ],
+  "supplierStatusEvents": [
+    {
+      "supplierStatusEventId": "SSE-CN-001",
+      "supplierId": "SUP-CN-001",
+      "previousState": "active_demo",
+      "newState": "suspended",
+      "changedAt": "2026-09-01T08:00:00Z",
+      "reason": "Synthetic disruption scenario; fictional primary supplier shipment was delayed.",
+      "dataMode": "synthetic"
+    },
+    {
+      "supplierStatusEventId": "SSE-IN-001",
+      "supplierId": "SUP-IN-001",
+      "previousState": "candidate",
+      "newState": "qualified_demo_only",
+      "changedAt": "2026-09-03T08:30:00Z",
+      "reason": "All six fictional verification checks were recorded as passed for this demonstration only.",
+      "dataMode": "synthetic"
+    }
+  ],
+  "supplierQualifications": [
+    {
+      "qualificationId": "QUAL-IN-QUALITY",
+      "supplierId": "SUP-IN-001",
+      "productId": "PRD-PARA-500",
+      "checkType": "quality",
+      "checkState": "verified",
+      "evidenceRef": "EVD-IN-QUALITY",
+      "reviewedBy": "USER-AUDIT-001",
+      "reviewedAt": "2026-09-02T10:00:00Z",
+      "validUntil": "2027-09-02",
+      "dataMode": "synthetic"
+    },
+    {
+      "qualificationId": "QUAL-IN-REGULATORY",
+      "supplierId": "SUP-IN-001",
+      "productId": "PRD-PARA-500",
+      "checkType": "regulatory",
+      "checkState": "verified",
+      "evidenceRef": "EVD-IN-REGULATORY",
+      "reviewedBy": "USER-AUDIT-001",
+      "reviewedAt": "2026-09-02T11:00:00Z",
+      "validUntil": "2027-09-02",
+      "dataMode": "synthetic"
+    },
+    {
+      "qualificationId": "QUAL-IN-QUANTITY",
+      "supplierId": "SUP-IN-001",
+      "productId": "PRD-PARA-500",
+      "checkType": "quantity",
+      "checkState": "verified",
+      "evidenceRef": "EVD-IN-QUANTITY",
+      "reviewedBy": "USER-PROC-001",
+      "reviewedAt": "2026-09-02T12:00:00Z",
+      "validUntil": null,
+      "dataMode": "synthetic"
+    },
+    {
+      "qualificationId": "QUAL-IN-CAPACITY",
+      "supplierId": "SUP-IN-001",
+      "productId": "PRD-PARA-500",
+      "checkType": "capacity",
+      "checkState": "verified",
+      "evidenceRef": "EVD-IN-CAPACITY",
+      "reviewedBy": "USER-PROC-001",
+      "reviewedAt": "2026-09-02T13:00:00Z",
+      "validUntil": null,
+      "dataMode": "synthetic"
+    },
+    {
+      "qualificationId": "QUAL-IN-CONFIRM",
+      "supplierId": "SUP-IN-001",
+      "productId": "PRD-PARA-500",
+      "checkType": "supplier_confirmation",
+      "checkState": "verified",
+      "evidenceRef": "EVD-IN-CONFIRM",
+      "reviewedBy": "USER-PROC-001",
+      "reviewedAt": "2026-09-02T14:00:00Z",
+      "validUntil": null,
+      "dataMode": "synthetic"
+    },
+    {
+      "qualificationId": "QUAL-IN-DELIVERY",
+      "supplierId": "SUP-IN-001",
+      "productId": "PRD-PARA-500",
+      "checkType": "delivery",
+      "checkState": "verified",
+      "evidenceRef": "EVD-IN-DELIVERY",
+      "reviewedBy": "USER-LOG-001",
+      "reviewedAt": "2026-09-03T08:00:00Z",
+      "validUntil": null,
+      "dataMode": "synthetic"
+    }
+  ],
+  "evidence": [
+    {
+      "evidenceId": "EVD-IN-QUALITY",
+      "subjectType": "supplier_qualification",
+      "subjectId": "QUAL-IN-QUALITY",
+      "evidenceType": "synthetic_quality_review",
+      "sourceLabel": "Fictional demo quality checklist",
+      "sourceStatus": "synthetic",
+      "observedAt": "2026-09-02T09:30:00Z",
+      "verifiedBy": "USER-AUDIT-001",
+      "verifiedAt": "2026-09-02T10:00:00Z",
+      "dataMode": "synthetic"
+    },
+    {
+      "evidenceId": "EVD-IN-REGULATORY",
+      "subjectType": "supplier_qualification",
+      "subjectId": "QUAL-IN-REGULATORY",
+      "evidenceType": "synthetic_regulatory_review",
+      "sourceLabel": "Fictional demo regulatory checklist",
+      "sourceStatus": "synthetic",
+      "observedAt": "2026-09-02T10:30:00Z",
+      "verifiedBy": "USER-AUDIT-001",
+      "verifiedAt": "2026-09-02T11:00:00Z",
+      "dataMode": "synthetic"
+    },
+    {
+      "evidenceId": "EVD-IN-QUANTITY",
+      "subjectType": "supplier_qualification",
+      "subjectId": "QUAL-IN-QUANTITY",
+      "evidenceType": "synthetic_quantity_confirmation",
+      "sourceLabel": "Fictional demo stock confirmation",
+      "sourceStatus": "synthetic",
+      "observedAt": "2026-09-02T11:30:00Z",
+      "verifiedBy": "USER-PROC-001",
+      "verifiedAt": "2026-09-02T12:00:00Z",
+      "dataMode": "synthetic"
+    },
+    {
+      "evidenceId": "EVD-IN-CAPACITY",
+      "subjectType": "supplier_qualification",
+      "subjectId": "QUAL-IN-CAPACITY",
+      "evidenceType": "synthetic_capacity_confirmation",
+      "sourceLabel": "Fictional demo capacity confirmation",
+      "sourceStatus": "synthetic",
+      "observedAt": "2026-09-02T12:30:00Z",
+      "verifiedBy": "USER-PROC-001",
+      "verifiedAt": "2026-09-02T13:00:00Z",
+      "dataMode": "synthetic"
+    },
+    {
+      "evidenceId": "EVD-IN-CONFIRM",
+      "subjectType": "supplier_qualification",
+      "subjectId": "QUAL-IN-CONFIRM",
+      "evidenceType": "synthetic_supplier_confirmation",
+      "sourceLabel": "Fictional demo supplier confirmation",
+      "sourceStatus": "synthetic",
+      "observedAt": "2026-09-02T13:30:00Z",
+      "verifiedBy": "USER-PROC-001",
+      "verifiedAt": "2026-09-02T14:00:00Z",
+      "dataMode": "synthetic"
+    },
+    {
+      "evidenceId": "EVD-IN-DELIVERY",
+      "subjectType": "supplier_qualification",
+      "subjectId": "QUAL-IN-DELIVERY",
+      "evidenceType": "synthetic_delivery_feasibility",
+      "sourceLabel": "Fictional demo Hyderabad delivery plan",
+      "sourceStatus": "synthetic",
+      "observedAt": "2026-09-03T07:30:00Z",
+      "verifiedBy": "USER-LOG-001",
+      "verifiedAt": "2026-09-03T08:00:00Z",
+      "dataMode": "synthetic"
+    }
+  ]
+}

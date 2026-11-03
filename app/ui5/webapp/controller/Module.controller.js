@@ -19,6 +19,8 @@ sap.ui.define([
     onInit: function () {
       this._page = this.byId('page');
       this._currentModule = null;
+      this._archiveOpen = false;
+      this._archiveGeneration = 0;
       this._router = this.getOwnerComponent().getRouter();
       this._routeMatched = this._onRouteMatched.bind(this);
       this._routeBypassed = this._onRouteBypassed.bind(this);
@@ -45,15 +47,17 @@ sap.ui.define([
       this._renderModule('executive-dashboard');
     },
 
-    _renderModule: function (moduleId) {
+    _renderModule: function (moduleId, force) {
       var moduleNames = window.VaxResilienceRouter.moduleNames;
       var title = moduleNames[moduleId] || moduleNames['executive-dashboard'];
-      if (this._currentModule === moduleId) return;
+      if (!force && this._currentModule === moduleId) return;
+      this._archiveGeneration = (this._archiveGeneration || 0) + 1;
       this._currentModule = moduleId;
       this._page.setTitle(title);
       this._page.removeAllContent();
       if (moduleId === 'risk-compliance-audit') this._showIntegrationMonitor();
-      else this._addUnavailableState(title);
+      if (this._archiveOpen) this._showHistoricalArchive(moduleId);
+      else if (moduleId !== 'risk-compliance-audit') this._addUnavailableState(title);
     },
 
     _addUnavailableState: function (title) {
@@ -63,6 +67,90 @@ sap.ui.define([
       }));
       this._page.addContent(new Title({ text: title + ' foundation', level: 'H2' }));
       this._page.addContent(new Text({ text: 'This module has a navigation entry only. No module data or protected action is available in this shell.' }));
+      this._page.addContent(new Button({
+        text: 'Open historical synthetic fixture archive',
+        press: this._openHistoricalArchive.bind(this)
+      }));
+    },
+
+    _openHistoricalArchive: function () {
+      this._archiveOpen = true;
+      this._renderModule(this._currentModule || 'executive-dashboard', true);
+    },
+
+    _closeHistoricalArchive: function () {
+      this._archiveOpen = false;
+      this._renderModule(this._currentModule || 'executive-dashboard', true);
+    },
+
+    _showHistoricalArchive: async function (moduleId) {
+      var generation = this._archiveGeneration;
+      var page = this._page;
+      var moduleNames = window.VaxResilienceRouter.moduleNames;
+      var archiveNotes = {
+        'executive-dashboard': 'Scenario facts are synthetic comparisons only; no active incident or normalized forecast is loaded.',
+        'supply-chain-digital-twin': 'All organizations and routes are fictional; no live map position or geographic coordinates are supplied.',
+        'ai-command-centre': 'Agent records are historical synthetic fixtures; no AI model or live agent runtime is connected.',
+        'inventory-manufacturing': 'Stock and qualification records do not indicate current availability or establish supplier eligibility.',
+        'customers-orders': 'Orders and demand records are fictional historical examples; no current allocation decision is represented.',
+        'approvals-decisions': 'Historical approval records do not authorize current actions; this archive cannot grant an approval.',
+        'risk-compliance-audit': 'Alerts and evidence are synthetic; they do not assert real misconduct or current holds.',
+        'resilience-impact-analytics': 'Scenario metrics are synthetic estimates, not patient outcomes or validated forecasts.'
+      };
+      var message = new Text({ text: 'Loading the selected historical fixture records…' });
+      page.addContent(new MessageStrip({
+        text: 'Historical synthetic archive only — not opening or current operational state. Read-only; no operational action is available.',
+        type: 'Warning', showIcon: true, showCloseButton: false
+      }));
+      page.addContent(new Title({ text: moduleNames[moduleId] + ' — fixture archive', level: 'H2' }));
+      page.addContent(new Button({ text: 'Close historical archive', press: this._closeHistoricalArchive.bind(this) }));
+      page.addContent(message);
+
+      try {
+        var archive = await window.VaxResilienceArchive.load(moduleId);
+        if (generation !== this._archiveGeneration || !this._archiveOpen || moduleId !== this._currentModule) return;
+        message.setText(`${archive.manifest.title} (${archive.manifest.scenarioStart} to ${archive.manifest.scenarioEnd}). ${archive.manifest.fictionalDisclaimer}`);
+        page.addContent(new MessageStrip({
+          text: archiveNotes[moduleId],
+          type: 'Warning', showIcon: true, showCloseButton: false
+        }));
+        page.addContent(new MessageStrip({
+          text: 'Excluded from this archive: calculationAssumptions and productionPlans (no approved record schemas), dependent productionBatches and productionConsumptions, and impactEstimates that reference unresolved calculation assumptions.',
+          type: 'Information', showIcon: true, showCloseButton: false
+        }));
+
+        var rows = [];
+        archive.collections.forEach(function (collection) {
+          collection.records.forEach(function (record, index) {
+            rows.push({ collection: collection.name, recordNumber: index + 1, contents: JSON.stringify(record) });
+          });
+        });
+        if (moduleId === 'executive-dashboard') {
+          Object.keys(archive.manifest.scenarioFacts).forEach(function (fact) {
+            rows.unshift({ collection: 'scenarioFacts', recordNumber: fact, contents: String(archive.manifest.scenarioFacts[fact]) });
+          });
+        }
+
+        var model = new JSONModel({ records: rows });
+        var table = new Table({
+          growing: true,
+          growingThreshold: 20,
+          noDataText: 'No validated fixture records are available for this module.',
+          columns: [
+            new Column({ header: new Text({ text: 'Fixture collection' }) }),
+            new Column({ header: new Text({ text: 'Record' }) }),
+            new Column({ header: new Text({ text: 'Source fixture values (JSON)' }) })
+          ],
+          items: { path: '/records', template: new ColumnListItem({ cells: [
+            new Text({ text: '{collection}' }), new Text({ text: '{recordNumber}' }), new Text({ text: '{contents}', wrapping: true })
+          ] }) }
+        });
+        table.setModel(model);
+        page.addContent(table);
+      } catch (_error) {
+        if (generation !== this._archiveGeneration || !this._archiveOpen || moduleId !== this._currentModule) return;
+        message.setText('Historical fixture records could not be loaded. Close the archive to return to the empty operational foundation.');
+      }
     },
 
     _showIntegrationMonitor: function () {
@@ -106,7 +194,11 @@ sap.ui.define([
       });
       var toolbar = new Toolbar({ content: [
         new Button({ text: 'Refresh', icon: 'sap-icon://refresh', press: function () { that._loadMessages(model, table); } }),
-        new Button({ text: 'Create demo failure', icon: 'sap-icon://add', press: function () { that._createDemoFailure(model, table); } })
+        new Button({ text: 'Create demo failure', icon: 'sap-icon://add', press: function () { that._createDemoFailure(model, table); } }),
+        new Button({
+          text: this._archiveOpen ? 'Close historical archive' : 'Open historical synthetic fixture archive',
+          press: this._archiveOpen ? this._closeHistoricalArchive.bind(this) : this._openHistoricalArchive.bind(this)
+        })
       ] });
       var filterField = new SearchField({
         width: '100%',

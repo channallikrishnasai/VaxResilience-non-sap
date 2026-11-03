@@ -29,3 +29,7 @@ The production profile targets HANA and JWT authentication but is not a complete
 ## Integrations
 
 Providers are not configured. The local retry operation is simulation-only. Before enabling any external adapter, define provider contracts, server-side secrets, authorization, approval controls, idempotency and reconciliation behavior, consent where applicable, and audit/retention rules. See [`INTEGRATION_REFERENCE.md`](INTEGRATION_REFERENCE.md) and the official decision register.
+
+## Production UI build artifact
+
+`npm run build` runs the archive preparation and CAP production build, then copies `app/ui5/webapp` to `gen/production/app/ui5/webapp`. Confirm this directory contains `index.html` before packaging; the CAP server resolves `/ui` from that path. This local build check does not deploy the application or verify a browser session on SAP BTP.

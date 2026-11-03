@@ -75,6 +75,17 @@ test('CAP HTTP health, OData, UI shell, and simulation actions work together', a
     const manifestResponse = await fetch(`${base}/ui/manifest.json`);
     assert.equal(manifestResponse.status, 200);
     assert.equal((await manifestResponse.json())['sap.app'].id, 'vaxresilience');
+    const archiveClientResponse = await fetch(`${base}/ui/archive-client.js`);
+    assert.equal(archiveClientResponse.status, 200);
+    assert.match(await archiveClientResponse.text(), /omittedCollections/);
+    const archiveManifestResponse = await fetch(`${base}/ui/demo-archive/manifest.json`);
+    assert.equal(archiveManifestResponse.status, 200);
+    const archiveManifest = await archiveManifestResponse.json();
+    assert.equal(archiveManifest.dataMode, 'synthetic');
+    assert.match(archiveManifest.fictionalDisclaimer, /fictional synthetic demonstration records/);
+    const archiveOperationsResponse = await fetch(`${base}/ui/demo-archive/operations.json`);
+    assert.equal(archiveOperationsResponse.status, 200);
+    assert.equal((await archiveOperationsResponse.json()).shipments.length, 2);
     const componentResponse = await fetch(`${base}/ui/Component.js`);
     assert.equal(componentResponse.status, 200);
     const controllerResponse = await fetch(`${base}/ui/controller/Module.controller.js`);

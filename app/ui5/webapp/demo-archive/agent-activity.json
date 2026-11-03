@@ -1,0 +1,362 @@
+{
+  "dataMode": "synthetic",
+  "agents": [
+    {
+      "agentId": "AGENT-A01",
+      "agentName": "Disruption & Risk Analyst",
+      "agentRole": "A-01",
+      "agentState": "available_demo",
+      "promptVersion": "proposed-1.0",
+      "isProposed": true,
+      "dataMode": "synthetic"
+    },
+    {
+      "agentId": "AGENT-A02",
+      "agentName": "Supplier & Compliance Analyst",
+      "agentRole": "A-02",
+      "agentState": "available_demo",
+      "promptVersion": "proposed-1.0",
+      "isProposed": true,
+      "dataMode": "synthetic"
+    },
+    {
+      "agentId": "AGENT-A03",
+      "agentName": "Inventory & Manufacturing Planner",
+      "agentRole": "A-03",
+      "agentState": "available_demo",
+      "promptVersion": "proposed-1.0",
+      "isProposed": true,
+      "dataMode": "synthetic"
+    },
+    {
+      "agentId": "AGENT-A04",
+      "agentName": "Logistics & Shipment Analyst",
+      "agentRole": "A-04",
+      "agentState": "available_demo",
+      "promptVersion": "proposed-1.0",
+      "isProposed": true,
+      "dataMode": "synthetic"
+    },
+    {
+      "agentId": "AGENT-A05",
+      "agentName": "Customer Impact & Communications Planner",
+      "agentRole": "A-05",
+      "agentState": "available_demo",
+      "promptVersion": "proposed-1.0",
+      "isProposed": true,
+      "dataMode": "synthetic"
+    }
+  ],
+  "agentExecutions": [
+    {
+      "agentExecutionId": "EXEC-A01-001",
+      "agentId": "AGENT-A01",
+      "disruptionId": "DIS-BM-PARA-001",
+      "taskId": "TASK-BM-PARA-001",
+      "startedAt": "2026-09-01T09:00:00Z",
+      "completedAt": "2026-09-01T09:01:00Z",
+      "executionState": "succeeded",
+      "summary": "Mapped synthetic disruption to shipment, product, inventory, and potential gap.",
+      "evidenceRefs": [
+        "EVD-DISRUPTION-001",
+        "EVD-INVENTORY-OPENING"
+      ],
+      "failureCode": null,
+      "dataMode": "simulated"
+    },
+    {
+      "agentExecutionId": "EXEC-A02-001",
+      "agentId": "AGENT-A02",
+      "disruptionId": "DIS-BM-PARA-001",
+      "taskId": "TASK-BM-PARA-002",
+      "startedAt": "2026-09-02T09:00:00Z",
+      "completedAt": "2026-09-03T08:15:00Z",
+      "executionState": "succeeded",
+      "summary": "Compiled six synthetic supplier verification checks; each is explicitly demo-only.",
+      "evidenceRefs": [
+        "EVD-IN-QUALITY",
+        "EVD-IN-REGULATORY",
+        "EVD-IN-QUANTITY",
+        "EVD-IN-CAPACITY",
+        "EVD-IN-CONFIRM",
+        "EVD-IN-DELIVERY"
+      ],
+      "failureCode": null,
+      "dataMode": "simulated"
+    },
+    {
+      "agentExecutionId": "EXEC-A03-001",
+      "agentId": "AGENT-A03",
+      "disruptionId": "DIS-BM-PARA-001",
+      "taskId": "TASK-BM-PARA-003",
+      "startedAt": "2026-09-02T10:00:00Z",
+      "completedAt": "2026-09-02T10:03:00Z",
+      "executionState": "succeeded",
+      "summary": "Calculated synthetic coverage and prepared non-executable recovery options.",
+      "evidenceRefs": [
+        "INV-SNAPSHOT-001",
+        "RISK-BM-PARA-001"
+      ],
+      "failureCode": null,
+      "dataMode": "simulated"
+    },
+    {
+      "agentExecutionId": "EXEC-A04-001",
+      "agentId": "AGENT-A04",
+      "disruptionId": "DIS-BM-PARA-001",
+      "taskId": "TASK-BM-PARA-004",
+      "startedAt": "2026-09-02T10:30:00Z",
+      "completedAt": "2026-09-02T10:32:00Z",
+      "executionState": "succeeded",
+      "summary": "Compared only the two synthetic route records and retained delayed shipment uncertainty.",
+      "evidenceRefs": [
+        "SHIP-MAIN-001",
+        "SHIP-BACKUP-001"
+      ],
+      "failureCode": null,
+      "dataMode": "simulated"
+    },
+    {
+      "agentExecutionId": "EXEC-A05-001",
+      "agentId": "AGENT-A05",
+      "disruptionId": "DIS-BM-PARA-001",
+      "taskId": "TASK-BM-PARA-005",
+      "startedAt": "2026-09-02T11:00:00Z",
+      "completedAt": "2026-09-02T11:05:00Z",
+      "executionState": "succeeded",
+      "summary": "Prepared synthetic customer exposure estimate and human-reviewable notice draft.",
+      "evidenceRefs": [
+        "IMPACT-BM-PARA-001",
+        "ORD-HOSP-A-001",
+        "ORD-HOSP-B-001",
+        "ORD-DIST-MUM-001",
+        "ORD-EXP-NBO-001",
+        "ORD-EXP-LON-001"
+      ],
+      "failureCode": null,
+      "dataMode": "simulated"
+    }
+  ],
+  "toolInvocations": [
+    {
+      "toolInvocationId": "TOOL-CALC-GAP-001",
+      "agentExecutionId": "EXEC-A01-001",
+      "toolName": "calculate_supply_gap",
+      "requestRef": "REQ-SYN-CALC-001",
+      "startedAt": "2026-09-01T09:00:10Z",
+      "completedAt": "2026-09-01T09:00:11Z",
+      "resultState": "succeeded",
+      "sourceStatus": "synthetic",
+      "idempotencyKey": "SYN-TOOL-GAP-001",
+      "dataMode": "simulated"
+    },
+    {
+      "toolInvocationId": "TOOL-QUALIFY-001",
+      "agentExecutionId": "EXEC-A02-001",
+      "toolName": "check_backup_supplier_eligibility",
+      "requestRef": "REQ-SYN-QUAL-001",
+      "startedAt": "2026-09-02T09:00:10Z",
+      "completedAt": "2026-09-03T08:15:00Z",
+      "resultState": "succeeded",
+      "sourceStatus": "synthetic",
+      "idempotencyKey": null,
+      "dataMode": "simulated"
+    },
+    {
+      "toolInvocationId": "TOOL-APPROVAL-001",
+      "agentExecutionId": null,
+      "toolName": "create_approval_request",
+      "requestRef": "APR-PURCHASE-001",
+      "startedAt": "2026-09-03T09:00:00Z",
+      "completedAt": "2026-09-03T09:00:01Z",
+      "resultState": "succeeded",
+      "sourceStatus": "synthetic",
+      "idempotencyKey": "SYN-IDEMP-PURCHASE-001",
+      "dataMode": "simulated"
+    }
+  ],
+  "voiceCalls": [
+    {
+      "voiceCallId": "CALL-PROC-001",
+      "disruptionId": "DIS-BM-PARA-001",
+      "initiatedBy": "USER-PROC-001",
+      "recipientRole": "Procurement Manager",
+      "purpose": "Synthetic internal coordination about supplier check evidence.",
+      "consentState": "confirmed_demo",
+      "callState": "completed_simulated",
+      "summary": "Synthetic demo call summary; verbal content is not independent supplier evidence.",
+      "verificationState": "unverified",
+      "startedAt": "2026-09-02T15:00:00Z",
+      "endedAt": "2026-09-02T15:05:00Z",
+      "dataMode": "simulated"
+    }
+  ],
+  "emailDrafts": [
+    {
+      "emailDraftId": "EMAIL-DRAFT-001",
+      "disruptionId": "DIS-BM-PARA-001",
+      "recipientRef": "CUST-HOSP-A",
+      "purpose": "Synthetic major disruption notification",
+      "content": "Synthetic demonstration notice: a supply disruption is being monitored. This fictional message does not establish a real order change, delivery date, or commitment.",
+      "contentVersion": 1,
+      "draftState": "sent_simulated",
+      "createdBy": "USER-CUSTOMER-001",
+      "createdAt": "2026-09-03T11:00:00Z",
+      "approvalRequestId": "APR-NOTICE-001",
+      "dataMode": "simulated"
+    }
+  ],
+  "communicationDeliveries": [
+    {
+      "communicationDeliveryId": "SIM-EMAIL-001",
+      "emailDraftId": "EMAIL-DRAFT-001",
+      "voiceCallId": null,
+      "deliveryState": "simulated_delivered",
+      "providerStatusRef": "SYNTHETIC-DELIVERY-001",
+      "attemptedAt": "2026-09-03T13:05:00Z",
+      "completedAt": "2026-09-03T13:05:01Z",
+      "dataMode": "simulated"
+    }
+  ],
+  "suspiciousActivityAlerts": [
+    {
+      "alertId": "ALERT-DEMO-001",
+      "disruptionId": "DIS-BM-PARA-001",
+      "subjectType": "purchase_order",
+      "subjectId": "PO-MAIN-001",
+      "alertType": "duplicate_po_pattern",
+      "neutralRationale": "Synthetic fixture demonstrates a duplicate-pattern flag for verification; review found no duplicate in this scenario.",
+      "evidenceRefs": [
+        "PO-MAIN-001",
+        "PO-BACKUP-001"
+      ],
+      "alertState": "reviewed_no_issue",
+      "holdState": "not_placed",
+      "createdAt": "2026-09-04T08:00:00Z",
+      "dataMode": "synthetic"
+    }
+  ],
+  "auditEvents": [
+    {
+      "auditEventId": "AUD-001",
+      "eventType": "incident_created",
+      "actorType": "system",
+      "actorId": "CAP-DEMO",
+      "roleId": null,
+      "occurredAt": "2026-09-01T08:00:00Z",
+      "recordedAt": "2026-09-01T08:00:01Z",
+      "resourceType": "disruption",
+      "resourceId": "DIS-BM-PARA-001",
+      "disruptionId": "DIS-BM-PARA-001",
+      "correlationId": "COR-DEMO-001",
+      "proposalVersion": null,
+      "resultState": "recorded",
+      "sourceRefs": [
+        "EVD-DISRUPTION-001"
+      ],
+      "redactionState": "minimal",
+      "dataMode": "synthetic"
+    },
+    {
+      "auditEventId": "AUD-002",
+      "eventType": "risk_assessed",
+      "actorType": "agent",
+      "actorId": "AGENT-A01",
+      "roleId": null,
+      "occurredAt": "2026-09-01T09:01:00Z",
+      "recordedAt": "2026-09-01T09:01:01Z",
+      "resourceType": "risk_assessment",
+      "resourceId": "RISK-BM-PARA-001",
+      "disruptionId": "DIS-BM-PARA-001",
+      "correlationId": "COR-DEMO-001",
+      "proposalVersion": null,
+      "resultState": "recorded",
+      "sourceRefs": [
+        "INV-SNAPSHOT-001"
+      ],
+      "redactionState": "minimal",
+      "dataMode": "simulated"
+    },
+    {
+      "auditEventId": "AUD-003",
+      "eventType": "approval_decided",
+      "actorType": "human",
+      "actorId": "USER-SCH-001",
+      "roleId": "ROLE-SCH",
+      "occurredAt": "2026-09-03T10:00:00Z",
+      "recordedAt": "2026-09-03T10:00:01Z",
+      "resourceType": "approval_request",
+      "resourceId": "APR-PURCHASE-001",
+      "disruptionId": "DIS-BM-PARA-001",
+      "correlationId": "COR-APPROVAL-001",
+      "proposalVersion": 1,
+      "resultState": "approved",
+      "sourceRefs": [
+        "DEC-PURCHASE-001"
+      ],
+      "redactionState": "minimal",
+      "dataMode": "synthetic"
+    },
+    {
+      "auditEventId": "AUD-004",
+      "eventType": "execution_verified",
+      "actorType": "human",
+      "actorId": "USER-WH-001",
+      "roleId": "ROLE-WH",
+      "occurredAt": "2026-09-05T13:00:00Z",
+      "recordedAt": "2026-09-05T13:00:01Z",
+      "resourceType": "shipment",
+      "resourceId": "SHIP-BACKUP-001",
+      "disruptionId": "DIS-BM-PARA-001",
+      "correlationId": "COR-RECEIPT-001",
+      "proposalVersion": 1,
+      "resultState": "verified_simulated",
+      "sourceRefs": [
+        "EVD-BACKUP-RECEIPT"
+      ],
+      "redactionState": "minimal",
+      "dataMode": "simulated"
+    },
+    {
+      "auditEventId": "AUD-005",
+      "eventType": "communication_sent",
+      "actorType": "system",
+      "actorId": "CAP-DEMO",
+      "roleId": null,
+      "occurredAt": "2026-09-03T13:05:00Z",
+      "recordedAt": "2026-09-03T13:05:01Z",
+      "resourceType": "communication_delivery",
+      "resourceId": "SIM-EMAIL-001",
+      "disruptionId": "DIS-BM-PARA-001",
+      "correlationId": "COR-EMAIL-001",
+      "proposalVersion": 1,
+      "resultState": "simulated_delivered",
+      "sourceRefs": [
+        "APR-NOTICE-001"
+      ],
+      "redactionState": "minimal",
+      "dataMode": "simulated"
+    },
+    {
+      "auditEventId": "AUD-006",
+      "eventType": "incident_closed",
+      "actorType": "human",
+      "actorId": "USER-SCH-001",
+      "roleId": "ROLE-SCH",
+      "occurredAt": "2026-11-02T18:00:00Z",
+      "recordedAt": "2026-11-02T18:00:01Z",
+      "resourceType": "disruption",
+      "resourceId": "DIS-BM-PARA-001",
+      "disruptionId": "DIS-BM-PARA-001",
+      "correlationId": "COR-CLOSE-001",
+      "proposalVersion": null,
+      "resultState": "closed_synthetic_demo",
+      "sourceRefs": [
+        "EVD-BACKUP-RECEIPT",
+        "EVD-MAIN-RECEIPT"
+      ],
+      "redactionState": "minimal",
+      "dataMode": "synthetic"
+    }
+  ]
+}

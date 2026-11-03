@@ -1,0 +1,244 @@
+{
+  "dataMode": "synthetic",
+  "organizations": [
+    {
+      "organizationId": "ORG-BM-001",
+      "legalName": "BharatMed Pharmaceuticals (Fictional)",
+      "displayName": "BharatMed Pharmaceuticals",
+      "countryCode": "IN",
+      "city": "Hyderabad",
+      "dataMode": "synthetic"
+    }
+  ],
+  "roles": [
+    {
+      "roleId": "ROLE-SCH",
+      "name": "Supply Chain Head",
+      "description": "Synthetic demo role; final approval authority for protected actions.",
+      "dataMode": "synthetic"
+    },
+    {
+      "roleId": "ROLE-PROC",
+      "name": "Procurement Manager",
+      "description": "Synthetic demo role; supplier and purchase review.",
+      "dataMode": "synthetic"
+    },
+    {
+      "roleId": "ROLE-FACTORY",
+      "name": "Factory Manager",
+      "description": "Synthetic demo role; production feasibility review.",
+      "dataMode": "synthetic"
+    },
+    {
+      "roleId": "ROLE-WH",
+      "name": "Warehouse Manager",
+      "description": "Synthetic demo role; inventory verification and proposals.",
+      "dataMode": "synthetic"
+    },
+    {
+      "roleId": "ROLE-LOG",
+      "name": "Logistics Manager",
+      "description": "Synthetic demo role; shipment and route review.",
+      "dataMode": "synthetic"
+    },
+    {
+      "roleId": "ROLE-CUSTOMER",
+      "name": "Customer / Export Manager",
+      "description": "Synthetic demo role; customer order and communication review.",
+      "dataMode": "synthetic"
+    },
+    {
+      "roleId": "ROLE-AUDIT",
+      "name": "Compliance / Auditor",
+      "description": "Synthetic demo role; compliance evidence and audit review.",
+      "dataMode": "synthetic"
+    }
+  ],
+  "users": [
+    {
+      "userId": "USER-SCH-001",
+      "organizationId": "ORG-BM-001",
+      "roleId": "ROLE-SCH",
+      "displayName": "Demo Supply Chain Head",
+      "accountState": "active",
+      "isSyntheticIdentity": true
+    },
+    {
+      "userId": "USER-PROC-001",
+      "organizationId": "ORG-BM-001",
+      "roleId": "ROLE-PROC",
+      "displayName": "Demo Procurement Manager",
+      "accountState": "active",
+      "isSyntheticIdentity": true
+    },
+    {
+      "userId": "USER-FACTORY-001",
+      "organizationId": "ORG-BM-001",
+      "roleId": "ROLE-FACTORY",
+      "displayName": "Demo Factory Manager",
+      "accountState": "active",
+      "isSyntheticIdentity": true
+    },
+    {
+      "userId": "USER-WH-001",
+      "organizationId": "ORG-BM-001",
+      "roleId": "ROLE-WH",
+      "displayName": "Demo Warehouse Manager",
+      "accountState": "active",
+      "isSyntheticIdentity": true
+    },
+    {
+      "userId": "USER-LOG-001",
+      "organizationId": "ORG-BM-001",
+      "roleId": "ROLE-LOG",
+      "displayName": "Demo Logistics Manager",
+      "accountState": "active",
+      "isSyntheticIdentity": true
+    },
+    {
+      "userId": "USER-CUSTOMER-001",
+      "organizationId": "ORG-BM-001",
+      "roleId": "ROLE-CUSTOMER",
+      "displayName": "Demo Customer Export Manager",
+      "accountState": "active",
+      "isSyntheticIdentity": true
+    },
+    {
+      "userId": "USER-AUDIT-001",
+      "organizationId": "ORG-BM-001",
+      "roleId": "ROLE-AUDIT",
+      "displayName": "Demo Compliance Auditor",
+      "accountState": "active",
+      "isSyntheticIdentity": true
+    }
+  ],
+  "permissions": [
+    {
+      "permissionId": "PERM-READ-SCOPED",
+      "resource": "business_records",
+      "action": "read",
+      "scopeDescription": "Read only within synthetic role scope.",
+      "dataMode": "synthetic"
+    },
+    {
+      "permissionId": "PERM-PROPOSE",
+      "resource": "recovery_actions",
+      "action": "propose",
+      "scopeDescription": "Prepare a non-executable proposal.",
+      "dataMode": "synthetic"
+    },
+    {
+      "permissionId": "PERM-APPROVE-PROTECTED",
+      "resource": "protected_actions",
+      "action": "approve_final",
+      "scopeDescription": "Supply Chain Head final approval in the synthetic demo only.",
+      "dataMode": "synthetic"
+    },
+    {
+      "permissionId": "PERM-AUDIT-READ",
+      "resource": "audit_events",
+      "action": "read",
+      "scopeDescription": "Read permitted audit records; no mutation.",
+      "dataMode": "synthetic"
+    }
+  ],
+  "rolePermissions": [
+    {
+      "roleId": "ROLE-SCH",
+      "permissionId": "PERM-READ-SCOPED",
+      "grantState": "demo_grant",
+      "scope": "Synthetic incident oversight",
+      "dataMode": "synthetic"
+    },
+    {
+      "roleId": "ROLE-SCH",
+      "permissionId": "PERM-PROPOSE",
+      "grantState": "demo_grant",
+      "scope": "Synthetic recovery plan review"
+    },
+    {
+      "roleId": "ROLE-SCH",
+      "permissionId": "PERM-APPROVE-PROTECTED",
+      "grantState": "demo_grant",
+      "scope": "Synthetic protected action approvals only"
+    },
+    {
+      "roleId": "ROLE-SCH",
+      "permissionId": "PERM-AUDIT-READ",
+      "grantState": "demo_grant",
+      "scope": "Synthetic incident audit"
+    },
+    {
+      "roleId": "ROLE-PROC",
+      "permissionId": "PERM-READ-SCOPED",
+      "grantState": "demo_grant",
+      "scope": "Synthetic supplier records"
+    },
+    {
+      "roleId": "ROLE-PROC",
+      "permissionId": "PERM-PROPOSE",
+      "grantState": "demo_grant",
+      "scope": "Synthetic supplier purchase proposal"
+    },
+    {
+      "roleId": "ROLE-FACTORY",
+      "permissionId": "PERM-READ-SCOPED",
+      "grantState": "demo_grant",
+      "scope": "Synthetic production records"
+    },
+    {
+      "roleId": "ROLE-FACTORY",
+      "permissionId": "PERM-PROPOSE",
+      "grantState": "demo_grant",
+      "scope": "Synthetic production proposal"
+    },
+    {
+      "roleId": "ROLE-WH",
+      "permissionId": "PERM-READ-SCOPED",
+      "grantState": "demo_grant",
+      "scope": "Synthetic inventory records"
+    },
+    {
+      "roleId": "ROLE-WH",
+      "permissionId": "PERM-PROPOSE",
+      "grantState": "demo_grant",
+      "scope": "Synthetic inventory proposal"
+    },
+    {
+      "roleId": "ROLE-LOG",
+      "permissionId": "PERM-READ-SCOPED",
+      "grantState": "demo_grant",
+      "scope": "Synthetic shipment records"
+    },
+    {
+      "roleId": "ROLE-LOG",
+      "permissionId": "PERM-PROPOSE",
+      "grantState": "demo_grant",
+      "scope": "Synthetic logistics proposal"
+    },
+    {
+      "roleId": "ROLE-CUSTOMER",
+      "permissionId": "PERM-READ-SCOPED",
+      "grantState": "demo_grant",
+      "scope": "Synthetic customer records"
+    },
+    {
+      "roleId": "ROLE-CUSTOMER",
+      "permissionId": "PERM-PROPOSE",
+      "grantState": "demo_grant",
+      "scope": "Synthetic communication draft"
+    },
+    {
+      "roleId": "ROLE-AUDIT",
+      "permissionId": "PERM-READ-SCOPED",
+      "grantState": "demo_grant",
+      "scope": "Synthetic compliance evidence"
+    },
+    {
+      "roleId": "ROLE-AUDIT",
+      "permissionId": "PERM-AUDIT-READ",
+      "grantState": "demo_grant",
+      "scope": "Synthetic audit history"
+    }
+  ]
+}

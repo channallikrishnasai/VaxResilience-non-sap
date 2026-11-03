@@ -1,0 +1,53 @@
+{
+  "dataMode": "synthetic",
+  "products": [
+    {
+      "productId": "PRD-PARA-500",
+      "organizationId": "ORG-BM-001",
+      "productName": "Paracetamol Tablets",
+      "strength": "500 mg",
+      "dosageForm": "oral tablet",
+      "baseUnit": "tablet",
+      "productState": "active",
+      "dataMode": "synthetic"
+    }
+  ],
+  "materials": [
+    {
+      "materialId": "MAT-PARA-API",
+      "materialName": "Paracetamol API powder",
+      "materialType": "api",
+      "baseUnit": "kg",
+      "materialState": "active",
+      "dataMode": "synthetic"
+    },
+    {
+      "materialId": "MAT-PACK-UNIT",
+      "materialName": "Synthetic tablet packaging unit",
+      "materialType": "packaging",
+      "baseUnit": "each",
+      "materialState": "active",
+      "dataMode": "synthetic"
+    }
+  ],
+  "productMaterials": [
+    {
+      "productId": "PRD-PARA-500",
+      "materialId": "MAT-PARA-API",
+      "effectiveFrom": "2026-01-01",
+      "quantityPerBaseUnit": 0.0005,
+      "unit": "kg/tablet",
+      "effectiveTo": null,
+      "dataMode": "synthetic"
+    },
+    {
+      "productId": "PRD-PARA-500",
+      "materialId": "MAT-PACK-UNIT",
+      "effectiveFrom": "2026-01-01",
+      "quantityPerBaseUnit": 1,
+      "unit": "each/tablet",
+      "effectiveTo": null,
+      "dataMode": "synthetic"
+    }
+  ]
+}

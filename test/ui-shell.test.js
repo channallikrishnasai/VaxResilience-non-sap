@@ -92,6 +92,7 @@ test('SAPUI5 component manifest and controller parse and preserve the shell acti
   assert.deepEqual(manifest['sap.ui5'].routing.routes.map((route) => route.pattern), ['', '{module}']);
   assert.match(html, /module:sap\/ui\/core\/ComponentSupport/);
   assert.match(html, /data-sap-ui-component data-name="vaxresilience"/);
+  assert.match(html, /src="\/ui\/archive-client\.js"/);
   assert.doesNotMatch(html, /<script>\s*sap\.ui\.getCore\(\)/);
   assert.doesNotThrow(() => new vm.Script(component));
   assert.doesNotThrow(() => new vm.Script(controller));
@@ -145,7 +146,7 @@ test('monitor table builds responsive columns with aligned row cells', () => {
   const page = { contents: [], addContent(control) { this.contents.push(control); }, setModel() {} };
   let filterInvocation;
   definition._showIntegrationMonitor.call({
-    _page: page, _loadMessages() {},
+    _page: page, _loadMessages() {}, _openHistoricalArchive() {}, _closeHistoricalArchive() {},
     _applyMessageFilter(model, query) { filterInvocation = { model, query }; }
   });
   const filter = page.contents.find((control) => control instanceof SearchField);
@@ -235,6 +236,102 @@ test('shell controller routes module selections, toggles navigation, and marks t
   });
   assert.equal(selectedKey, 'executive-dashboard');
   assert.deepEqual(JSON.parse(JSON.stringify(calls.at(-1))), ['navTo', 'home', {}, true]);
+});
+
+test('historical archive requires explicit entry and closing returns to the empty foundation', () => {
+  const source = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/controller/Module.controller.js'), 'utf8');
+  let definition;
+  const StubControl = function StubControl() {};
+  const context = { sap: { ui: { define: (_dependencies, factory) => {
+    const Controller = { extend: (_name, implementation) => implementation };
+    definition = factory(Controller, ...Array(12).fill(StubControl));
+  } } } };
+  vm.runInNewContext(source, context);
+
+  const renderCalls = [];
+  const controller = {
+    _currentModule: 'executive-dashboard',
+    _renderModule: (...args) => renderCalls.push(args)
+  };
+  definition._openHistoricalArchive.call(controller);
+  assert.equal(controller._archiveOpen, true);
+  assert.deepEqual(renderCalls.pop(), ['executive-dashboard', true]);
+  definition._closeHistoricalArchive.call(controller);
+  assert.equal(controller._archiveOpen, false);
+  assert.deepEqual(renderCalls.pop(), ['executive-dashboard', true]);
+});
+
+test('historical archive rendering is read-only, source-labelled, and excludes unresolved collections', async () => {
+  const source = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/controller/Module.controller.js'), 'utf8');
+  const captured = { buttons: [], messages: [], tables: [] };
+  const control = (capture) => function (settings = {}) {
+    this.settings = settings;
+    if (capture) capture(this);
+  };
+  const Text = control();
+  Text.prototype.setText = function (text) { this.settings.text = text; };
+  const Button = control((item) => captured.buttons.push(item));
+  const MessageStrip = control((item) => captured.messages.push(item));
+  const Table = control((item) => {
+    captured.tables.push(item);
+    item.setModel = (model) => { item.model = model; };
+  });
+  function JSONModel(data) { this.data = data; }
+  const dependencies = {
+    'sap/m/MessageStrip': MessageStrip,
+    'sap/m/Title': control(),
+    'sap/m/Label': control(),
+    'sap/m/Text': Text,
+    'sap/m/Table': Table,
+    'sap/m/Column': control(),
+    'sap/m/ColumnListItem': control(),
+    'sap/m/ObjectStatus': control(),
+    'sap/m/Button': Button,
+    'sap/m/SearchField': control(),
+    'sap/m/Toolbar': control(),
+    'sap/ui/model/json/JSONModel': JSONModel
+  };
+  let definition;
+  const context = {
+    sap: { ui: { define: (_names, factory) => {
+      const Controller = { extend: (_name, implementation) => implementation };
+      definition = factory(Controller, ...Object.values(dependencies));
+    } } },
+    window: { VaxResilienceRouter: loadRouterApi() }
+  };
+  vm.runInNewContext(source, context);
+
+  const page = { contents: [], addContent(item) { this.contents.push(item); } };
+  const record = { routeId: 'ROUTE-SYNTHETIC-1', dataMode: 'synthetic' };
+  const controller = {
+    _page: page,
+    _archiveGeneration: 1,
+    _archiveOpen: true,
+    _currentModule: 'supply-chain-digital-twin',
+    _closeHistoricalArchive() {},
+    window: context.window
+  };
+  context.window.VaxResilienceArchive = {
+    load: async (moduleId) => ({
+      manifest: {
+        title: 'Fictional disruption scenario', scenarioStart: '2026-09-01', scenarioEnd: '2026-11-02',
+        fictionalDisclaimer: 'All records are fictional synthetic demonstration records.', scenarioFacts: {}
+      },
+      collections: [{ name: 'routes', records: [record] }],
+      omittedCollections: ['calculationAssumptions', 'productionPlans']
+    })
+  };
+  await definition._showHistoricalArchive.call(controller, 'supply-chain-digital-twin');
+
+  assert.match(captured.messages[0].settings.text, /not opening or current operational state/);
+  assert.equal(captured.messages[0].settings.type, 'Warning');
+  assert.match(captured.messages[1].settings.text, /fictional; no live map position/);
+  assert.match(captured.messages[2].settings.text, /calculationAssumptions and productionPlans/);
+  assert.equal(captured.tables.length, 1);
+  assert.deepEqual(JSON.parse(JSON.stringify(captured.tables[0].model.data.records)), [{
+    collection: 'routes', recordNumber: 1, contents: JSON.stringify(record)
+  }]);
+  assert.deepEqual(captured.buttons.map((button) => button.settings.text), ['Close historical archive']);
 });
 
 function loadControllerDefinition(source, routeHelper = loadRouterApi()) {

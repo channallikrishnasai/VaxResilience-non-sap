@@ -5,9 +5,14 @@
   "description": "SAP CAP foundation and synthetic integration operations for VaxResilience",
   "engines": { "node": ">=22.12" },
   "scripts": {
+    "prestart": "node scripts/prepare-ui-archive.js",
     "start": "cds-serve",
+    "prewatch": "node scripts/prepare-ui-archive.js",
     "watch": "cds watch",
+    "prebuild": "node scripts/prepare-ui-archive.js",
     "build": "cds build --production --dest production",
+    "postbuild": "node scripts/copy-ui-to-production.js",
+    "pretest": "node scripts/prepare-ui-archive.js",
     "test": "node --test test/*.test.js"
   },
   "dependencies": {

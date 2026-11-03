@@ -1,0 +1,241 @@
+{
+  "dataMode": "synthetic",
+  "evidence": [
+    {
+      "evidenceId": "EVD-DISRUPTION-001",
+      "subjectType": "disruption",
+      "subjectId": "DIS-BM-PARA-001",
+      "evidenceType": "synthetic_delay_notice",
+      "sourceLabel": "Fictional supplier disruption notice",
+      "sourceStatus": "synthetic",
+      "observedAt": "2026-09-01T08:00:00Z",
+      "verifiedBy": "USER-PROC-001",
+      "verifiedAt": "2026-09-01T10:00:00Z",
+      "dataMode": "synthetic"
+    },
+    {
+      "evidenceId": "EVD-INVENTORY-OPENING",
+      "subjectType": "inventory_position",
+      "subjectId": "INV-SNAPSHOT-001",
+      "evidenceType": "synthetic_inventory_snapshot",
+      "sourceLabel": "Fictional opening inventory record",
+      "sourceStatus": "synthetic",
+      "observedAt": "2026-09-01T00:00:00Z",
+      "verifiedBy": "USER-WH-001",
+      "verifiedAt": "2026-09-01T07:30:00Z",
+      "dataMode": "synthetic"
+    },
+    {
+      "evidenceId": "EVD-BACKUP-RECEIPT",
+      "subjectType": "shipment",
+      "subjectId": "SHIP-BACKUP-001",
+      "evidenceType": "simulated_receipt",
+      "sourceLabel": "Synthetic demo receipt verification",
+      "sourceStatus": "simulated",
+      "observedAt": "2026-09-05T12:00:00Z",
+      "verifiedBy": "USER-WH-001",
+      "verifiedAt": "2026-09-05T13:00:00Z",
+      "dataMode": "simulated"
+    },
+    {
+      "evidenceId": "EVD-MAIN-RECEIPT",
+      "subjectType": "shipment",
+      "subjectId": "SHIP-MAIN-001",
+      "evidenceType": "simulated_receipt",
+      "sourceLabel": "Synthetic delayed shipment receipt",
+      "sourceStatus": "simulated",
+      "observedAt": "2026-10-01T12:00:00Z",
+      "verifiedBy": "USER-WH-001",
+      "verifiedAt": "2026-10-01T13:00:00Z",
+      "dataMode": "simulated"
+    }
+  ],
+  "disruptions": [
+    {
+      "disruptionId": "DIS-BM-PARA-001",
+      "organizationId": "ORG-BM-001",
+      "title": "Synthetic Paracetamol API shipment disruption",
+      "productId": "PRD-PARA-500",
+      "supplierId": "SUP-CN-001",
+      "shipmentId": "SHIP-MAIN-001",
+      "detectedAt": "2026-09-01T08:00:00Z",
+      "reportedDelayDays": 30,
+      "incidentState": "closed",
+      "sourceStatus": "synthetic",
+      "dataMode": "synthetic",
+      "closedAt": "2026-11-02T18:00:00Z",
+      "closureDecisionBy": "USER-SCH-001",
+      "closureEvidenceRefs": [
+        "EVD-BACKUP-RECEIPT",
+        "EVD-MAIN-RECEIPT"
+      ]
+    }
+  ],
+  "riskAssessments": [
+    {
+      "riskAssessmentId": "RISK-BM-PARA-001",
+      "disruptionId": "DIS-BM-PARA-001",
+      "assessedAt": "2026-09-01T10:30:00Z",
+      "riskType": "material_supply_gap",
+      "severity": "high",
+      "summary": "Potential 10-production-day exposure without additional supply; synthetic inputs only.",
+      "method": "30 delay days minus 20 coverage days",
+      "inputRefs": [
+        "EVD-DISRUPTION-001",
+        "EVD-INVENTORY-OPENING"
+      ],
+      "assessmentState": "initial",
+      "dataMode": "synthetic"
+    },
+    {
+      "riskAssessmentId": "RISK-BM-PARA-002",
+      "disruptionId": "DIS-BM-PARA-001",
+      "assessedAt": "2026-10-02T12:00:00Z",
+      "riskType": "material_supply_gap",
+      "severity": "low",
+      "summary": "Synthetic mitigation evidence records backup material receipt before the potential coverage gap and the delayed primary shipment receipt; residual exposure is low in this closed demo scenario.",
+      "method": "Scenario-state comparison; not a live operational risk score",
+      "inputRefs": [
+        "EVD-BACKUP-RECEIPT",
+        "EVD-MAIN-RECEIPT"
+      ],
+      "assessmentState": "residual_demo",
+      "dataMode": "synthetic"
+    }
+  ],
+  "recoveryPlans": [
+    {
+      "recoveryPlanId": "PLAN-BM-PARA-001",
+      "disruptionId": "DIS-BM-PARA-001",
+      "version": 2,
+      "planState": "completed",
+      "summary": "Verify fictional local supply, submit and approve a version-bound purchase proposal, simulate receipt, monitor the delayed shipment, and close after human review.",
+      "allocationPolicyRef": "POLICY-ALLOC-001",
+      "createdBy": "USER-SCH-001",
+      "createdAt": "2026-09-02T14:00:00Z",
+      "dataMode": "synthetic"
+    }
+  ],
+  "recoveryActions": [
+    {
+      "recoveryActionId": "RA-QUALIFY-BACKUP-001",
+      "recoveryPlanId": "PLAN-BM-PARA-001",
+      "actionType": "supplier_verification",
+      "actionState": "verified",
+      "targetRef": "SUP-IN-001",
+      "proposalVersion": 1,
+      "executionRef": null,
+      "evidenceRefs": [
+        "EVD-IN-QUALITY",
+        "EVD-IN-REGULATORY",
+        "EVD-IN-QUANTITY",
+        "EVD-IN-CAPACITY",
+        "EVD-IN-CONFIRM",
+        "EVD-IN-DELIVERY"
+      ],
+      "dataMode": "synthetic"
+    },
+    {
+      "recoveryActionId": "RA-PURCHASE-BACKUP-001",
+      "recoveryPlanId": "PLAN-BM-PARA-001",
+      "actionType": "alternative_supplier_purchase",
+      "actionState": "verified",
+      "targetRef": "PO-BACKUP-001",
+      "proposalVersion": 1,
+      "executionRef": "SIM-PO-BACKUP-001",
+      "evidenceRefs": [
+        "EVD-IN-QUANTITY",
+        "EVD-IN-CONFIRM",
+        "EVD-IN-DELIVERY",
+        "EVD-BACKUP-RECEIPT"
+      ],
+      "dataMode": "simulated"
+    },
+    {
+      "recoveryActionId": "RA-MONITOR-SHIPMENT-001",
+      "recoveryPlanId": "PLAN-BM-PARA-001",
+      "actionType": "shipment_monitoring",
+      "actionState": "verified",
+      "targetRef": "SHIP-MAIN-001",
+      "proposalVersion": 1,
+      "executionRef": "SIM-SHIP-MAIN-001",
+      "evidenceRefs": [
+        "EVD-DISRUPTION-001",
+        "EVD-MAIN-RECEIPT"
+      ],
+      "dataMode": "simulated"
+    },
+    {
+      "recoveryActionId": "RA-CUSTOMER-NOTICE-001",
+      "recoveryPlanId": "PLAN-BM-PARA-001",
+      "actionType": "major_customer_disruption_notification",
+      "actionState": "verified",
+      "targetRef": "EMAIL-DRAFT-001",
+      "proposalVersion": 1,
+      "executionRef": "SIM-EMAIL-001",
+      "evidenceRefs": [
+        "EVD-DISRUPTION-001"
+      ],
+      "dataMode": "simulated"
+    }
+  ],
+  "approvalRequests": [
+    {
+      "approvalRequestId": "APR-PURCHASE-001",
+      "recoveryActionId": "RA-PURCHASE-BACKUP-001",
+      "actionCategory": "alternative_supplier_purchase",
+      "proposalVersion": 1,
+      "submittedBy": "USER-PROC-001",
+      "submittedAt": "2026-09-03T09:00:00Z",
+      "approverRoleId": "ROLE-SCH",
+      "requestState": "approved",
+      "idempotencyKey": "SYN-IDEMP-PURCHASE-001",
+      "dataMode": "synthetic"
+    },
+    {
+      "approvalRequestId": "APR-NOTICE-001",
+      "recoveryActionId": "RA-CUSTOMER-NOTICE-001",
+      "actionCategory": "major_customer_disruption_notification",
+      "proposalVersion": 1,
+      "submittedBy": "USER-CUSTOMER-001",
+      "submittedAt": "2026-09-03T12:00:00Z",
+      "approverRoleId": "ROLE-SCH",
+      "requestState": "approved",
+      "idempotencyKey": "SYN-IDEMP-NOTICE-001",
+      "dataMode": "synthetic"
+    }
+  ],
+  "approvalDecisions": [
+    {
+      "approvalDecisionId": "DEC-PURCHASE-001",
+      "approvalRequestId": "APR-PURCHASE-001",
+      "proposalVersion": 1,
+      "decision": "approve",
+      "decisionBy": "USER-SCH-001",
+      "decidedAt": "2026-09-03T10:00:00Z",
+      "reason": "Synthetic demo decision after all six supplier checks were recorded verified.",
+      "decisionEvidenceRefs": [
+        "EVD-IN-QUALITY",
+        "EVD-IN-REGULATORY",
+        "EVD-IN-QUANTITY",
+        "EVD-IN-CAPACITY",
+        "EVD-IN-CONFIRM",
+        "EVD-IN-DELIVERY"
+      ],
+      "dataMode": "synthetic"
+    },
+    {
+      "approvalDecisionId": "DEC-NOTICE-001",
+      "approvalRequestId": "APR-NOTICE-001",
+      "proposalVersion": 1,
+      "decision": "approve",
+      "decisionBy": "USER-SCH-001",
+      "decidedAt": "2026-09-03T13:00:00Z",
+      "reason": "Synthetic demo review of the exact notice draft version.",
+      "decisionEvidenceRefs": [
+        "EVD-DISRUPTION-001"
+      ],
+      "dataMode": "synthetic"
+    }
+  ]
+}

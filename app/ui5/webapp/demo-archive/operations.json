@@ -1,0 +1,283 @@
+{
+  "dataMode": "synthetic",
+  "facilities": [
+    {
+      "facilityId": "FAC-HYD-001",
+      "organizationId": "ORG-BM-001",
+      "facilityName": "BharatMed Hyderabad Manufacturing Facility (Fictional)",
+      "city": "Hyderabad",
+      "countryCode": "IN",
+      "facilityState": "active",
+      "dataMode": "synthetic"
+    }
+  ],
+  "warehouses": [
+    {
+      "warehouseId": "WH-RAW-001",
+      "organizationId": "ORG-BM-001",
+      "facilityId": "FAC-HYD-001",
+      "warehouseName": "Synthetic API Raw Material Store",
+      "city": "Hyderabad",
+      "countryCode": "IN",
+      "warehouseType": "raw_material",
+      "warehouseState": "active",
+      "dataMode": "synthetic"
+    },
+    {
+      "warehouseId": "WH-FG-001",
+      "organizationId": "ORG-BM-001",
+      "facilityId": "FAC-HYD-001",
+      "warehouseName": "Synthetic Finished Goods Store",
+      "city": "Hyderabad",
+      "countryCode": "IN",
+      "warehouseType": "finished_goods",
+      "warehouseState": "active",
+      "dataMode": "synthetic"
+    }
+  ],
+  "ports": [
+    {
+      "portId": "PORT-SHA-001",
+      "portName": "Shanghai Port (Scenario Node)",
+      "city": "Shanghai",
+      "countryCode": "CN",
+      "portType": "sea",
+      "dataMode": "synthetic"
+    },
+    {
+      "portId": "PORT-NS-001",
+      "portName": "Nhava Sheva Port (Scenario Node)",
+      "city": "Navi Mumbai",
+      "countryCode": "IN",
+      "portType": "sea",
+      "dataMode": "synthetic"
+    }
+  ],
+  "routes": [
+    {
+      "routeId": "ROUTE-CN-HYD-001",
+      "routeName": "China API sea route to Hyderabad (Fictional Scenario)",
+      "originRef": "SUP-CN-001",
+      "destinationRef": "FAC-HYD-001",
+      "waypoints": [
+        "PORT-SHA-001",
+        "PORT-NS-001"
+      ],
+      "modeSummary": "Synthetic ocean freight, customs, then domestic road/rail",
+      "routeState": "active_demo",
+      "dataMode": "synthetic"
+    },
+    {
+      "routeId": "ROUTE-HYD-LOCAL-001",
+      "routeName": "Hyderabad local supplier route (Fictional Scenario)",
+      "originRef": "SUP-IN-001",
+      "destinationRef": "FAC-HYD-001",
+      "waypoints": [],
+      "modeSummary": "Synthetic local road transport",
+      "routeState": "active_demo",
+      "dataMode": "synthetic"
+    }
+  ],
+  "inventoryBatches": [
+    {
+      "batchId": "BATCH-OPENING-001",
+      "materialId": "MAT-PARA-API",
+      "lotCode": "SYN-OPENING-LOT",
+      "quantity": 1000,
+      "unit": "kg",
+      "manufacturedOn": "2026-06-01",
+      "expiresOn": "2027-06-01",
+      "qualityState": "released_demo",
+      "sourceStatus": "synthetic",
+      "dataMode": "synthetic"
+    },
+    {
+      "batchId": "BATCH-BACKUP-001",
+      "materialId": "MAT-PARA-API",
+      "lotCode": "SYN-BACKUP-LOT",
+      "quantity": 500,
+      "unit": "kg",
+      "manufacturedOn": "2026-07-01",
+      "expiresOn": "2027-07-01",
+      "qualityState": "released_demo",
+      "sourceStatus": "synthetic",
+      "dataMode": "simulated"
+    },
+    {
+      "batchId": "BATCH-MAIN-001",
+      "materialId": "MAT-PARA-API",
+      "lotCode": "SYN-MAIN-SHIPMENT-LOT",
+      "quantity": 1500,
+      "unit": "kg",
+      "manufacturedOn": "2026-05-01",
+      "expiresOn": "2027-05-01",
+      "qualityState": "released_demo",
+      "sourceStatus": "synthetic",
+      "dataMode": "simulated"
+    }
+  ],
+  "inventoryPositions": [
+    {
+      "inventoryId": "INV-SNAPSHOT-001",
+      "materialId": "MAT-PARA-API",
+      "warehouseId": "WH-RAW-001",
+      "batchId": null,
+      "quantity": 1000,
+      "unit": "kg",
+      "asOf": "2026-09-01T00:00:00Z",
+      "coverageDays": 20,
+      "sourceStatus": "synthetic",
+      "dataMode": "synthetic"
+    },
+    {
+      "inventoryId": "INV-SNAPSHOT-002",
+      "materialId": "MAT-PARA-API",
+      "warehouseId": "WH-RAW-001",
+      "batchId": null,
+      "quantity": 1300,
+      "unit": "kg",
+      "asOf": "2026-09-05T12:00:00Z",
+      "coverageDays": 26,
+      "sourceStatus": "synthetic",
+      "dataMode": "simulated"
+    },
+    {
+      "inventoryId": "INV-SNAPSHOT-003",
+      "materialId": "MAT-PARA-API",
+      "warehouseId": "WH-RAW-001",
+      "batchId": "BATCH-BACKUP-001",
+      "quantity": 500,
+      "unit": "kg",
+      "asOf": "2026-09-21T00:00:00Z",
+      "coverageDays": 10,
+      "sourceStatus": "synthetic",
+      "dataMode": "simulated"
+    },
+    {
+      "inventoryId": "INV-SNAPSHOT-004",
+      "materialId": "MAT-PARA-API",
+      "warehouseId": "WH-RAW-001",
+      "batchId": "BATCH-MAIN-001",
+      "quantity": 1500,
+      "unit": "kg",
+      "asOf": "2026-10-01T12:00:00Z",
+      "coverageDays": 30,
+      "sourceStatus": "synthetic",
+      "dataMode": "simulated"
+    }
+  ],
+  "purchaseOrders": [
+    {
+      "purchaseOrderId": "PO-MAIN-001",
+      "supplierId": "SUP-CN-001",
+      "orderedAt": "2026-08-15T10:00:00Z",
+      "currency": "USD",
+      "orderState": "received",
+      "approvalRequestId": null,
+      "sourceStatus": "synthetic",
+      "dataMode": "simulated"
+    },
+    {
+      "purchaseOrderId": "PO-BACKUP-001",
+      "supplierId": "SUP-IN-001",
+      "orderedAt": "2026-09-03T11:00:00Z",
+      "currency": "INR",
+      "orderState": "received",
+      "approvalRequestId": "APR-PURCHASE-001",
+      "sourceStatus": "synthetic",
+      "dataMode": "simulated"
+    }
+  ],
+  "purchaseOrderLines": [
+    {
+      "purchaseOrderLineId": "POL-MAIN-001",
+      "purchaseOrderId": "PO-MAIN-001",
+      "materialId": "MAT-PARA-API",
+      "quantity": 1500,
+      "unit": "kg",
+      "unitPrice": null,
+      "lineState": "received"
+    },
+    {
+      "purchaseOrderLineId": "POL-BACKUP-001",
+      "purchaseOrderId": "PO-BACKUP-001",
+      "materialId": "MAT-PARA-API",
+      "quantity": 500,
+      "unit": "kg",
+      "unitPrice": null,
+      "lineState": "received"
+    }
+  ],
+  "shipments": [
+    {
+      "shipmentId": "SHIP-MAIN-001",
+      "purchaseOrderId": "PO-MAIN-001",
+      "routeId": "ROUTE-CN-HYD-001",
+      "carrierRef": null,
+      "originRef": "SUP-CN-001",
+      "destinationRef": "FAC-HYD-001",
+      "plannedArrival": "2026-09-01",
+      "revisedArrival": "2026-10-01",
+      "actualArrival": "2026-10-01",
+      "shipmentState": "arrived",
+      "sourceStatus": "synthetic",
+      "dataMode": "simulated"
+    },
+    {
+      "shipmentId": "SHIP-BACKUP-001",
+      "purchaseOrderId": "PO-BACKUP-001",
+      "routeId": "ROUTE-HYD-LOCAL-001",
+      "carrierRef": null,
+      "originRef": "SUP-IN-001",
+      "destinationRef": "FAC-HYD-001",
+      "plannedArrival": "2026-09-05",
+      "revisedArrival": null,
+      "actualArrival": "2026-09-05",
+      "shipmentState": "arrived",
+      "sourceStatus": "synthetic",
+      "dataMode": "simulated"
+    }
+  ],
+  "shipmentEvents": [
+    {
+      "shipmentEventId": "SHE-MAIN-001",
+      "shipmentId": "SHIP-MAIN-001",
+      "eventType": "created",
+      "eventAt": "2026-08-15T10:00:00Z",
+      "description": "Synthetic planned shipment created.",
+      "sourceRef": "PO-MAIN-001",
+      "sourceStatus": "synthetic",
+      "dataMode": "synthetic"
+    },
+    {
+      "shipmentEventId": "SHE-MAIN-002",
+      "shipmentId": "SHIP-MAIN-001",
+      "eventType": "delay_reported",
+      "eventAt": "2026-09-01T08:00:00Z",
+      "description": "Fictional supplier disruption reports a 30-calendar-day delay from original ETA.",
+      "sourceRef": "EVD-DISRUPTION-001",
+      "sourceStatus": "synthetic",
+      "dataMode": "synthetic"
+    },
+    {
+      "shipmentEventId": "SHE-MAIN-003",
+      "shipmentId": "SHIP-MAIN-001",
+      "eventType": "delivered",
+      "eventAt": "2026-10-01T12:00:00Z",
+      "description": "Simulated arrival of delayed 1500 kg API shipment.",
+      "sourceRef": "SIM-SHIP-MAIN-001",
+      "sourceStatus": "simulated",
+      "dataMode": "simulated"
+    },
+    {
+      "shipmentEventId": "SHE-BACKUP-001",
+      "shipmentId": "SHIP-BACKUP-001",
+      "eventType": "delivered",
+      "eventAt": "2026-09-05T12:00:00Z",
+      "description": "Simulated receipt of approved-for-demo 500 kg backup order.",
+      "sourceRef": "SIM-SHIP-BACKUP-001",
+      "sourceStatus": "simulated",
+      "dataMode": "simulated"
+    }
+  ]
+}

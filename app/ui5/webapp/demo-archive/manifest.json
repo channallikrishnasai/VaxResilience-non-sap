@@ -1,0 +1,45 @@
+{
+  "datasetId": "DATASET-BM-PARA-2026-10",
+  "schemaVersion": "1.0.0",
+  "scenarioId": "BM-PARA-DISRUPTION-2026-10",
+  "title": "BharatMed Paracetamol API disruption",
+  "dataMode": "synthetic",
+  "fictionalDisclaimer": "All organizations, suppliers, customers, locations, quantities, decisions, statuses, and outcomes in this dataset are fictional synthetic demonstration records. No live system or real person is represented.",
+  "scenarioStart": "2026-09-01T00:00:00Z",
+  "scenarioEnd": "2026-11-02T18:00:00Z",
+  "scenarioAnchorDate": "2026-09-01",
+  "scenarioFacts": {
+    "productId": "PRD-PARA-500",
+    "materialId": "MAT-PARA-API",
+    "delayDays": 30,
+    "inventoryCoverageDays": 20,
+    "potentialGapDays": 10,
+    "apiConsumptionKgPerProductionDay": 50,
+    "inventoryAtStartKg": 1000,
+    "mainShipmentOriginalEta": "2026-09-01",
+    "mainShipmentRevisedEta": "2026-10-01",
+    "backupReportedStockKg": 500,
+    "backupReportedProductionDays": 10,
+    "gapFormula": "30-day delay from original ETA 2026-09-01 to revised ETA 2026-10-01; 20-day coverage through 2026-09-21; 10 potential production days remain without mitigation",
+    "gapInterpretation": "Synthetic exposure estimate only; not a verified shortage or patient outcome.",
+    "backupQualification": "All six checks are marked verified for this synthetic scenario only; these fixture statuses do not qualify a real supplier."
+  },
+  "demoPolicies": [
+    {
+      "policyId": "POLICY-ALLOC-001",
+      "name": "Healthcare-first balanced allocation",
+      "status": "proposed",
+      "applied": false,
+      "description": "Provisional allocation concept retained for discussion; not a confirmed or applied business rule."
+    }
+  ],
+  "fixtureFiles": [
+    "organization.json",
+    "suppliers.json",
+    "products.json",
+    "operations.json",
+    "customers-orders.json",
+    "incidents-recovery.json",
+    "agent-activity.json"
+  ]
+}

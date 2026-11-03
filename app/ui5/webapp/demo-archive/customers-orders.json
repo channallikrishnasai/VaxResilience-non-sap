@@ -1,0 +1,299 @@
+{
+  "dataMode": "synthetic",
+  "customers": [
+    {
+      "customerId": "CUST-HOSP-A",
+      "organizationId": "ORG-BM-001",
+      "customerName": "Hospital A (Fictional)",
+      "customerType": "hospital",
+      "city": "Hyderabad",
+      "countryCode": "IN",
+      "customerState": "active",
+      "dataMode": "synthetic"
+    },
+    {
+      "customerId": "CUST-HOSP-B",
+      "organizationId": "ORG-BM-001",
+      "customerName": "Hospital B (Fictional)",
+      "customerType": "hospital",
+      "city": "Bengaluru",
+      "countryCode": "IN",
+      "customerState": "active",
+      "dataMode": "synthetic"
+    },
+    {
+      "customerId": "CUST-DIST-MUM",
+      "organizationId": "ORG-BM-001",
+      "customerName": "Medical Distributor (Fictional)",
+      "customerType": "medical_distributor",
+      "city": "Mumbai",
+      "countryCode": "IN",
+      "customerState": "active",
+      "dataMode": "synthetic"
+    },
+    {
+      "customerId": "CUST-EXP-NBO",
+      "organizationId": "ORG-BM-001",
+      "customerName": "Export Importer A (Fictional)",
+      "customerType": "export_importer",
+      "city": "Nairobi",
+      "countryCode": "KE",
+      "customerState": "active",
+      "dataMode": "synthetic"
+    },
+    {
+      "customerId": "CUST-EXP-LON",
+      "organizationId": "ORG-BM-001",
+      "customerName": "Export Importer B (Fictional)",
+      "customerType": "export_importer",
+      "city": "London",
+      "countryCode": "GB",
+      "customerState": "active",
+      "dataMode": "synthetic"
+    }
+  ],
+  "demandAssumptions": [
+    {
+      "assumptionId": "DEMAND-HOSP-A",
+      "customerId": "CUST-HOSP-A",
+      "productId": "PRD-PARA-500",
+      "dailyDemand": 5000,
+      "unit": "tablet/day",
+      "dataMode": "synthetic"
+    },
+    {
+      "assumptionId": "DEMAND-HOSP-B",
+      "customerId": "CUST-HOSP-B",
+      "productId": "PRD-PARA-500",
+      "dailyDemand": 5000,
+      "unit": "tablet/day",
+      "dataMode": "synthetic"
+    },
+    {
+      "assumptionId": "DEMAND-DIST-MUM",
+      "customerId": "CUST-DIST-MUM",
+      "productId": "PRD-PARA-500",
+      "dailyDemand": 5000,
+      "unit": "tablet/day",
+      "dataMode": "synthetic"
+    },
+    {
+      "assumptionId": "DEMAND-EXP-NBO",
+      "customerId": "CUST-EXP-NBO",
+      "productId": "PRD-PARA-500",
+      "dailyDemand": 5000,
+      "unit": "tablet/day",
+      "dataMode": "synthetic"
+    },
+    {
+      "assumptionId": "DEMAND-EXP-LON",
+      "customerId": "CUST-EXP-LON",
+      "productId": "PRD-PARA-500",
+      "dailyDemand": 5000,
+      "unit": "tablet/day",
+      "dataMode": "synthetic"
+    },
+    {
+      "assumptionId": "DEMAND-SYNTHETIC-001",
+      "customerId": null,
+      "productId": "PRD-PARA-500",
+      "dailyDemand": 25000,
+      "unit": "tablet/day",
+      "calculation": "Sum of five synthetic customer demand assumptions",
+      "dataMode": "synthetic"
+    }
+  ],
+  "customerOrders": [
+    {
+      "customerOrderId": "ORD-HOSP-A-001",
+      "customerId": "CUST-HOSP-A",
+      "orderedAt": "2026-09-20T09:00:00Z",
+      "requiredDeliveryDate": "2026-10-15",
+      "orderState": "fulfilled",
+      "dataMode": "simulated"
+    },
+    {
+      "customerOrderId": "ORD-HOSP-B-001",
+      "customerId": "CUST-HOSP-B",
+      "orderedAt": "2026-09-20T09:30:00Z",
+      "requiredDeliveryDate": "2026-10-15",
+      "orderState": "fulfilled",
+      "dataMode": "simulated"
+    },
+    {
+      "customerOrderId": "ORD-DIST-MUM-001",
+      "customerId": "CUST-DIST-MUM",
+      "orderedAt": "2026-09-20T10:00:00Z",
+      "requiredDeliveryDate": "2026-10-15",
+      "orderState": "fulfilled",
+      "dataMode": "simulated"
+    },
+    {
+      "customerOrderId": "ORD-EXP-NBO-001",
+      "customerId": "CUST-EXP-NBO",
+      "orderedAt": "2026-09-20T10:30:00Z",
+      "requiredDeliveryDate": "2026-10-15",
+      "orderState": "fulfilled",
+      "dataMode": "simulated"
+    },
+    {
+      "customerOrderId": "ORD-EXP-LON-001",
+      "customerId": "CUST-EXP-LON",
+      "orderedAt": "2026-09-20T11:00:00Z",
+      "requiredDeliveryDate": "2026-10-15",
+      "orderState": "fulfilled",
+      "dataMode": "simulated"
+    }
+  ],
+  "orderLines": [
+    {
+      "orderLineId": "LINE-HOSP-A-001",
+      "customerOrderId": "ORD-HOSP-A-001",
+      "productId": "PRD-PARA-500",
+      "quantity": 100000,
+      "unit": "tablet",
+      "lineState": "fulfilled"
+    },
+    {
+      "orderLineId": "LINE-HOSP-B-001",
+      "customerOrderId": "ORD-HOSP-B-001",
+      "productId": "PRD-PARA-500",
+      "quantity": 100000,
+      "unit": "tablet",
+      "lineState": "fulfilled"
+    },
+    {
+      "orderLineId": "LINE-DIST-MUM-001",
+      "customerOrderId": "ORD-DIST-MUM-001",
+      "productId": "PRD-PARA-500",
+      "quantity": 100000,
+      "unit": "tablet",
+      "lineState": "fulfilled"
+    },
+    {
+      "orderLineId": "LINE-EXP-NBO-001",
+      "customerOrderId": "ORD-EXP-NBO-001",
+      "productId": "PRD-PARA-500",
+      "quantity": 100000,
+      "unit": "tablet",
+      "lineState": "fulfilled"
+    },
+    {
+      "orderLineId": "LINE-EXP-LON-001",
+      "customerOrderId": "ORD-EXP-LON-001",
+      "productId": "PRD-PARA-500",
+      "quantity": 100000,
+      "unit": "tablet",
+      "lineState": "fulfilled"
+    }
+  ],
+  "orderFulfilments": [
+    {
+      "fulfilmentId": "FUL-HOSP-A-001",
+      "orderLineId": "LINE-HOSP-A-001",
+      "quantity": 100000,
+      "warehouseId": "WH-FG-001",
+      "fulfilmentState": "fulfilled",
+      "approvalRequestId": null,
+      "dataMode": "simulated"
+    },
+    {
+      "fulfilmentId": "FUL-HOSP-B-001",
+      "orderLineId": "LINE-HOSP-B-001",
+      "quantity": 100000,
+      "warehouseId": "WH-FG-001",
+      "fulfilmentState": "fulfilled",
+      "approvalRequestId": null,
+      "dataMode": "simulated"
+    },
+    {
+      "fulfilmentId": "FUL-DIST-MUM-001",
+      "orderLineId": "LINE-DIST-MUM-001",
+      "quantity": 100000,
+      "warehouseId": "WH-FG-001",
+      "fulfilmentState": "fulfilled",
+      "approvalRequestId": null,
+      "dataMode": "simulated"
+    },
+    {
+      "fulfilmentId": "FUL-EXP-NBO-001",
+      "orderLineId": "LINE-EXP-NBO-001",
+      "quantity": 100000,
+      "warehouseId": "WH-FG-001",
+      "fulfilmentState": "fulfilled",
+      "approvalRequestId": null,
+      "dataMode": "simulated"
+    },
+    {
+      "fulfilmentId": "FUL-EXP-LON-001",
+      "orderLineId": "LINE-EXP-LON-001",
+      "quantity": 100000,
+      "warehouseId": "WH-FG-001",
+      "fulfilmentState": "fulfilled",
+      "approvalRequestId": null,
+      "dataMode": "simulated"
+    }
+  ],
+  "deliveries": [
+    {
+      "deliveryId": "DEL-HOSP-A-001",
+      "fulfilmentId": "FUL-HOSP-A-001",
+      "shipmentId": null,
+      "quantity": 100000,
+      "unit": "tablet",
+      "despatchedAt": "2026-10-14T08:00:00Z",
+      "deliveredAt": "2026-10-15T09:00:00Z",
+      "deliveryState": "delivered_simulated",
+      "sourceStatus": "simulated",
+      "dataMode": "simulated"
+    },
+    {
+      "deliveryId": "DEL-HOSP-B-001",
+      "fulfilmentId": "FUL-HOSP-B-001",
+      "shipmentId": null,
+      "quantity": 100000,
+      "unit": "tablet",
+      "despatchedAt": "2026-10-14T08:00:00Z",
+      "deliveredAt": "2026-10-15T10:00:00Z",
+      "deliveryState": "delivered_simulated",
+      "sourceStatus": "simulated",
+      "dataMode": "simulated"
+    },
+    {
+      "deliveryId": "DEL-DIST-MUM-001",
+      "fulfilmentId": "FUL-DIST-MUM-001",
+      "shipmentId": null,
+      "quantity": 100000,
+      "unit": "tablet",
+      "despatchedAt": "2026-10-14T08:00:00Z",
+      "deliveredAt": "2026-10-15T11:00:00Z",
+      "deliveryState": "delivered_simulated",
+      "sourceStatus": "simulated",
+      "dataMode": "simulated"
+    },
+    {
+      "deliveryId": "DEL-EXP-NBO-001",
+      "fulfilmentId": "FUL-EXP-NBO-001",
+      "shipmentId": null,
+      "quantity": 100000,
+      "unit": "tablet",
+      "despatchedAt": "2026-10-14T08:00:00Z",
+      "deliveredAt": "2026-10-15T12:00:00Z",
+      "deliveryState": "delivered_simulated",
+      "sourceStatus": "simulated",
+      "dataMode": "simulated"
+    },
+    {
+      "deliveryId": "DEL-EXP-LON-001",
+      "fulfilmentId": "FUL-EXP-LON-001",
+      "shipmentId": null,
+      "quantity": 100000,
+      "unit": "tablet",
+      "despatchedAt": "2026-10-14T08:00:00Z",
+      "deliveredAt": "2026-10-15T13:00:00Z",
+      "deliveryState": "delivered_simulated",
+      "sourceStatus": "simulated",
+      "dataMode": "simulated"
+    }
+  ]
+}

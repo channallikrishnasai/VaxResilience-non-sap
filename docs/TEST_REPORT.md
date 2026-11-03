@@ -538,7 +538,7 @@ The latest verified feature-code push is `f7413cb9c04e6725e2dc4c9809a10fe28c2f33
 | Roadmap case | Status | Evidence / remaining gap |
 |---|---|---|
 | T-01 baseline | BLOCKED | No approved baseline fixture/selection and no seed/reset. Do not load the completed history as opening state. |
-| T-02 30-day delay | NOT VERIFIED | Fixture dates exist, but no operational module renders the dated disruption with provenance. |
+| T-02 30-day delay | PARTIAL — historical fixture archive | The opt-in archive renders source fixture values and date fields with provenance and explicit historical/read-only warnings. It does not calculate or present a verified dynamic 30-day delay workflow. |
 | T-03 coverage/gap | PASS — domain helper only | `test/coverage-calculation.test.js` verifies 1,000 kg / 50 kg per production day = 20 production days and the 30/20 = 10 comparison with `normalized:false` and `forecast:false`; not exposed as a CAP API or page. |
 | T-04 supplier failure | PARTIAL — domain helper only | `test/supplier-qualification.test.js` proves missing, failed, unverified, expired, conflicting, and evidence-free checks remain unconfirmed; no purchase proposal/dispatch gate exists. |
 | T-05 supplier success | PARTIAL — checklist only | Test proves all six checks can be complete while intentionally omitting `supplierEligible`; no purchase proposal path exists. |
@@ -568,3 +568,17 @@ The latest verified feature-code push is `f7413cb9c04e6725e2dc4c9809a10fe28c2f33
 | `.venv\Scripts\python.exe scripts\validate_synthetic_fixtures.py` | 157 schema-validated records; exit 1 for the two genuinely unmapped collections `calculationAssumptions` and `productionPlans`. | BLOCKED / FAIL-CLOSED |
 
 Passing foundational tests do not constitute acceptance of T-01 through T-20 as a whole; statuses above indicate the actual scope tested.
+
+### Historical synthetic archive and production UI artifact — 2026-11-03
+
+| Command/check | Actual output/result | Status |
+|---|---|---|
+| `npm test` | 44 passed, 0 failed; 10.03s. Covers archive filtering, generated archive integrity, UI archive state/read-only warnings, HTTP static delivery, and prior CAP monitoring actions. | PASS |
+| `npm run build` | Exit 0; CAP production build completed in 18.16s. Postbuild copied UI assets; verified `gen/production/app/ui5/webapp/index.html`, `demo-archive/manifest.json`, and the module controller are present. | PASS |
+| `.venv\Scripts\python.exe -m pytest -q` | 102 passed, 0 failed; 15.34s; one existing pandas DB-API warning. | PASS |
+| `.venv\Scripts\python.exe scripts\validate_synthetic_fixtures.py` | 157 schema-validated records; exit 1 because `calculationAssumptions` and `productionPlans` have no approved record schemas. | BLOCKED / FAIL-CLOSED |
+| `git diff --check` | Exit code 0 after documentation edits. | PASS |
+
+The UI now offers an explicit read-only archive of selected historical synthetic fixtures across the eight roadmap modules. It is not baseline/current state and is not a seed/reset mechanism. Collections without approved schemas and dependent records are excluded and disclosed in the UI. The CAP production build now includes the UI files at the path served by the production server. CAP's development HTTP suite verifies static UI/archive assets and monitoring/action endpoints; a real browser render and a deployed SAP-hosted demo remain unverified.
+
+git diff --check | Exit code 0 after archive/build documentation updates. | PASS |
