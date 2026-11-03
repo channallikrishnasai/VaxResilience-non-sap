@@ -260,3 +260,9 @@ Verification: `npm test` passed **46/46** (8.75s); `npm run build` passed (CAP b
 Extended the opt-in historical fixture archive with a source-linked Digital Twin view. It resolves entity nodes and route/fulfilment relationships solely from official fixture IDs, reports unresolved references without synthesizing missing nodes, rejects duplicate entity IDs, and expressly avoids inventing coordinates. This is a historical static demonstration view; it is not a live map, CAP-backed operational module, or opening state.
 
 Verification: `npm test` passed **50/50** (9.78s), including model, UI table, and HTTP static delivery checks; `npm run build` passed (CAP build 14.44s plus UI copy); the UI view remains well-formed XML; `git diff --check` passed. The broader IMP-05 exit criteria remain incomplete pending approved data/API contracts, baseline/reset, authorization, and live browser evidence.
+
+### IMP-05 historical collection tables — 2026-11-03
+
+Changed the explicit historical archive from one opaque JSON row list to per-collection tables with columns drawn directly from the source fixture fields, read-only local filtering, and growing rows. Nested values are shown as JSON and source nulls are labelled unavailable; no field semantics, calculations, or state transitions are inferred. Dashboard context remains separate and explicitly historical.
+
+Verification: `npm test` passed **51/51** (9.57s); `npm run build` passed (CAP build 15.09s plus production UI copy); the UI view parses as XML; `git diff --check` passed. Live CAP-backed core modules, state reset, role enforcement, and browser rendering are still outstanding.

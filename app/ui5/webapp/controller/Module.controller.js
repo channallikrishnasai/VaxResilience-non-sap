@@ -123,6 +123,10 @@ sap.ui.define([
           this._showHistoricalNetwork(archive.collections);
           return;
         }
+        if (moduleId !== 'executive-dashboard') {
+          this._showFixtureCollections(archive.collections);
+          return;
+        }
 
         var rows = [];
         archive.collections.forEach(function (collection) {
@@ -195,6 +199,61 @@ sap.ui.define([
       });
       table.setModel(model);
       return table;
+    },
+
+    _showFixtureCollections: function (collections) {
+      var that = this;
+      collections.forEach(function (collection) {
+        that._page.addContent(new Title({ text: collection.name, level: 'H3' }));
+        var fieldNames = [...new Set(collection.records.reduce(function (fields, record) {
+          return fields.concat(Object.keys(record));
+        }, []))];
+        if (fieldNames.length === 0) {
+          that._page.addContent(new Text({ text: 'No records are present in this fixture collection.' }));
+          return;
+        }
+
+        var displayRecords = collection.records.map(function (record) {
+          var display = {};
+          fieldNames.forEach(function (field) {
+            var value = record[field];
+            display[field] = value === null || value === undefined
+              ? 'Not provided in source'
+              : typeof value === 'object' ? JSON.stringify(value) : String(value);
+          });
+          return display;
+        });
+        var model = new JSONModel({ records: displayRecords });
+        var filterField = new SearchField({
+          width: '100%',
+          placeholder: `Filter historical ${collection.name}`,
+          tooltip: `Filter source fixture fields in ${collection.name}; values are not changed`,
+          liveChange: function (event) {
+            var query = String(event.getParameter('newValue') || '').trim().toLowerCase();
+            model.setData({ records: displayRecords.filter(function (record) {
+              return JSON.stringify(record).toLowerCase().indexOf(query) >= 0;
+            }) });
+          }
+        });
+        var filterLabel = new Label({ text: `Filter ${collection.name}` });
+        filterLabel.setLabelFor(filterField);
+        that._page.addContent(filterLabel);
+        that._page.addContent(filterField);
+        var table = new Table({
+          growing: true,
+          growingThreshold: 20,
+          noDataText: 'No historical fixture records match this filter.',
+          columns: fieldNames.map(function (field) {
+            var header = field.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/^./, function (letter) { return letter.toUpperCase(); });
+            return new Column({ header: new Text({ text: header }) });
+          }),
+          items: { path: '/records', template: new ColumnListItem({ cells: fieldNames.map(function (field) {
+            return new Text({ text: `{${field}}`, wrapping: true });
+          }) }) }
+        });
+        table.setModel(model);
+        that._page.addContent(table);
+      });
     },
 
     _showIntegrationMonitor: function () {

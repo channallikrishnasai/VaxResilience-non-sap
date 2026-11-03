@@ -604,3 +604,14 @@ The shell search now locates only module names/IDs and navigates only for a uniq
 | `git diff --check` | Exit code 0. | PASS |
 
 IMP-05 progress is partial: when the user explicitly opens the historical archive, the Digital Twin displays fictional supplier, port, facility, warehouse, organization, and customer nodes plus fixture-declared route and simulated fulfilment links. The view uses no geographic coordinates or live map source. It is neither an initial/baseline state nor CAP-backed operational data. Core live CAP module APIs, baseline/reset, role-scoped data access, and browser-render verification remain incomplete or blocked.
+
+### IMP-05 structured historical collection tables and filtering — 2026-11-03
+
+| Command/check | Actual output/result | Status |
+|---|---|---|
+| `npm test` | 51 passed, 0 failed; 9.57s. Covers filter behavior, unchanged source data, Digital Twin model/UI, HTTP asset delivery, and CAP regressions. | PASS |
+| `npm run build` | CAP production build completed in 15.09s; postbuild UI copy completed; exit 0. | PASS |
+| XML parse of `app/ui5/webapp/view/App.view.xml` | Well-formed XML. | PASS |
+| `git diff --check` | Exit code 0. | PASS |
+
+For non-dashboard modules in the opt-in historical archive, source collections now render as field-based tables with per-collection in-memory filtering and growing rows. Nested fixture values are represented as JSON; null values remain explicitly unavailable in the source. Filtering changes only the displayed view and never writes to CAP or alters fixture records. The dashboard continues to identify itself as historical synthetic context. This is still not equivalent to the live CAP-backed modules or the verified, authenticated user journeys required for IMP-05 exit.

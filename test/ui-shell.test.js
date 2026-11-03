@@ -353,7 +353,7 @@ test('historical archive rendering is read-only, source-labelled, and excludes u
     _page: page,
     _archiveGeneration: 1,
     _archiveOpen: true,
-    _currentModule: 'inventory-manufacturing',
+    _currentModule: 'executive-dashboard',
     _closeHistoricalArchive() {},
     window: context.window
   };
@@ -367,11 +367,11 @@ test('historical archive rendering is read-only, source-labelled, and excludes u
       omittedCollections: ['calculationAssumptions', 'productionPlans']
     })
   };
-  await definition._showHistoricalArchive.call(controller, 'inventory-manufacturing');
+  await definition._showHistoricalArchive.call(controller, 'executive-dashboard');
 
   assert.match(captured.messages[0].settings.text, /not opening or current operational state/);
   assert.equal(captured.messages[0].settings.type, 'Warning');
-  assert.match(captured.messages[1].settings.text, /Stock and qualification records/);
+  assert.match(captured.messages[1].settings.text, /Scenario facts are synthetic comparisons/);
   assert.match(captured.messages[2].settings.text, /calculationAssumptions and productionPlans/);
   assert.equal(captured.tables.length, 1);
   assert.deepEqual(JSON.parse(JSON.stringify(captured.tables[0].model.data.records)), [{
@@ -411,6 +411,46 @@ test('historical Digital Twin renders explicit entity and relationship tables wi
   assert.deepEqual(JSON.parse(JSON.stringify(tables.map((table) => table.model.data.records))), [network.nodes, network.relationships]);
   assert.ok(page.contents.some((item) => item.settings && /no geographic coordinates/.test(item.settings.text || '')));
   assert.ok(page.contents.some((item) => item.settings && /1 fixture references could not be resolved/.test(item.settings.text || '')));
+});
+
+test('historical fixture collections render source fields and filter rows without mutating records', () => {
+  const source = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/controller/Module.controller.js'), 'utf8');
+  const controls = [];
+  const control = function (settings = {}) {
+    this.settings = settings;
+    controls.push(this);
+  };
+  control.prototype.setModel = function (model) { this.model = model; };
+  control.prototype.setLabelFor = function (field) { this.labelFor = field; };
+  function JSONModel(data) {
+    this.data = data;
+    this.setData = (next) => { this.data = next; };
+  }
+  let definition;
+  const context = { sap: { ui: { define: (_names, factory) => {
+    const Controller = { extend: (_name, implementation) => implementation };
+    definition = factory(Controller, ...Array(11).fill(control), JSONModel);
+  } } } };
+  vm.runInNewContext(source, context);
+
+  const original = [
+    { productId: 'PRD-A', displayName: 'Synthetic Medicine A', dataMode: 'synthetic', attributes: ['fictional'] },
+    { productId: 'PRD-B', displayName: 'Synthetic Medicine B', dataMode: 'synthetic', attributes: ['fictional'] }
+  ];
+  const page = { contents: [], addContent(item) { this.contents.push(item); } };
+  definition._showFixtureCollections.call({ _page: page }, [{ name: 'products', records: original }]);
+
+  const field = controls.find((item) => item.settings.placeholder === 'Filter historical products');
+  const table = controls.find((item) => item.settings.items && item.settings.items.path === '/records');
+  assert.ok(field);
+  assert.ok(table);
+  assert.equal(controls.find((item) => item.settings.text === 'Filter products').labelFor, field);
+  assert.equal(table.settings.columns.length, 4);
+  assert.equal(table.settings.items.template.settings.cells.length, 4);
+  assert.equal(table.model.data.records.length, 2);
+  field.settings.liveChange({ getParameter: () => 'medicine b' });
+  assert.deepEqual(JSON.parse(JSON.stringify(table.model.data.records.map((record) => record.productId))), ['PRD-B']);
+  assert.deepEqual(original.map((record) => record.productId), ['PRD-A', 'PRD-B']);
 });
 
 function loadControllerDefinition(source, routeHelper = loadRouterApi(), overrides = {}) {
