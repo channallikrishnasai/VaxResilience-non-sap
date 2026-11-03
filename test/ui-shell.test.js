@@ -138,6 +138,8 @@ test('monitor table builds responsive columns with aligned row cells', () => {
     'sap/m/Button': makeControl('Button'),
     'sap/m/SearchField': SearchField,
     'sap/m/Toolbar': makeControl('Toolbar'),
+    'sap/m/VBox': makeControl('VBox'),
+    'sap/m/FlexBox': makeControl('FlexBox'),
     'sap/ui/model/json/JSONModel': JSONModel
   };
   let definition;
@@ -290,7 +292,7 @@ test('historical archive requires explicit entry and closing returns to the empt
   const StubControl = function StubControl() {};
   const context = { sap: { ui: { define: (_dependencies, factory) => {
     const Controller = { extend: (_name, implementation) => implementation };
-    definition = factory(Controller, ...Array(12).fill(StubControl));
+    definition = factory(Controller, ...Array(13).fill(StubControl), StubControl);
   } } } };
   vm.runInNewContext(source, context);
 
@@ -337,6 +339,8 @@ test('historical archive rendering is read-only, source-labelled, and excludes u
     'sap/m/Button': Button,
     'sap/m/SearchField': control(),
     'sap/m/Toolbar': control(),
+    'sap/m/VBox': control(),
+    'sap/m/FlexBox': control(),
     'sap/ui/model/json/JSONModel': JSONModel
   };
   let definition;
@@ -394,7 +398,7 @@ test('historical Digital Twin renders explicit entity and relationship tables wi
   let definition;
   const context = { sap: { ui: { define: (_names, factory) => {
     const Controller = { extend: (_name, implementation) => implementation };
-    definition = factory(Controller, ...Array(11).fill(control), JSONModel);
+    definition = factory(Controller, ...Array(13).fill(control), JSONModel);
   } } } };
   vm.runInNewContext(source, context);
 
@@ -431,7 +435,7 @@ test('historical fixture collections render source fields and filter rows withou
   let definition;
   const context = { sap: { ui: { define: (_names, factory) => {
     const Controller = { extend: (_name, implementation) => implementation };
-    definition = factory(Controller, ...Array(11).fill(control), JSONModel);
+    definition = factory(Controller, ...Array(13).fill(control), JSONModel);
   } } } };
   vm.runInNewContext(source, context);
 
@@ -467,7 +471,7 @@ test('historical dashboard displays manifest facts verbatim and explains unresol
   let definition;
   const context = { sap: { ui: { define: (_names, factory) => {
     const Controller = { extend: (_name, implementation) => implementation };
-    definition = factory(Controller, ...Array(11).fill(control), JSONModel);
+    definition = factory(Controller, ...Array(13).fill(control), JSONModel);
   } } } };
   vm.runInNewContext(source, context);
 
@@ -485,6 +489,42 @@ test('historical dashboard displays manifest facts verbatim and explains unresol
   ]);
   assert.ok(page.contents.some((item) => item.settings && /not recalculated/.test(item.settings.text || '')));
   assert.ok(page.contents.some((item) => item.settings && /D-01/.test(item.settings.text || '')));
+});
+
+test('operations dashboard sample traffic creates eight synthetic API messages and records four simulated retries', async () => {
+  const source = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/controller/Module.controller.js'), 'utf8');
+  let definition;
+  const ids = [];
+  const retries = [];
+  const context = {
+    sap: { ui: { define: (_dependencies, factory) => {
+      const Controller = { extend: (_name, implementation) => implementation };
+      definition = factory(Controller, ...Array(13).fill(function StubControl() {}), function JSONModel() {});
+    } } },
+    window: { VaxResilienceApi: {
+      createDemoFailure: async () => {
+        const ID = `message-${ids.length + 1}`;
+        ids.push(ID);
+        return { ID };
+      },
+      retryMessage: async (ID) => { retries.push(ID); },
+      listMessages: async () => ids.map((ID) => ({ ID, status: 'FAILED', retryCount: 0, modifiedAt: 'now' }))
+    } }
+  };
+  vm.runInNewContext(source, context);
+  const values = {};
+  const model = { setProperty: (key, value) => { values[key] = value; } };
+  const busy = [];
+  const table = { setBusy: (value) => busy.push(value), setNoDataText() {} };
+  await definition._generateDashboardTraffic.call({
+    _dashboardGeneration: 0,
+    _loadDashboardMessages: definition._loadDashboardMessages
+  }, model, table);
+  assert.equal(ids.length, 8);
+  assert.deepEqual(retries, ['message-2', 'message-4', 'message-6', 'message-8']);
+  assert.match(values['/sampleNotice'], /eight clearly labeled synthetic CAP messages/);
+  assert.equal(values['/total'], '8');
+  assert.deepEqual(busy, [true, true, false]);
 });
 
 function loadControllerDefinition(source, routeHelper = loadRouterApi(), overrides = {}) {

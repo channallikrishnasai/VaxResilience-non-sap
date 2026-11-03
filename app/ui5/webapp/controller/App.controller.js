@@ -9,6 +9,7 @@ sap.ui.define(['sap/ui/core/mvc/Controller', 'sap/m/MessageToast'], function (Co
 
   return Controller.extend('vaxresilience.controller.App', {
     onInit: function () {
+      this.byId('toolPage').addStyleClass('vr-tool-page');
       this._router = this.getOwnerComponent().getRouter();
       this._routeMatched = this._syncNavigation.bind(this);
       this._router.attachRouteMatched(this._routeMatched);

@@ -9,9 +9,10 @@
       <tnt:ToolHeader>
         <Button icon="sap-icon://menu2" type="Transparent" tooltip="Toggle navigation" press="onToggleNavigation" />
         <Title text="VaxResilience" level="H1" />
+        <Text text="Integration Operations" class="vr-header-subtitle" />
         <ToolbarSpacer />
-        <Text text="Synthetic demonstration" />
-        <Text text="No active incident" />
+        <ObjectStatus text="LOCAL SIMULATION" state="Information" />
+        <ObjectStatus text="No active incident" state="None" />
         <SearchField id="moduleSearch" width="14rem" placeholder="Find a module" tooltip="Search module names only; business record search is unavailable"
           search="onGlobalSearch" />
         <Button text="Notifications" icon="sap-icon://bell" type="Transparent" tooltip="Notifications unavailable: no notification source is connected" press="onNotifications" />
@@ -22,14 +23,14 @@
       <tnt:SideNavigation>
         <tnt:item>
           <tnt:NavigationList id="moduleNavigation" itemSelect="onNavigationSelect">
-            <tnt:NavigationListItem key="executive-dashboard" text="Executive Dashboard" />
-            <tnt:NavigationListItem key="supply-chain-digital-twin" text="Supply Chain Digital Twin" />
-            <tnt:NavigationListItem key="ai-command-centre" text="AI Command Centre" />
-            <tnt:NavigationListItem key="inventory-manufacturing" text="Inventory &amp; Manufacturing" />
-            <tnt:NavigationListItem key="customers-orders" text="Customers &amp; Orders" />
-            <tnt:NavigationListItem key="approvals-decisions" text="Approvals &amp; Decisions" />
-            <tnt:NavigationListItem key="risk-compliance-audit" text="Risk, Compliance &amp; Audit" />
-            <tnt:NavigationListItem key="resilience-impact-analytics" text="Resilience &amp; Impact Analytics" />
+            <tnt:NavigationListItem key="executive-dashboard" text="Executive Dashboard" icon="sap-icon://home" />
+            <tnt:NavigationListItem key="supply-chain-digital-twin" text="Supply Chain Digital Twin" icon="sap-icon://map" />
+            <tnt:NavigationListItem key="ai-command-centre" text="AI Command Centre" icon="sap-icon://activities" />
+            <tnt:NavigationListItem key="inventory-manufacturing" text="Inventory &amp; Manufacturing" icon="sap-icon://product" />
+            <tnt:NavigationListItem key="customers-orders" text="Customers &amp; Orders" icon="sap-icon://customer" />
+            <tnt:NavigationListItem key="approvals-decisions" text="Approvals &amp; Decisions" icon="sap-icon://task" />
+            <tnt:NavigationListItem key="risk-compliance-audit" text="Risk, Compliance &amp; Audit" icon="sap-icon://shield" />
+            <tnt:NavigationListItem key="resilience-impact-analytics" text="Resilience &amp; Impact Analytics" icon="sap-icon://bar-chart" />
           </tnt:NavigationList>
         </tnt:item>
       </tnt:SideNavigation>

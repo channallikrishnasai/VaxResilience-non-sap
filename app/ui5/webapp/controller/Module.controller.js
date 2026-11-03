@@ -11,8 +11,10 @@ sap.ui.define([
   'sap/m/Button',
   'sap/m/SearchField',
   'sap/m/Toolbar',
+  'sap/m/VBox',
+  'sap/m/FlexBox',
   'sap/ui/model/json/JSONModel'
-], function (Controller, MessageStrip, Title, Label, Text, Table, Column, ColumnListItem, ObjectStatus, Button, SearchField, Toolbar, JSONModel) {
+], function (Controller, MessageStrip, Title, Label, Text, Table, Column, ColumnListItem, ObjectStatus, Button, SearchField, Toolbar, VBox, FlexBox, JSONModel) {
   'use strict';
 
   return Controller.extend('vaxresilience.controller.Module', {
@@ -21,6 +23,8 @@ sap.ui.define([
       this._currentModule = null;
       this._archiveOpen = false;
       this._archiveGeneration = 0;
+      this._dashboardGeneration = 0;
+      this._page.addStyleClass('vr-module-page');
       this._router = this.getOwnerComponent().getRouter();
       this._routeMatched = this._onRouteMatched.bind(this);
       this._routeBypassed = this._onRouteBypassed.bind(this);
@@ -31,6 +35,7 @@ sap.ui.define([
 
     onExit: function () {
       this._loadGeneration = (this._loadGeneration || 0) + 1;
+      this._dashboardGeneration = (this._dashboardGeneration || 0) + 1;
       this._router.detachRouteMatched(this._routeMatched);
       this._router.detachBypassed(this._routeBypassed);
     },
@@ -52,11 +57,13 @@ sap.ui.define([
       var title = moduleNames[moduleId] || moduleNames['executive-dashboard'];
       if (!force && this._currentModule === moduleId) return;
       this._archiveGeneration = (this._archiveGeneration || 0) + 1;
+      this._dashboardGeneration = (this._dashboardGeneration || 0) + 1;
       this._currentModule = moduleId;
       this._page.setTitle(title);
       this._page.removeAllContent();
       if (moduleId === 'risk-compliance-audit') this._showIntegrationMonitor();
       if (this._archiveOpen) this._showHistoricalArchive(moduleId);
+      else if (moduleId === 'executive-dashboard') this._showOperationsDashboard();
       else if (moduleId !== 'risk-compliance-audit') this._addUnavailableState(title);
     },
 
@@ -175,6 +182,154 @@ sap.ui.define([
       this._page.addContent(this._archiveTable(facts, [
         ['field', 'Manifest field'], ['sourceValue', 'Source value']
       ], 'The source manifest has no scenario facts.'));
+    },
+
+    _showOperationsDashboard: function () {
+      var that = this;
+      var model = new JSONModel({
+        total: 'Loading…', failed: 'Loading…', retries: 'Loading…', latest: 'Loading…',
+        messages: [], error: '', sampleNotice: '', connectionState: 'Checking CAP monitor…'
+      });
+      var errorStrip = new MessageStrip({
+        text: '{/error}', type: 'Error', showIcon: true, showCloseButton: false,
+        visible: '{= !!${/error} }'
+      });
+      var pageIntro = new VBox({ items: [
+        new Title({ text: 'Operations overview', level: 'H2' }),
+        new Text({ text: 'Monitor CAP integration activity and recover simulated failures.' })
+      ] });
+      pageIntro.addStyleClass('vr-page-intro');
+
+      var metricDefinitions = [
+        ['Integration messages', '{/total}', 'sap-icon://message-popup'],
+        ['Failed messages', '{/failed}', 'sap-icon://alert'],
+        ['Recorded retries', '{/retries}', 'sap-icon://refresh'],
+        ['Latest activity', '{/latest}', 'sap-icon://history']
+      ];
+      var cards = new FlexBox({
+        wrap: 'Wrap', justifyContent: 'Start', alignItems: 'Stretch',
+        items: metricDefinitions.map(function (definition) {
+          var card = new VBox({ items: [
+            new Label({ text: definition[0] }),
+            new Text({ text: definition[1], wrapping: true })
+          ] });
+          card.addStyleClass('vr-metric-card');
+          card.addStyleClass('vr-metric-card-' + definition[2].split('/').pop());
+          return card;
+        })
+      });
+      cards.setModel(model);
+
+      var table = new Table({
+        growing: true,
+        growingThreshold: 8,
+        popinLayout: 'GridSmall',
+        noDataText: 'No integration messages have been recorded.',
+        columns: [
+          { label: 'Status' }, { label: 'Business object' },
+          { label: 'Correlation ID', minScreenWidth: 'Tablet' },
+          { label: 'Source' }, { label: 'Updated', minScreenWidth: 'Tablet' }
+        ].map(function (column) {
+          var settings = { header: new Text({ text: column.label }), popinDisplay: 'Block' };
+          if (column.minScreenWidth) {
+            settings.minScreenWidth = column.minScreenWidth;
+            settings.demandPopin = true;
+          }
+          return new Column(settings);
+        }),
+        items: { path: '/messages', template: new ColumnListItem({ cells: [
+          new ObjectStatus({ text: '{status}', state: { path: 'status', formatter: function (status) { return status === 'FAILED' ? 'Error' : 'Information'; } } }),
+          new Text({ text: '{businessObject}' }), new Text({ text: '{correlationId}' }),
+          new Text({ text: '{source}' }), new Text({ text: '{modifiedAt}' })
+        ] }) }
+      });
+      table.setModel(model);
+
+      var toolbar = new Toolbar({ content: [
+        new Button({ text: 'Refresh', icon: 'sap-icon://refresh', press: function () { that._loadDashboardMessages(model, table); } }),
+        new Button({ text: 'Create simulated failure', icon: 'sap-icon://add', press: function () { that._createDashboardFailure(model, table); } }),
+        new Button({ text: 'Generate sample traffic (8)', icon: 'sap-icon://process', tooltip: 'Create eight synthetic CAP messages; record simulated retries for four.', press: function () { that._generateDashboardTraffic(model, table); } }),
+        new Button({ text: 'Open integration queue', icon: 'sap-icon://navigation-right-arrow', press: function () {
+          that._router.navTo('module', { module: 'risk-compliance-audit' });
+        } }),
+        new Button({ text: 'Historical fixture archive', icon: 'sap-icon://database', press: this._openHistoricalArchive.bind(this) })
+      ] });
+
+      this._page.addContent(new MessageStrip({
+        text: 'Connected to the CAP monitoring service. Local simulation only: no SAP Integration Suite or external provider is connected.',
+        type: 'Information', showIcon: true, showCloseButton: false
+      }));
+      this._page.addContent(pageIntro);
+      this._page.addContent(errorStrip);
+      this._page.addContent(new MessageStrip({
+        text: '{/sampleNotice}', type: 'Information', showIcon: true, showCloseButton: true,
+        visible: '{= !!${/sampleNotice} }', close: function () { model.setProperty('/sampleNotice', ''); }
+      }));
+      this._page.addContent(cards);
+      this._page.addContent(new Title({ text: 'Recent integration activity', level: 'H3' }));
+      this._page.addContent(toolbar);
+      this._page.addContent(table);
+      this._page.setModel(model);
+      this._loadDashboardMessages(model, table);
+    },
+
+    _loadDashboardMessages: async function (model, table) {
+      var requestId = this._dashboardGeneration = (this._dashboardGeneration || 0) + 1;
+      model.setProperty('/error', '');
+      model.setProperty('/connectionState', 'Loading CAP monitoring data…');
+      table.setBusy(true);
+      try {
+        var messages = await window.VaxResilienceApi.listMessages();
+        if (requestId !== this._dashboardGeneration) return;
+        var failed = messages.filter(function (message) { return message.status === 'FAILED'; }).length;
+        var retries = messages.reduce(function (total, message) { return total + (Number(message.retryCount) || 0); }, 0);
+        model.setProperty('/messages', messages.slice(0, 8));
+        model.setProperty('/total', String(messages.length));
+        model.setProperty('/failed', String(failed));
+        model.setProperty('/retries', String(retries));
+        model.setProperty('/latest', messages.length ? String(messages[0].modifiedAt || 'Not provided') : 'No activity yet');
+        model.setProperty('/connectionState', 'CAP monitoring service available');
+        table.setNoDataText('No integration messages have been recorded. Create a simulated failure to exercise the queue.');
+      } catch (_error) {
+        if (requestId !== this._dashboardGeneration) return;
+        model.setProperty('/messages', []);
+        model.setProperty('/total', 'Unavailable');
+        model.setProperty('/failed', 'Unavailable');
+        model.setProperty('/retries', 'Unavailable');
+        model.setProperty('/latest', 'Unavailable');
+        model.setProperty('/connectionState', 'CAP monitoring service unavailable');
+        model.setProperty('/error', 'CAP monitoring data could not be loaded. Use Refresh to retry.');
+        table.setNoDataText('Messages are unavailable until the CAP monitoring service responds.');
+      } finally {
+        if (requestId === this._dashboardGeneration) table.setBusy(false);
+      }
+    },
+
+    _createDashboardFailure: async function (model, table) {
+      try {
+        await window.VaxResilienceApi.createDemoFailure();
+        await this._loadDashboardMessages(model, table);
+      } catch (_error) {
+        model.setProperty('/error', 'The simulated failure could not be created. Check CAP connectivity and retry.');
+      }
+    },
+
+    _generateDashboardTraffic: async function (model, table) {
+      model.setProperty('/error', '');
+      model.setProperty('/sampleNotice', '');
+      table.setBusy(true);
+      try {
+        for (var index = 0; index < 8; index += 1) {
+          var message = await window.VaxResilienceApi.createDemoFailure();
+          if (index % 2 === 1) await window.VaxResilienceApi.retryMessage(message.ID);
+        }
+        model.setProperty('/sampleNotice', 'Added eight clearly labeled synthetic CAP messages; four retries were recorded locally. No external system was contacted.');
+        await this._loadDashboardMessages(model, table);
+      } catch (_error) {
+        model.setProperty('/sampleNotice', 'Sample traffic stopped before all eight messages were created. Refresh to see records successfully written so far.');
+        model.setProperty('/error', 'The sample traffic request did not complete.');
+        table.setBusy(false);
+      }
     },
 
     _archiveTable: function (records, fields, emptyText) {

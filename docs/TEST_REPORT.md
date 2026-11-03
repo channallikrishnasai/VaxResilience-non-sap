@@ -639,3 +639,15 @@ No Python source or business logic changed in the UI increments. The strict vali
 | `git diff --check` | Exit code 0 before status documentation changes. | PASS |
 
 The new setup checklist records SAP Cockpit, Cloud Foundry, HANA/HDI, CAP facets, build/deploy, runtime verification, and Work Zone launch steps. It explicitly records that `mta.yaml`/`xs-security.json` and `cf`/`mbt` are absent locally and that no SAP deployment has been performed. D-11/D-13/D-17 still gate a tenant-specific deployment.
+
+### Operations-console dashboard and synthetic traffic verification — 2026-11-03
+
+| Command/check | Actual output/result | Status |
+|---|---|---|
+| `npm test` | 53 passed, 0 failed; 11.07s. Includes CAP HTTP health/ready, OData and create/retry flows, static CSS delivery, and the sample generator's eight creates/four retries. | PASS |
+| `npm run build` | CAP production build completed in 21.38s; postbuild UI copy exited 0. | PASS |
+| PowerShell XML parse of `app/ui5/webapp/view/App.view.xml` | Well-formed XML. | PASS |
+| `git diff --check` | Exit code 0. | PASS |
+| Live local browser preview | Not verified. A second server could not bind port 4004 (`EADDRINUSE`) and the browser origin approval was declined. | NOT VERIFIED |
+
+The dashboard's message totals and activity table come from CAP MonitoringService. Its optional traffic action calls the same-origin CAP API for eight synthetic failures and four local simulated retries. CAP integration tests independently exercise message creation and retry over HTTP. Records remain marked `SIMULATION`; the dashboard says no external provider is connected. This does not establish live SAP Integration Suite, BTP deployment, or SAP-hosted browser behavior.
