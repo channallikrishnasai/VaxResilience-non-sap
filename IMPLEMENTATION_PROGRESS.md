@@ -2,7 +2,7 @@
 
 **Branch:** `feat/sap-foundation-monitoring`  
 **Roadmap:** Official [`PHASES.md`](docs/official-specification/PHASES.md)  
-**Current phase:** IMP-03 is in progress; IMP-02 retains the specification and baseline blockers listed below. The draft local CAP domain model and fixture schemas cover all currently specified entities except two unresolved fixture collections. Seed/reset remains blocked pending an authoritative baseline fixture. Commit `f7413cb` is the latest pushed commit on `origin/feat/sap-foundation-monitoring`; no BTP deployment was performed.
+**Current phase:** IMP-03 is in progress; IMP-02 retains the specification and baseline blockers listed below. The draft local CAP domain model and fixture schemas cover all currently specified entities except two unresolved fixture collections. Seed/reset remains blocked pending an authoritative baseline fixture. The IMP-04 load-failure fallback is in feature commit `f7413cb`; status evidence was subsequently pushed. No BTP deployment was performed.
 
 ## Foundation verification
 
@@ -229,7 +229,7 @@ Fixture and schema JSON now reject duplicate object keys and non-standard `NaN`/
 
 No BTP deployment or SAP-hosted demo was performed. Cloud Foundry CLI and MBT are unavailable in this environment; deployment target/account and unresolved official decisions remain prerequisites. Local SAPUI5 browser rendering has not been independently verified; the automated CAP HTTP integration test verifies the UI shell response and action wiring only.
 
-The feature branch push completed successfully; remote `refs/heads/feat/sap-foundation-monitoring` last resolved to `f7413cb9c04e6725e2dc4c9809a10fe28c2f3304`. The unrelated `docs/sap-integration/` and `docs/sap-architecture/` additions were excluded from the commits because their text describes a separate live S/4HANA Integration Suite deployment and is not evidence for this application.
+The feature branch push completed successfully; feature commit `f7413cb9c04e6725e2dc4c9809a10fe28c2f3304` and the following status-evidence commit are on `origin/feat/sap-foundation-monitoring`. The unrelated `docs/sap-integration/` and `docs/sap-architecture/` additions were excluded from the commits because their text describes a separate live S/4HANA Integration Suite deployment and is not evidence for this application.
 
 ### IMP-04 SAPUI5 runtime-load failure state
 
