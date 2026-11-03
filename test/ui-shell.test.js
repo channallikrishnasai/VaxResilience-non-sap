@@ -67,13 +67,14 @@ test('frontend shell contains no credentials or direct provider endpoints', () =
   const webapp = path.join(__dirname, '../app/ui5/webapp');
   const apiClient = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/api-client.js'), 'utf8');
   const router = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/module-router.js'), 'utf8');
+  const digitalTwin = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/digital-twin-model.js'), 'utf8');
   const manifest = fs.readFileSync(path.join(webapp, 'manifest.json'), 'utf8');
   const component = fs.readFileSync(path.join(webapp, 'Component.js'), 'utf8');
   const controller = fs.readFileSync(path.join(webapp, 'controller/Module.controller.js'), 'utf8');
   const shellController = fs.readFileSync(path.join(webapp, 'controller/App.controller.js'), 'utf8');
   const views = ['view/App.view.xml', 'view/Module.view.xml']
     .map((file) => fs.readFileSync(path.join(webapp, file), 'utf8')).join('\n');
-  const sources = `${html}\n${manifest}\n${component}\n${controller}\n${shellController}\n${views}\n${apiClient}\n${router}`;
+  const sources = `${html}\n${manifest}\n${component}\n${controller}\n${shellController}\n${views}\n${apiClient}\n${router}\n${digitalTwin}`;
   assert.doesNotMatch(sources, /(?:api[_-]?key|access[_-]?token|client[_-]?secret|password)\s*[:=]/i);
   const externalUrls = [...sources.matchAll(/https?:\/\/[^\s'"<>]+/g)].map((match) => match[0]);
   assert.deepEqual(externalUrls, ['https://ui5.sap.com/1.148.12/resources/sap-ui-core.js']);
@@ -109,6 +110,7 @@ test('SAPUI5 component manifest and controller parse and preserve the shell acti
   assert.match(controller, /VaxResilienceRouter\.fromHash/);
   assert.match(html, /src="\/ui\/module-router\.js"/);
   assert.match(html, /src="\/ui\/api-client\.js"/);
+  assert.match(html, /src="\/ui\/digital-twin-model\.js"/);
 });
 
 test('monitor table builds responsive columns with aligned row cells', () => {
@@ -351,7 +353,7 @@ test('historical archive rendering is read-only, source-labelled, and excludes u
     _page: page,
     _archiveGeneration: 1,
     _archiveOpen: true,
-    _currentModule: 'supply-chain-digital-twin',
+    _currentModule: 'inventory-manufacturing',
     _closeHistoricalArchive() {},
     window: context.window
   };
@@ -365,17 +367,50 @@ test('historical archive rendering is read-only, source-labelled, and excludes u
       omittedCollections: ['calculationAssumptions', 'productionPlans']
     })
   };
-  await definition._showHistoricalArchive.call(controller, 'supply-chain-digital-twin');
+  await definition._showHistoricalArchive.call(controller, 'inventory-manufacturing');
 
   assert.match(captured.messages[0].settings.text, /not opening or current operational state/);
   assert.equal(captured.messages[0].settings.type, 'Warning');
-  assert.match(captured.messages[1].settings.text, /fictional; no live map position/);
+  assert.match(captured.messages[1].settings.text, /Stock and qualification records/);
   assert.match(captured.messages[2].settings.text, /calculationAssumptions and productionPlans/);
   assert.equal(captured.tables.length, 1);
   assert.deepEqual(JSON.parse(JSON.stringify(captured.tables[0].model.data.records)), [{
     collection: 'routes', recordNumber: 1, contents: JSON.stringify(record)
   }]);
   assert.deepEqual(captured.buttons.map((button) => button.settings.text), ['Close historical archive']);
+});
+
+test('historical Digital Twin renders explicit entity and relationship tables with geography limits', () => {
+  const source = fs.readFileSync(path.join(__dirname, '../app/ui5/webapp/controller/Module.controller.js'), 'utf8');
+  const controls = [];
+  const control = function (settings = {}) {
+    this.settings = settings;
+    controls.push(this);
+  };
+  control.prototype.setModel = function (model) { this.model = model; };
+  function JSONModel(data) { this.data = data; }
+  let definition;
+  const context = { sap: { ui: { define: (_names, factory) => {
+    const Controller = { extend: (_name, implementation) => implementation };
+    definition = factory(Controller, ...Array(11).fill(control), JSONModel);
+  } } } };
+  vm.runInNewContext(source, context);
+
+  const page = { contents: [], addContent(item) { this.contents.push(item); } };
+  const network = {
+    nodes: [{ id: 'SUP-CN-001', type: 'Supplier', name: 'Fictional supplier', location: 'Suzhou, CN', state: 'suspended' }],
+    relationships: [{ sourceId: 'SUP-CN-001', sourceName: 'Fictional supplier', targetId: 'PORT-SHA-001', targetName: 'Shanghai Port', relationship: 'Route segment 1', context: 'Fixture route' }],
+    unresolvedReferences: [{ sourceId: 'unknown', targetId: 'unknown-2' }]
+  };
+  const controller = { _page: page, _archiveTable: definition._archiveTable };
+  context.window = { VaxResilienceDigitalTwin: { build: () => network } };
+  definition._showHistoricalNetwork.call(controller, []);
+
+  const tables = page.contents.filter((item) => item instanceof control && item.settings.items);
+  assert.equal(tables.length, 2);
+  assert.deepEqual(JSON.parse(JSON.stringify(tables.map((table) => table.model.data.records))), [network.nodes, network.relationships]);
+  assert.ok(page.contents.some((item) => item.settings && /no geographic coordinates/.test(item.settings.text || '')));
+  assert.ok(page.contents.some((item) => item.settings && /1 fixture references could not be resolved/.test(item.settings.text || '')));
 });
 
 function loadControllerDefinition(source, routeHelper = loadRouterApi(), overrides = {}) {

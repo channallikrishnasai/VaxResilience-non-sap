@@ -119,6 +119,11 @@ sap.ui.define([
           type: 'Information', showIcon: true, showCloseButton: false
         }));
 
+        if (moduleId === 'supply-chain-digital-twin') {
+          this._showHistoricalNetwork(archive.collections);
+          return;
+        }
+
         var rows = [];
         archive.collections.forEach(function (collection) {
           collection.records.forEach(function (record, index) {
@@ -151,6 +156,45 @@ sap.ui.define([
         if (generation !== this._archiveGeneration || !this._archiveOpen || moduleId !== this._currentModule) return;
         message.setText('Historical fixture records could not be loaded. Close the archive to return to the empty operational foundation.');
       }
+    },
+
+    _showHistoricalNetwork: function (collections) {
+      var network = window.VaxResilienceDigitalTwin.build(collections);
+      this._page.addContent(new MessageStrip({
+        text: 'Relationship view is derived only from explicit synthetic fixture references. It has no geographic coordinates, live positions, or map service. Historical shipment and fulfilment states are not current.',
+        type: 'Information', showIcon: true, showCloseButton: false
+      }));
+      this._page.addContent(new Title({ text: 'Synthetic network entities', level: 'H3' }));
+      this._page.addContent(this._archiveTable(network.nodes, [
+        ['id', 'Record ID'], ['type', 'Entity type'], ['name', 'Name'], ['location', 'Source location'], ['state', 'Fixture state']
+      ], 'No network entities are available.'));
+      this._page.addContent(new Title({ text: 'Fixture-declared relationships', level: 'H3' }));
+      this._page.addContent(this._archiveTable(network.relationships, [
+        ['sourceId', 'From ID'], ['sourceName', 'From'], ['targetId', 'To ID'], ['targetName', 'To'], ['relationship', 'Relationship'], ['context', 'Fixture reference']
+      ], 'No resolvable network relationships are available.'));
+      if (network.unresolvedReferences.length) {
+        this._page.addContent(new MessageStrip({
+          text: `${network.unresolvedReferences.length} fixture references could not be resolved and are omitted from the relationship table.`,
+          type: 'Warning', showIcon: true, showCloseButton: false
+        }));
+      }
+    },
+
+    _archiveTable: function (records, fields, emptyText) {
+      var model = new JSONModel({ records: records });
+      var table = new Table({
+        growing: true,
+        growingThreshold: 20,
+        noDataText: emptyText,
+        columns: fields.map(function (field) {
+          return new Column({ header: new Text({ text: field[1] }) });
+        }),
+        items: { path: '/records', template: new ColumnListItem({ cells: fields.map(function (field) {
+          return new Text({ text: `{${field[0]}}`, wrapping: true });
+        }) }) }
+      });
+      table.setModel(model);
+      return table;
     },
 
     _showIntegrationMonitor: function () {

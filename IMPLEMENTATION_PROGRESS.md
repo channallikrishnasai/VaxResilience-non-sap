@@ -254,3 +254,9 @@ Verification: `npm test` passed 44/44 (10.03s); `npm run build` passed (18.16s) 
 Implemented a module-only search in the SAPUI5 shell: a unique module name/ID match navigates to that module; ambiguous and unmatched queries explain the limited search scope. The search does not access business records or bypass unresolved access policy. Replaced the inert disabled notifications button with an explicit disconnected-source notification message. The profile, role, and incident context remain marked unavailable where identity/data services are not connected.
 
 Verification: `npm test` passed **46/46** (8.75s); `npm run build` passed (CAP build 20.30s and postbuild UI copy); the modified `App.view.xml` parsed as well-formed XML; `git diff --check` passed. Automated controller tests do not replace real browser verification. No Python code changed; Python tests were not rerun for this UI-only increment. No deployment was performed.
+
+### IMP-05 partial Digital Twin fixture relationship view — 2026-11-03
+
+Extended the opt-in historical fixture archive with a source-linked Digital Twin view. It resolves entity nodes and route/fulfilment relationships solely from official fixture IDs, reports unresolved references without synthesizing missing nodes, rejects duplicate entity IDs, and expressly avoids inventing coordinates. This is a historical static demonstration view; it is not a live map, CAP-backed operational module, or opening state.
+
+Verification: `npm test` passed **50/50** (9.78s), including model, UI table, and HTTP static delivery checks; `npm run build` passed (CAP build 14.44s plus UI copy); the UI view remains well-formed XML; `git diff --check` passed. The broader IMP-05 exit criteria remain incomplete pending approved data/API contracts, baseline/reset, authorization, and live browser evidence.

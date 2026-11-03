@@ -9,8 +9,9 @@
     'supply-chain-digital-twin': Object.freeze([
       ['organization.json', 'organizations'], ['suppliers.json', 'suppliers'],
       ['operations.json', 'facilities'], ['operations.json', 'warehouses'],
-      ['operations.json', 'ports'], ['operations.json', 'routes'],
-      ['operations.json', 'shipments']
+      ['operations.json', 'ports'], ['operations.json', 'routes'], ['operations.json', 'shipments'],
+      ['customers-orders.json', 'customers'], ['customers-orders.json', 'customerOrders'],
+      ['customers-orders.json', 'orderLines'], ['customers-orders.json', 'orderFulfilments']
     ]),
     'ai-command-centre': Object.freeze([
       ['agent-activity.json', 'agents'], ['agent-activity.json', 'agentExecutions'],

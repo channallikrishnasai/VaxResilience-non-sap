@@ -593,3 +593,14 @@ git diff --check | Exit code 0 after archive/build documentation updates. | PASS
 | `git diff --check` | Exit code 0. | PASS |
 
 The shell search now locates only module names/IDs and navigates only for a unique match. It does not search business records. The notification affordance now reports that no notification source is connected instead of being a dead disabled control. Identity/profile and role remain explicitly unavailable. These controller tests and XML parsing do not prove browser rendering; no browser or SAP-hosted demo was exercised.
+
+### IMP-05 historical synthetic Digital Twin relationship view — 2026-11-03
+
+| Command/check | Actual output/result | Status |
+|---|---|---|
+| `npm test` | 50 passed, 0 failed; 9.78s. Includes model checks for 13 fixture nodes, 9 declared route/fulfilment relationships, dangling-reference handling, duplicate identifiers, UI table rendering, and HTTP delivery of the model script. | PASS |
+| `npm run build` | CAP production build completed in 14.44s; postbuild UI copy completed; exit 0. | PASS |
+| XML parse of `app/ui5/webapp/view/App.view.xml` | Well-formed XML. | PASS |
+| `git diff --check` | Exit code 0. | PASS |
+
+IMP-05 progress is partial: when the user explicitly opens the historical archive, the Digital Twin displays fictional supplier, port, facility, warehouse, organization, and customer nodes plus fixture-declared route and simulated fulfilment links. The view uses no geographic coordinates or live map source. It is neither an initial/baseline state nor CAP-backed operational data. Core live CAP module APIs, baseline/reset, role-scoped data access, and browser-render verification remain incomplete or blocked.

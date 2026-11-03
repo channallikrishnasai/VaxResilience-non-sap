@@ -78,6 +78,9 @@ test('CAP HTTP health, OData, UI shell, and simulation actions work together', a
     const archiveClientResponse = await fetch(`${base}/ui/archive-client.js`);
     assert.equal(archiveClientResponse.status, 200);
     assert.match(await archiveClientResponse.text(), /omittedCollections/);
+    const digitalTwinResponse = await fetch(`${base}/ui/digital-twin-model.js`);
+    assert.equal(digitalTwinResponse.status, 200);
+    assert.match(await digitalTwinResponse.text(), /VaxResilienceDigitalTwin/);
     const archiveManifestResponse = await fetch(`${base}/ui/demo-archive/manifest.json`);
     assert.equal(archiveManifestResponse.status, 200);
     const archiveManifest = await archiveManifestResponse.json();
