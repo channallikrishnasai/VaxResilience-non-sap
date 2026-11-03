@@ -532,3 +532,39 @@ The shell now displays a screen-reader-announced load error if the external SAPU
 The package override does not replace dependencies embedded in the CLI tarball. Do not claim the complete dependency tree is vulnerability-free. Reassess against a compatible SAP CAP CLI release with the bundled parser fixed.
 
 The latest verified feature-code push is `f7413cb9c04e6725e2dc4c9809a10fe28c2f3304` on `origin/feat/sap-foundation-monitoring`.
+
+### PHASES.md scenario test coverage audit — 2026-11-03
+
+| Roadmap case | Status | Evidence / remaining gap |
+|---|---|---|
+| T-01 baseline | BLOCKED | No approved baseline fixture/selection and no seed/reset. Do not load the completed history as opening state. |
+| T-02 30-day delay | NOT VERIFIED | Fixture dates exist, but no operational module renders the dated disruption with provenance. |
+| T-03 coverage/gap | PASS — domain helper only | `test/coverage-calculation.test.js` verifies 1,000 kg / 50 kg per production day = 20 production days and the 30/20 = 10 comparison with `normalized:false` and `forecast:false`; not exposed as a CAP API or page. |
+| T-04 supplier failure | PARTIAL — domain helper only | `test/supplier-qualification.test.js` proves missing, failed, unverified, expired, conflicting, and evidence-free checks remain unconfirmed; no purchase proposal/dispatch gate exists. |
+| T-05 supplier success | PARTIAL — checklist only | Test proves all six checks can be complete while intentionally omitting `supplierEligible`; no purchase proposal path exists. |
+| T-06 conflicting agent results | BLOCKED | No runtime roster/provider/protocol; D-02/D-03/D-04. |
+| T-07 missing/stale data | PARTIAL | Domain calculations reject missing/invalid inputs; source-age policy and page-level stale-state behavior are not implemented. |
+| T-08 unsupported model claims | BLOCKED | No model adapter/output path; D-03/D-04. |
+| T-09 reject approval | BLOCKED | No protected proposal/approval API; D-11/D-12/D-19. |
+| T-10 modify approved proposal | BLOCKED | Proposal version/approval lifecycle API not implemented; D-12/D-19. |
+| T-11 expired approval | BLOCKED | Expiry policy unresolved; D-19. |
+| T-12 duplicate execution | PARTIAL | Monitoring retry rejects a second retry with HTTP 409; this is not the required idempotency-key replay/body-mismatch contract. D-12. |
+| T-13 unauthorized action | PARTIAL | Anonymous monitoring read returns HTTP 401 in the HTTP smoke test; there are no protected business action APIs or approved role/record scopes. D-11. |
+| T-14 agent failure | BLOCKED | No agent task runtime; D-02/D-03/D-04. |
+| T-15 AI outage | BLOCKED | No AI adapter; D-03/D-04. |
+| T-16 database outage | NOT VERIFIED | HANA/local database outage and audit-commit failure behavior are not exercised. D-10/D-13. |
+| T-17 communication outage | BLOCKED | No provider/simulated communication workflow; D-05/D-06/D-16. |
+| T-18 suspicious activity | NOT IMPLEMENTED | Schema/model coverage does not provide detection, review workflow, or audit behavior. |
+| T-19 emergency stop | BLOCKED | Authority and halt/resume policy unresolved; D-11/D-15. |
+| T-20 incident closure | BLOCKED | No verified recovery evidence/approval workflow; D-10/D-11/D-19 and missing baseline. |
+
+### Current full regression — 2026-11-03
+
+| Command/check | Actual output/result | Status |
+|---|---|---|
+| `npm test` | 37 passed, 0 failed; 7.77s. CAP HTTP smoke covers health/readiness, anonymous 401, MonitoringService OData, UI shell/assets, synthetic create/retry, and duplicate-retry conflict. | PASS |
+| `npm run build` | CAP HANA/Node production build completed in 19.05s. | PASS |
+| `.venv\Scripts\python.exe -m pytest -q` | 102 passed, 0 failed, 17.16s; one existing pandas DB-API warning. | PASS |
+| `.venv\Scripts\python.exe scripts\validate_synthetic_fixtures.py` | 157 schema-validated records; exit 1 for the two genuinely unmapped collections `calculationAssumptions` and `productionPlans`. | BLOCKED / FAIL-CLOSED |
+
+Passing foundational tests do not constitute acceptance of T-01 through T-20 as a whole; statuses above indicate the actual scope tested.

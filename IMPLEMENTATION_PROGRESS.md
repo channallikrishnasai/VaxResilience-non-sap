@@ -238,3 +238,7 @@ Added a hidden accessible `role="alert"` fallback that becomes visible if the pi
 ### Dependency audit finding
 
 Current `npm audit` reports two high findings because `@sap/cds-dk@10.2.0` bundles `body-parser@2.3.0`, affected by GHSA-27r3-jxmh-p828. Production-only audit (`npm audit --omit=dev`) finds **0 vulnerabilities**. `npm audit fix --dry-run` confirms npm cannot update the bundled dependency; npm registry metadata shows 10.2.0 is the latest available CAP 10 CLI in the configured registry. Downgrading to 9.9.7 would cross a major version and is not an acceptable automatic fix for this CAP 10 project. Revisit when SAP publishes a compatible fixed CLI release; do not represent the full dependency audit as clean.
+
+### IMP-10 scenario-test coverage audit
+
+Mapped all 20 official scenario cases (T-01 through T-20) to current evidence in [`TEST_REPORT.md`](docs/TEST_REPORT.md). Only T-03's domain-helper behavior passes at its narrow unit-test scope; T-04/T-05/T-07/T-12/T-13 are partial, and baseline, workflow, agent, communications, emergency-control, and closure scenarios remain blocked or unimplemented. Current full regressions: Node/CAP **37 passed**; Python **102 passed** (one existing pandas DB-API warning); CAP production build passed; strict fixture validation remains fail-closed for the two unmapped collections. This matrix intentionally does not inflate unit or smoke-test evidence into full scenario acceptance.
